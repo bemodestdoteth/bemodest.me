@@ -1,0 +1,1696 @@
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 32358
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+error: hashString is not defined
+info: Listening on 25833
+error: Function: labelGet | Error: ReferenceError: hashString is not defined
+info: Listening on 25833
+error: Function: labelGet | Error: TypeError: crypto.createHash is not a function
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+error: Function: labelGet | Error: ReferenceError: Signature is not defined
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+error: Function: labelGet | Error: TypeError: req.headers is not iterable
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+error: Function: labelGet | Error: MongoServerError: E11000 duplicate key error collection: codys.labelAddrs index: addr dup key: { addr: "0x0000000001e4ef00d069e71d6ba041b0a16f7ea0" }
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+error: [WebSocket] chainGet Error: ReferenceError: req is not defined
+info: Listening on 25833
+error: [WebSocket] chainGet Error: TypeError: Cannot read properties of undefined (reading 'X-Signature')
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected
+info: [WebSocket] Clients connected:
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Received handshake from client: {"event":"handshake","timestamp":1735974361922}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Received handshake from client: {"event":"handshake","timestamp":1735974458409}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Received handshake from client: {"event":"handshake","timestamp":1735974477016}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Received handshake from client: {"event":"handshake","timestamp":1735975270670}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Received handshake from client: {"event":"handshake","timestamp":1735975353157}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] chain-get from:
+error: [WebSocket] chain-get Error: logger.warning is not a function {"stack":"TypeError: logger.warning is not a function\n    at wsChainGet (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:544:20)\n    at WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:628:36)\n    at WebSocket.emit (node:events:524:28)\n    at Receiver.receiverOnMessage (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/ws/lib/websocket.js:1220:20)\n    at Receiver.emit (node:events:524:28)\n    at Receiver.dataMessage (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/ws/lib/receiver.js:596:14)\n    at Receiver.getData (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/ws/lib/receiver.js:496:10)\n    at Receiver.startLoop (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/ws/lib/receiver.js:167:16)\n    at Receiver._write (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/ws/lib/receiver.js:94:10)\n    at writeOrBuffer (node:internal/streams/writable:572:12)"}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736837012710}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736837046599}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736837050154}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736837054616}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736837072161}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736837086144}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736837260892}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736837448628}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736837448736}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736837598631}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736837781927}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736837924105}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736837931341}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736841264008}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736841269037}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736841304932}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736841320019}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736841330436}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736841802193}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736842243669}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736842275153}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736842277661}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736842282637}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736842289580}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1736842315984}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Clients connected:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+error: Cannot read properties of undefined (reading 'collection')
+info: Listening on 25833
+error: Cannot read properties of undefined (reading 'collection')
+info: Listening on 25833
+error: Cannot read properties of undefined (reading 'collection')
+info: Listening on 25833
+error: Cannot read properties of undefined (reading 'collection')
+error: Cannot read properties of undefined (reading 'collection')
+error: Cannot read properties of undefined (reading 'collection')
+info: Listening on 25833
+error: Cannot read properties of undefined (reading 'collection')
+info: Listening on 25833
+error: Cannot read properties of undefined (reading 'collection')
+info: Listening on 25833
+info: Listening on 25833
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+info: Listening on 25833
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+info: Listening on 25833
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+info: Listening on 25833
+error: Cannot read properties of undefined (reading 'collection')
+info: Listening on 25833
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+info: Listening on 25833
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+info: Listening on 25833
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+info: Listening on 25833
+info: Listening on 25833
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+info: Listening on 25833
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+info: Listening on 25833
+info: Listening on 25833
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+info: Listening on 25833
+error: dbClient.collection is not a function
+info: Listening on 25833
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+info: Listening on 25833
+info: Listening on 25833
+error: collection is not defined
+error: collection is not defined
+info: Listening on 25833
+error: collection is not defined
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+info: Listening on 25833
+error: Converting circular structure to JSON
+    --> starting at object with constructor 'MongoClient'
+    |     property 's' -> object with constructor 'Object'
+    |     property 'sessionPool' -> object with constructor 'ServerSessionPool'
+    --- property 'client' closes the circle
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+error: Cannot read properties of null (reading 'collection')
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+error: objArray1 is not defined
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+error: length is not defined
+error: length is not defined
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+error: key is not defined
+info: Listening on 25833
+error: key is not defined
+info: Listening on 25833
+error: key is not defined
+info: Listening on 25833
+error: key is not defined
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+error: len is not defined
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+error: length is not defined
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+error: DB_SONARAWATCH_LIST is not defined
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+error: DB_SONARAWATCH_LIST is not defined
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+error: DB_SONARAWATCH_LIST is not defined
+error: DB_SONARAWATCH_LIST is not defined
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+error: Expression $in takes exactly 2 arguments. 1970 were passed in. {"code":16020,"codeName":"Location16020","errorResponse":{"code":16020,"codeName":"Location16020","errmsg":"Expression $in takes exactly 2 arguments. 1970 were passed in.","ok":0},"ok":0}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+error: Expression $in takes exactly 2 arguments. 1970 were passed in. {"code":16020,"codeName":"Location16020","errorResponse":{"code":16020,"codeName":"Location16020","errmsg":"Expression $in takes exactly 2 arguments. 1970 were passed in.","ok":0},"ok":0}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+error: Assignment to constant variable.
+error: Assignment to constant variable.
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+error: platform is not defined
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+error: decimals is not defined
+error: decimals is not defined
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1737304428726}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1737304553877}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1737304586301}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","timestamp":1737304937007}
+error: [WebSocket] Client ::ffff:100.86.126.128 missing required headers:
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"fe50a6ee423e980d083dee210b2ecf83f14d760ff7654977e9d210fc655cbda0","X-Timestamp":"1737304942"},"params":{},"body":{},"timestamp":1737304942873}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a82b18d5dd2cd1c160eab4115b7a1f6b5849265c0455fbc67983f0bf1f013635","X-Timestamp":"1737305131"},"params":{},"body":{},"timestamp":1737305131502}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"d80294e3228700f306ba7dac94eb26fc5c2d7183b49a71ea2d4e21c0272fd679","X-Timestamp":"1737305167"},"params":{},"body":{},"timestamp":1737305167466}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"68db6b7ac33ad81bfacba9a0798f640d54ec34945bd6f9578d9beb1da196553b","X-Timestamp":"1737305192"},"params":{},"body":{},"timestamp":1737305192900}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"cd77a08ef3f7f9a89d178e93b75ed7fc0dab29a01cdd987792fbad7a4afa9873","X-Timestamp":"1737305196"},"params":{},"body":{},"timestamp":1737305196040}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"4e1114d4943157d20cf35c3a992028e9f07d25ff6fb999aed286ee9b6077f19a","X-Timestamp":"1737305310"},"params":{},"body":{},"timestamp":1737305310723}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"c02c7203501b4aa3d3c86a4ba8987bfc2b1d1d87c4a3f0910971bcd34d221667","X-Timestamp":"1737305368"},"params":{},"body":{},"timestamp":1737305368254}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"3a4b71896889411a707b512d27ed38daf8c42b5a8aa8980721c4c6711e2c4fe9","X-Timestamp":"1737305385"},"params":{},"body":{},"timestamp":1737305385394}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"fd0e3a93513b7c39741e9cfba8817cf4c016bc09ab94c7c7bcb48d483cdea2d1","X-Timestamp":"1737305395"},"params":{},"body":{},"timestamp":1737305395130}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a680b5bb9eed6ef73d12bfb11d5df3cbb4d4b646b16584bc275ac0363b2519dc","X-Timestamp":"1737305469"},"params":{},"body":{},"timestamp":1737305469918}
+error: [WebSocket] chain-get Error: collectionName is not defined {"stack":"ReferenceError: collectionName is not defined\n    at wsChainGet (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:725:28)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:787:30)"}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"5f72f23032b61eccb2d6f3b5f14e7cff2ff1c75d4a2b53fe4790865547c9a983","X-Timestamp":"1737305506"},"params":{},"body":{},"timestamp":1737305507000}
+error: [WebSocket] chain-get Error: collectionName is not defined {"stack":"ReferenceError: collectionName is not defined\n    at wsChainGet (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:725:28)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:787:30)"}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"4d877ae66dcad0a5f8aa953fc770c8d13d85408163c44dc48876855d96b746b9","X-Timestamp":"1737305525"},"params":{},"body":{},"timestamp":1737305525935}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"6b60a9ffc2ee00ef52f0ea82882db8401c605c836e70d2d7617e237de5393350","X-Timestamp":"1737305613"},"params":{},"body":{},"timestamp":1737305613180}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"4a5ef816ef94b808fbdaa37dbd5905d56d569a8f85e1846fd43d1b426ab82fb0","X-Timestamp":"1737305616"},"params":{},"body":{},"timestamp":1737305616098}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"e2558d1840ca9ffbd36d3430adf1804437708ef075e5f6da5023293df0b700a5","X-Timestamp":"1737305823"},"params":{},"body":{},"timestamp":1737305824033}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a0f64d79fa9e76962c9a55d1a1e956f010f94b2296cd9b714fb19770331b0ad7","X-Timestamp":"1737305865"},"params":{},"body":{},"timestamp":1737305865484}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"2dab5f7c6b0fd0d7f3e8659ce10ae068a4866df07e7660d4669d04864d089025","X-Timestamp":"1737305893"},"params":{},"body":{},"timestamp":1737305893982}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"3e21ca7677cc353cbd07ad9ec7046405fbc77c527f7a096542fc50f6222430a0","X-Timestamp":"1737306099"},"params":{},"body":{},"timestamp":1737306099891}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"c5a8a2da692e1f8a8d76dc688ccbbe21e31587ec7b220cf21da7a4ed9900bee9","X-Timestamp":"1737306155"},"params":{},"body":{},"timestamp":1737306155445}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"4de64b810cb407646b0157c27e164864c343ac27647d9df902a515527853d86a","X-Timestamp":"1737306452"},"params":{},"body":{},"timestamp":1737306452794}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"6f95359932407f9c9160b3882c94ace0824b373344089d4dab7e7d12573643ef","X-Timestamp":"1737307009"},"params":{},"body":{},"timestamp":1737307009570}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"2106c9bd378a2611014849600243370e8397499733845a7ecde441dba6ce40f7","X-Timestamp":"1737307107"},"params":{},"body":{},"timestamp":1737307107549}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"aa325ba5f26c3d534e50002eea5dc30c291e186b642d7c17eefefed7c0c57b70","X-Timestamp":"1737307210"},"params":{},"body":{},"timestamp":1737307210153}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"5f9db046424ef743cbcca89ef096d637bac6f40856e4e06e35745fea68986453","X-Timestamp":"1737307321"},"params":{},"body":{},"timestamp":1737307322021}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a6a9e84aae625abfbce1e599f7a6b5c80728dcbcb718516178867e10b6fbc881","X-Timestamp":"1737307451"},"params":{},"body":{},"timestamp":1737307451587}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"c792fcda3bec4f7afce504bec0e5a0ff812d25f7cd484f31dfec69438e907357","X-Timestamp":"1737307715"},"params":{},"body":{},"timestamp":1737307715049}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"e1267d21aa1c58cfc9711b5a24b1c73570a059cbfe820b8ee10f79d30cc1b781","X-Timestamp":"1737307731"},"params":{},"body":{},"timestamp":1737307731774}
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"8a9a7c610cda9888ba554a756ab8692fb3ac58700e8a2fcf1ced8e9e4962cd7f","X-Timestamp":"1737310569"},"params":{},"body":{},"timestamp":1737310569625}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"689b9828bb78b1c9ea6b82978853b7d60faf13123eecd13bc31f7ebd9854bf50","X-Timestamp":"1737315070"},"params":{},"body":{},"timestamp":1737315070507}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"27024b18a641b6d96367aea617c1f1a1f6ad0992cce9797ce0472c6d69d4a396","X-Timestamp":"1737315122"},"params":{},"body":{},"timestamp":1737315122370}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"1022e6590b945b3272b372c0404ee6c8dc3779ef497fdbe5811f36626dc5ad09","X-Timestamp":"1737315167"},"params":{},"body":{},"timestamp":1737315167671}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"1022e6590b945b3272b372c0404ee6c8dc3779ef497fdbe5811f36626dc5ad09","X-Timestamp":"1737315167"},"params":{},"body":{},"timestamp":1737315167673}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"b4c36d01a91734e3354b981f5d346e2809eefba7d927ac3b8a184a0c927879ee","X-Timestamp":"1737315287"},"params":{},"body":{},"timestamp":1737315287048}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"b4c36d01a91734e3354b981f5d346e2809eefba7d927ac3b8a184a0c927879ee","X-Timestamp":"1737315287"},"params":{},"body":{},"timestamp":1737315287052}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"fe328f6aee1239ad689a7678188aa3125475383b8284deb18a1cf8b6aafb7f5a","X-Timestamp":"1737315385"},"params":{},"body":{},"timestamp":1737315385551}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"fe328f6aee1239ad689a7678188aa3125475383b8284deb18a1cf8b6aafb7f5a","X-Timestamp":"1737315385"},"params":{},"body":{},"timestamp":1737315385552}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"6a927aaa90036ff734769b26ca6abd9e897fb3a6a77fe6813aeb4a9ed18b955b","X-Timestamp":"1737317288"},"params":{},"body":{},"timestamp":1737317288166}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"6a927aaa90036ff734769b26ca6abd9e897fb3a6a77fe6813aeb4a9ed18b955b","X-Timestamp":"1737317288"},"params":{},"body":{},"timestamp":1737317288166}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"8e4c745feb746573fc2e45c21cf8cbb97e65d7de9e154e12c752fa51fc062b48","X-Timestamp":"1737318353"},"params":{},"body":{},"timestamp":1737318353430}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"8e4c745feb746573fc2e45c21cf8cbb97e65d7de9e154e12c752fa51fc062b48","X-Timestamp":"1737318353"},"params":{},"body":{},"timestamp":1737318353431}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"d707fa82b6cb30758d51031923cf39ad70e1a0bb53c41cb72abf135ca5d353a2","X-Timestamp":"1737318458"},"params":{},"body":{},"timestamp":1737318458958}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"d707fa82b6cb30758d51031923cf39ad70e1a0bb53c41cb72abf135ca5d353a2","X-Timestamp":"1737318458"},"params":{},"body":{},"timestamp":1737318458959}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"03c6593004022451997f9b68499d4b21869fd6ad086f41cd97e0be35b6b69953","X-Timestamp":"1737318505"},"params":{},"body":{},"timestamp":1737318505845}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"03c6593004022451997f9b68499d4b21869fd6ad086f41cd97e0be35b6b69953","X-Timestamp":"1737318505"},"params":{},"body":{},"timestamp":1737318505846}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"06fb7a62ccce80c3dd5d2c1b4b2ccea92008eeda361b4a73c1429be11a5bc744","X-Timestamp":"1737318576"},"params":{},"body":{},"timestamp":1737318576298}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"06fb7a62ccce80c3dd5d2c1b4b2ccea92008eeda361b4a73c1429be11a5bc744","X-Timestamp":"1737318576"},"params":{},"body":{},"timestamp":1737318576298}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"f8820b8c4997916c8f71439402a63b96a7145dea2f18f0db55faf1465f86c298","X-Timestamp":"1737318626"},"params":{},"body":{},"timestamp":1737318626215}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"f8820b8c4997916c8f71439402a63b96a7145dea2f18f0db55faf1465f86c298","X-Timestamp":"1737318626"},"params":{},"body":{},"timestamp":1737318626216}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"5a3ffcb6f341aa7d5b3712446be6bda39030d07a1694a216e95d0d4ee8216d6f","X-Timestamp":"1737318686"},"params":{},"body":{},"timestamp":1737318687013}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"5a3ffcb6f341aa7d5b3712446be6bda39030d07a1694a216e95d0d4ee8216d6f","X-Timestamp":"1737318686"},"params":{},"body":{},"timestamp":1737318687014}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"ce7e14e18c57c0b46ffc21b3310518974c16cd591d9c2bb69c3579c1ffe67fd5","X-Timestamp":"1737318737"},"params":{},"body":{},"timestamp":1737318737231}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"ce7e14e18c57c0b46ffc21b3310518974c16cd591d9c2bb69c3579c1ffe67fd5","X-Timestamp":"1737318737"},"params":{},"body":{},"timestamp":1737318737231}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"0e221d71957e4422c7cb54733f7a0e51f62807e07f5b6c14ae384fabc08fca41","X-Timestamp":"1737318751"},"params":{},"body":{},"timestamp":1737318751748}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"0e221d71957e4422c7cb54733f7a0e51f62807e07f5b6c14ae384fabc08fca41","X-Timestamp":"1737318751"},"params":{},"body":{},"timestamp":1737318751749}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"7e6a8b80673e965a166ba6deadb8fc148a52b2ea617820ef74c254800202dd69","X-Timestamp":"1737318765"},"params":{},"body":{},"timestamp":1737318765792}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"7e6a8b80673e965a166ba6deadb8fc148a52b2ea617820ef74c254800202dd69","X-Timestamp":"1737318765"},"params":{},"body":{},"timestamp":1737318765793}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"18630f4b5f829f984048af428e3a48381c97142c15937f6e1b2c580e28441ec3","X-Timestamp":"1737318801"},"params":{},"body":{},"timestamp":1737318801792}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"18630f4b5f829f984048af428e3a48381c97142c15937f6e1b2c580e28441ec3","X-Timestamp":"1737318801"},"params":{},"body":{},"timestamp":1737318801793}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"d12a92b18f8386936c4509f195e0b723a5d1c2e4b50f46f10bba55e1a69bc286","X-Timestamp":"1737318810"},"params":{},"body":{},"timestamp":1737318810402}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"d12a92b18f8386936c4509f195e0b723a5d1c2e4b50f46f10bba55e1a69bc286","X-Timestamp":"1737318810"},"params":{},"body":{},"timestamp":1737318810404}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"76d947c2bf810c5cbbe975b76182285563dac8f4802d55db034fc80c08a75202","X-Timestamp":"1737318824"},"params":{},"body":{},"timestamp":1737318824941}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"76d947c2bf810c5cbbe975b76182285563dac8f4802d55db034fc80c08a75202","X-Timestamp":"1737318824"},"params":{},"body":{},"timestamp":1737318824942}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"0181669583d1f46d26e43133780afd0ed6e1172d86e3f86b4cbc98dab8dc5d94","X-Timestamp":"1737319119"},"params":{},"body":{},"timestamp":1737319119747}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"0181669583d1f46d26e43133780afd0ed6e1172d86e3f86b4cbc98dab8dc5d94","X-Timestamp":"1737319119"},"params":{},"body":{},"timestamp":1737319119747}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"d8d2f375c87e8cdb2d78e567aa64da5ee79189b1b6b756b1ea5d5440017192dc","X-Timestamp":"1737319576"},"params":{},"body":{},"timestamp":1737319576092}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"d8d2f375c87e8cdb2d78e567aa64da5ee79189b1b6b756b1ea5d5440017192dc","X-Timestamp":"1737319576"},"params":{},"body":{},"timestamp":1737319576094}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"e6981fac7ebd8c23add8383de4aa93853caf4f9fe7e8b77c2b19bde9b45babb8","X-Timestamp":"1737319589"},"params":{},"body":{},"timestamp":1737319589515}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"e6981fac7ebd8c23add8383de4aa93853caf4f9fe7e8b77c2b19bde9b45babb8","X-Timestamp":"1737319589"},"params":{},"body":{},"timestamp":1737319589517}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"9dfc52531e075f8cb5120153d7d9a2ef2f42507603e142ffc659791d56869e74","X-Timestamp":"1737319608"},"params":{},"body":{},"timestamp":1737319608485}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"9dfc52531e075f8cb5120153d7d9a2ef2f42507603e142ffc659791d56869e74","X-Timestamp":"1737319608"},"params":{},"body":{},"timestamp":1737319608487}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"f6c52aafef148ff3e56af8fe0988288ce17e5b71a7f8cc37fef05a9b1cf8892a","X-Timestamp":"1737319612"},"params":{},"body":{},"timestamp":1737319612626}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"f6c52aafef148ff3e56af8fe0988288ce17e5b71a7f8cc37fef05a9b1cf8892a","X-Timestamp":"1737319612"},"params":{},"body":{},"timestamp":1737319612627}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"3011544a36dd2e4c4153d1949a191d464e0e03f2ed88911b3c1094d9e27fc8ba","X-Timestamp":"1737319634"},"params":{},"body":{},"timestamp":1737319634507}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"3011544a36dd2e4c4153d1949a191d464e0e03f2ed88911b3c1094d9e27fc8ba","X-Timestamp":"1737319634"},"params":{},"body":{},"timestamp":1737319634511}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"fef184636bd212aab9927004997ee102eb3677520bf5725057c1e0b72f811dd9","X-Timestamp":"1737320073"},"params":{},"body":{},"timestamp":1737320073883}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"fef184636bd212aab9927004997ee102eb3677520bf5725057c1e0b72f811dd9","X-Timestamp":"1737320073"},"params":{},"body":{},"timestamp":1737320073893}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"ef320e19407467e6a9bd13f987e3f8525b9a7d0ef7ef78b29a36baafaf99d00f","X-Timestamp":"1737320087"},"params":{},"body":{},"timestamp":1737320087852}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"ef320e19407467e6a9bd13f987e3f8525b9a7d0ef7ef78b29a36baafaf99d00f","X-Timestamp":"1737320087"},"params":{},"body":{},"timestamp":1737320087856}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"de0b79d8273f8413dead310f9af00a1904ae9e0bfa0f7d2df42fd601b83a412d","X-Timestamp":"1737320153"},"params":{},"body":{},"timestamp":1737320153393}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"de0b79d8273f8413dead310f9af00a1904ae9e0bfa0f7d2df42fd601b83a412d","X-Timestamp":"1737320153"},"params":{},"body":{},"timestamp":1737320153403}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"ca75229df669e968c0166342335c6c30deb4bf43d74328d5da8d31dbfc372da4","X-Timestamp":"1737320172"},"params":{},"body":{},"timestamp":1737320172103}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"ca75229df669e968c0166342335c6c30deb4bf43d74328d5da8d31dbfc372da4","X-Timestamp":"1737320172"},"params":{},"body":{},"timestamp":1737320172105}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"cbd04fd1cf4db9cc94b2015d51e451c5ad6c133ee0899b8e5e986f7981dc21bc","X-Timestamp":"1737320194"},"params":{},"body":{},"timestamp":1737320194200}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"cbd04fd1cf4db9cc94b2015d51e451c5ad6c133ee0899b8e5e986f7981dc21bc","X-Timestamp":"1737320194"},"params":{},"body":{},"timestamp":1737320194212}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"b8f4da3fc84cc3034f0b9f7f01d312be000a766abafef1bad684397af591db23","X-Timestamp":"1737320308"},"params":{},"body":{},"timestamp":1737320308432}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"b8f4da3fc84cc3034f0b9f7f01d312be000a766abafef1bad684397af591db23","X-Timestamp":"1737320308"},"params":{},"body":{},"timestamp":1737320308435}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"4847dc7a7cb40f10227b1a208b2446d3055055ce44bd001b839a65da5d088e47","X-Timestamp":"1737320319"},"params":{},"body":{},"timestamp":1737320319914}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"4847dc7a7cb40f10227b1a208b2446d3055055ce44bd001b839a65da5d088e47","X-Timestamp":"1737320319"},"params":{},"body":{},"timestamp":1737320319915}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"fd7f3bb7cec1562a0106b078bdb6fcf916070b19f71a812cdc4ff7ffed4dcf48","X-Timestamp":"1737320322"},"params":{},"body":{},"timestamp":1737320322430}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"fd7f3bb7cec1562a0106b078bdb6fcf916070b19f71a812cdc4ff7ffed4dcf48","X-Timestamp":"1737320322"},"params":{},"body":{},"timestamp":1737320322434}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"e2ddd6fdc3a60e23aa04e03bc0a8ad2fe951c471292d90814bf813eec0b8e236","X-Timestamp":"1737320787"},"params":{},"body":{},"timestamp":1737320787589}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"e2ddd6fdc3a60e23aa04e03bc0a8ad2fe951c471292d90814bf813eec0b8e236","X-Timestamp":"1737320787"},"params":{},"body":{},"timestamp":1737320787590}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"b50568c30fb8e00aff8b4e7784af3a3812da186ecb1d0728b09a06bc1abc3f64","X-Timestamp":"1737320812"},"params":{},"body":{},"timestamp":1737320812408}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"b50568c30fb8e00aff8b4e7784af3a3812da186ecb1d0728b09a06bc1abc3f64","X-Timestamp":"1737320812"},"params":{},"body":{},"timestamp":1737320812416}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"14c31c44baa0d21f836b42034b6e5cd713e5ab93c1921f974eb4f5bf6d3f1e28","X-Timestamp":"1737360431"},"params":{},"body":{},"timestamp":1737360431232}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"14c31c44baa0d21f836b42034b6e5cd713e5ab93c1921f974eb4f5bf6d3f1e28","X-Timestamp":"1737360431"},"params":{},"body":{},"timestamp":1737360431233}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"ea90cb665ce70fed35b509227e30e596353532cbfed06e57e9baa4dc570aa955","X-Timestamp":"1737360642"},"params":{},"body":{},"timestamp":1737360642211}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"ea90cb665ce70fed35b509227e30e596353532cbfed06e57e9baa4dc570aa955","X-Timestamp":"1737360642"},"params":{},"body":{},"timestamp":1737360642214}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"e4a50f68c4d4b816f1551c2f619766ebd08b269bba287d91f059f8a1c355c586","X-Timestamp":"1737425936"},"params":{},"body":{},"timestamp":1737425936225}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"e4a50f68c4d4b816f1551c2f619766ebd08b269bba287d91f059f8a1c355c586","X-Timestamp":"1737425936"},"params":{},"body":{},"timestamp":1737425936233}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"bafa9d8450409a87c8ed331758cdfbf2d072654cb31a2b9851be975d6a68055b","X-Timestamp":"1737426856"},"params":{},"body":{},"timestamp":1737426857034}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"db4cebd825158c3bf9541b74dd144a6479ed25fd71b59176f740b365829462fb","X-Timestamp":"1737426920"},"params":{},"body":{},"timestamp":1737426920385}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"57360fe667bd1e9a969a549f8d71d24f1ef75c277825bc5bf92b173c629924b7","X-Timestamp":"1737426953"},"params":{},"body":{},"timestamp":1737426953364}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"a37283ce90b7d89f37d9c809ffcd52444ca9fa6a945993a15f0c3eb29824131e","X-Timestamp":"1737427757"},"params":{},"body":{},"timestamp":1737427757714}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"80a2c255316b09a3c1b3388e81bacc308e0783272d24751ca0a1426dc0ebcc43","X-Timestamp":"1737427790"},"params":{},"body":{},"timestamp":1737427790170}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"eb460fc8a9b092ed951ec60a3b891aaac143eb8375853318cdee4bd2d1d878aa","X-Timestamp":"1737428137"},"params":{},"body":{},"timestamp":1737428137176}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"37c31b06ee2b32a74a7d974ddde699a6e6c76f6cb96a8223179d58ddff2640a6","X-Timestamp":"1737428144"},"params":{},"body":{},"timestamp":1737428144635}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 2
+info: [WebSocket] Client connected. Current clients: 2
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"454588232dff9496b2885a49e6aa57908955c8e0055dc3a18815d23e499dc9b7","X-Timestamp":"1737433474"},"params":{},"body":{},"timestamp":1737433476195}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"9dec99f2b176752985cd3c5103b9ff1a52fb22b0b16f91784804dc160e08a0b5","X-Timestamp":"1737433478"},"params":{},"body":{},"timestamp":1737433479351}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"5684b392262c9aa9173b80cf581b4b17e37e6da48e09179f9c994bbb4a1aef12","X-Timestamp":"1737433487"},"params":{},"body":{},"timestamp":1737433488652}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"294bf6b8811e5312fccc09b864517276af94d85e7f15fef27bb00ff16c64a0fb","X-Timestamp":"1737433490"},"params":{},"body":{},"timestamp":1737433492262}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"664ecc114bc5e428038401dbfcdbc79178f0adadc47ff6a07463a741fa8181fc","X-Timestamp":"1737433613"},"params":{},"body":{},"timestamp":1737433615062}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"664ecc114bc5e428038401dbfcdbc79178f0adadc47ff6a07463a741fa8181fc","X-Timestamp":"1737433613"},"params":{},"body":{},"timestamp":1737433615063}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"d29796cba20e14a8cb5cc19b799957a4bf768015d5b2762af7d2fa6cdfcc680d","X-Timestamp":"1737433623"},"params":{},"body":{},"timestamp":1737433623160}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"d29796cba20e14a8cb5cc19b799957a4bf768015d5b2762af7d2fa6cdfcc680d","X-Timestamp":"1737433623"},"params":{},"body":{},"timestamp":1737433623161}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"b42108d18a7f5205e5b6e893d67bce4e90782c101d1395563516e324636f85b5","X-Timestamp":"1737433714"},"params":{},"body":{},"timestamp":1737433714338}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"b42108d18a7f5205e5b6e893d67bce4e90782c101d1395563516e324636f85b5","X-Timestamp":"1737433714"},"params":{},"body":{},"timestamp":1737433714339}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"7417796d679fa9cc94e393c416f58e4ba3a2185df0155860a885d14612bcfdb9","X-Timestamp":"1737433884"},"params":{},"body":{},"timestamp":1737433884543}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"7417796d679fa9cc94e393c416f58e4ba3a2185df0155860a885d14612bcfdb9","X-Timestamp":"1737433884"},"params":{},"body":{},"timestamp":1737433884544}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"fd338ea3d4ca4f2b84734c5c9a7b8decb3560afc7aad770941848110072406fe","X-Timestamp":"1737433901"},"params":{},"body":{},"timestamp":1737433901467}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"fd338ea3d4ca4f2b84734c5c9a7b8decb3560afc7aad770941848110072406fe","X-Timestamp":"1737433901"},"params":{},"body":{},"timestamp":1737433901468}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"2f63bb149a96ab5f7b4d4280e5619d99d24a4d58128ee960e7f3c8db878a8f72","X-Timestamp":"1737433935"},"params":{},"body":{},"timestamp":1737433935232}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"2f63bb149a96ab5f7b4d4280e5619d99d24a4d58128ee960e7f3c8db878a8f72","X-Timestamp":"1737433935"},"params":{},"body":{},"timestamp":1737433935238}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"66416163d3a6aebb14ebedfe71993fd84d6c58d5e386f5334da5b511bd39d2cd","X-Timestamp":"1737436504"},"params":{},"body":{},"timestamp":1737436504200}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"66416163d3a6aebb14ebedfe71993fd84d6c58d5e386f5334da5b511bd39d2cd","X-Timestamp":"1737436504"},"params":{},"body":{},"timestamp":1737436504202}
+error: [WebSocket] chain-get Error: Cannot read properties of undefined (reading 'map') {"stack":"TypeError: Cannot read properties of undefined (reading 'map')\n    at chainGet (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:674:59)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:915:30)"}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"63345abd58a5ff3dbb18c28ba39995cd38477b919fb982cb6649fb5cc21b4eb2","X-Timestamp":"1737436604"},"params":{},"body":{},"timestamp":1737436604491}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"63345abd58a5ff3dbb18c28ba39995cd38477b919fb982cb6649fb5cc21b4eb2","X-Timestamp":"1737436604"},"params":{},"body":{},"timestamp":1737436604492}
+error: [WebSocket] chain-get Error: serializedResult is not defined {"stack":"ReferenceError: serializedResult is not defined\n    at file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:688:27\n    at Set.forEach (<anonymous>)\n    at chainGet (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:682:21)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:920:30)"}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"df599987b1734f88d6142d06cff5e18f61ee3cf3d01e2197f78543bde3ae5bc0","X-Timestamp":"1737436616"},"params":{},"body":{},"timestamp":1737436617047}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"df599987b1734f88d6142d06cff5e18f61ee3cf3d01e2197f78543bde3ae5bc0","X-Timestamp":"1737436616"},"params":{},"body":{},"timestamp":1737436617049}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"06c37e39de9738a61007db3ec4bd654b9503c791c6e75670b4fbaf5694e236d5","X-Timestamp":"1737436801"},"params":{},"body":{},"timestamp":1737436801310}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"06c37e39de9738a61007db3ec4bd654b9503c791c6e75670b4fbaf5694e236d5","X-Timestamp":"1737436801"},"params":{},"body":{},"timestamp":1737436801311}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"43c1cd611ac782e8190813d50feb3f11f26165ace841239e492117db46352bcb","X-Timestamp":"1737437191"},"params":{},"body":{},"timestamp":1737437191901}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"43c1cd611ac782e8190813d50feb3f11f26165ace841239e492117db46352bcb","X-Timestamp":"1737437191"},"params":{},"body":{},"timestamp":1737437191903}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"645fad01aa6968c43947a79eba33d5c42a04d87d437528a024c929a3f70d81e6","X-Timestamp":"1737437222"},"params":{},"body":{},"timestamp":1737437222908}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"645fad01aa6968c43947a79eba33d5c42a04d87d437528a024c929a3f70d81e6","X-Timestamp":"1737437222"},"params":{},"body":{},"timestamp":1737437222910}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"e562d636df8f7a041b8ddec2e396015c873742d2e4bda1771a6c51ce45282c57","X-Timestamp":"1737437273"},"params":{},"body":{},"timestamp":1737437273425}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"e562d636df8f7a041b8ddec2e396015c873742d2e4bda1771a6c51ce45282c57","X-Timestamp":"1737437273"},"params":{},"body":{},"timestamp":1737437273427}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"d9110f96fef826269a3e57f2e011bbe0885f9b08da9bdd74a7bef3de5d2242d9","X-Timestamp":"1737437908"},"params":{},"body":{},"timestamp":1737437908765}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"d9110f96fef826269a3e57f2e011bbe0885f9b08da9bdd74a7bef3de5d2242d9","X-Timestamp":"1737437908"},"params":{},"body":{},"timestamp":1737437908767}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"0ca70e0a89efc7a43ec7b4f28898f4108932b7011da871b12a67f285d673a94e","X-Timestamp":"1737438003"},"params":{},"body":{},"timestamp":1737438003214}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"0ca70e0a89efc7a43ec7b4f28898f4108932b7011da871b12a67f285d673a94e","X-Timestamp":"1737438003"},"params":{},"body":{},"timestamp":1737438003216}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"1f58a6026dd7458545929109bd5e868bdea149e86506a5fd16becb9f7d21d69f","X-Timestamp":"1737438045"},"params":{},"body":{},"timestamp":1737438045339}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"1f58a6026dd7458545929109bd5e868bdea149e86506a5fd16becb9f7d21d69f","X-Timestamp":"1737438045"},"params":{},"body":{},"timestamp":1737438045340}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"c773df013e254016932e4d91b59eeeed089cd3aa09f2dcc5767e5910aba47f25","X-Timestamp":"1737438062"},"params":{},"body":{},"timestamp":1737438062987}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"c773df013e254016932e4d91b59eeeed089cd3aa09f2dcc5767e5910aba47f25","X-Timestamp":"1737438062"},"params":{},"body":{},"timestamp":1737438062988}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"3e0b0aacfac4b03d5a4f01a90d6109f49360525501a7728a6daab5bcd27a5686","X-Timestamp":"1737438278"},"params":{},"body":{},"timestamp":1737438278808}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"3e0b0aacfac4b03d5a4f01a90d6109f49360525501a7728a6daab5bcd27a5686","X-Timestamp":"1737438278"},"params":{},"body":{},"timestamp":1737438278809}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"a8a7d299138a6353a90d6c6fa5249cf3cd8ca3dcaca7bc4a3a783ad361176073","X-Timestamp":"1737438998"},"params":{},"body":{},"timestamp":1737438998156}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a8a7d299138a6353a90d6c6fa5249cf3cd8ca3dcaca7bc4a3a783ad361176073","X-Timestamp":"1737438998"},"params":{},"body":{},"timestamp":1737438998158}
+error: [WebSocket] chain-get Error: Cannot read properties of undefined (reading 'toString') {"stack":"TypeError: Cannot read properties of undefined (reading 'toString')\n    at file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:677:41\n    at Array.map (<anonymous>)\n    at file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:676:40\n    at Array.map (<anonymous>)\n    at chainGet (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:674:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:922:30)"}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"92c8d4e8a93ad44b87b4e1b520d247c6d847f7f3a5a84de481a70317bc4f41a7","X-Timestamp":"1737439012"},"params":{},"body":{},"timestamp":1737439014088}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"92c8d4e8a93ad44b87b4e1b520d247c6d847f7f3a5a84de481a70317bc4f41a7","X-Timestamp":"1737439012"},"params":{},"body":{},"timestamp":1737439014089}
+error: [WebSocket] chain-get Error: Cannot read properties of undefined (reading 'toString') {"stack":"TypeError: Cannot read properties of undefined (reading 'toString')\n    at file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:677:41\n    at Array.map (<anonymous>)\n    at file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:676:40\n    at Array.map (<anonymous>)\n    at chainGet (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:674:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:922:30)"}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"c656aea817bd0e1bb1acf5c8711728156a9626c5a99393bbdd8c30f93bf99bad","X-Timestamp":"1737439015"},"params":{},"body":{},"timestamp":1737439017511}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"c656aea817bd0e1bb1acf5c8711728156a9626c5a99393bbdd8c30f93bf99bad","X-Timestamp":"1737439015"},"params":{},"body":{},"timestamp":1737439017522}
+error: [WebSocket] chain-get Error: Cannot read properties of undefined (reading 'toString') {"stack":"TypeError: Cannot read properties of undefined (reading 'toString')\n    at file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:677:41\n    at Array.map (<anonymous>)\n    at file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:676:40\n    at Array.map (<anonymous>)\n    at chainGet (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:674:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:922:30)"}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"4799e1004fe668811558bd54efba66f3a4096c82b2046864a17dc91bb56fb5c3","X-Timestamp":"1737439056"},"params":{},"body":{},"timestamp":1737439057384}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"4799e1004fe668811558bd54efba66f3a4096c82b2046864a17dc91bb56fb5c3","X-Timestamp":"1737439056"},"params":{},"body":{},"timestamp":1737439057387}
+error: [WebSocket] chain-get Error: Cannot read properties of undefined (reading 'toString') {"stack":"TypeError: Cannot read properties of undefined (reading 'toString')\n    at file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:677:41\n    at Array.map (<anonymous>)\n    at file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:676:40\n    at Array.map (<anonymous>)\n    at chainGet (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:674:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:922:30)"}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"036995231a5673f2526d153d12d43d33ffa96cd8086576f3d8aa8662a9e17991","X-Timestamp":"1737439091"},"params":{},"body":{},"timestamp":1737439093249}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"036995231a5673f2526d153d12d43d33ffa96cd8086576f3d8aa8662a9e17991","X-Timestamp":"1737439091"},"params":{},"body":{},"timestamp":1737439093250}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"c11430c3789403906d3878fca9a1c7e813612ee16174490027553fbbc5694e56","X-Timestamp":"1737439095"},"params":{},"body":{},"timestamp":1737439095195}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"c11430c3789403906d3878fca9a1c7e813612ee16174490027553fbbc5694e56","X-Timestamp":"1737439095"},"params":{},"body":{},"timestamp":1737439095195}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"a99ac8b5015aa918a8fe04caccf6fa81b38a738312019570ce503840bcb4f1dd","X-Timestamp":"1737439406"},"params":{},"body":{},"timestamp":1737439406725}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a99ac8b5015aa918a8fe04caccf6fa81b38a738312019570ce503840bcb4f1dd","X-Timestamp":"1737439406"},"params":{},"body":{},"timestamp":1737439406726}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"95a8c84b34d8b85af8ed867404f9ccc8bc71408a3a841dda7cd696a3d497396f","X-Timestamp":"1737439430"},"params":{},"body":{},"timestamp":1737439431466}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"95a8c84b34d8b85af8ed867404f9ccc8bc71408a3a841dda7cd696a3d497396f","X-Timestamp":"1737439430"},"params":{},"body":{},"timestamp":1737439431473}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"222b5dfcaf549cea76dd43a9e110f2d2d2ce8a151597dfdbc0d4e27e54486311","X-Timestamp":"1737439433"},"params":{},"body":{},"timestamp":1737439433895}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"222b5dfcaf549cea76dd43a9e110f2d2d2ce8a151597dfdbc0d4e27e54486311","X-Timestamp":"1737439433"},"params":{},"body":{},"timestamp":1737439433896}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"7a7b15c1fb2f1118674ab34db56c050e205a8c0755ec3efc78899a74e4d22982","X-Timestamp":"1737439506"},"params":{},"body":{},"timestamp":1737439506784}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"7a7b15c1fb2f1118674ab34db56c050e205a8c0755ec3efc78899a74e4d22982","X-Timestamp":"1737439506"},"params":{},"body":{},"timestamp":1737439506794}
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"5c2d32d39ce2525acafb386a52799ad006b409c223652feb9600946b087c89c7","X-Timestamp":"1737440565"},"params":{},"body":{},"timestamp":1737440565983}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"5c2d32d39ce2525acafb386a52799ad006b409c223652feb9600946b087c89c7","X-Timestamp":"1737440565"},"params":{},"body":{},"timestamp":1737440565985}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"21deef17bf5b0cb49f501ef0bc38332c13128353b5416e4123072fee3b8a74ff","X-Timestamp":"1737440590"},"params":{},"body":{},"timestamp":1737440590728}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"21deef17bf5b0cb49f501ef0bc38332c13128353b5416e4123072fee3b8a74ff","X-Timestamp":"1737440590"},"params":{},"body":{},"timestamp":1737440590735}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"436653e1039954480dc172c04f723d0ea116fbc76e53c368bdc24c32fe79ff1b","X-Timestamp":"1737440662"},"params":{},"body":{},"timestamp":1737440662175}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"436653e1039954480dc172c04f723d0ea116fbc76e53c368bdc24c32fe79ff1b","X-Timestamp":"1737440662"},"params":{},"body":{},"timestamp":1737440662176}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"e101718b94766096d4c71d2acca3be5c8a465deac2ea74940893d01bd9f71198","X-Timestamp":"1737440699"},"params":{},"body":{},"timestamp":1737440699347}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"e101718b94766096d4c71d2acca3be5c8a465deac2ea74940893d01bd9f71198","X-Timestamp":"1737440699"},"params":{},"body":{},"timestamp":1737440699348}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"788bcdc13349933baeb652f4e09a97820ccf9b977d65f9470eb96d3fcc396401","X-Timestamp":"1737440731"},"params":{},"body":{},"timestamp":1737440731258}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"788bcdc13349933baeb652f4e09a97820ccf9b977d65f9470eb96d3fcc396401","X-Timestamp":"1737440731"},"params":{},"body":{},"timestamp":1737440731262}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"2881f0a6a6b1f30e1cc681b8cb4c7d846924b28784562421f9cc1fdc759e983a","X-Timestamp":"1737440778"},"params":{},"body":{},"timestamp":1737440778401}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"2881f0a6a6b1f30e1cc681b8cb4c7d846924b28784562421f9cc1fdc759e983a","X-Timestamp":"1737440778"},"params":{},"body":{},"timestamp":1737440778406}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"9a56758e1c5512fb21ed8c28015ae7f18eecd3f9422649457879d4e5df256cd8","X-Timestamp":"1737440831"},"params":{},"body":{},"timestamp":1737440832014}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"9a56758e1c5512fb21ed8c28015ae7f18eecd3f9422649457879d4e5df256cd8","X-Timestamp":"1737440831"},"params":{},"body":{},"timestamp":1737440832015}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"fc7304eb226edc43d23f1d4942662e0bd304d2e30a1ae88b2deeb35c7f63238c","X-Timestamp":"1737440837"},"params":{},"body":{},"timestamp":1737440837696}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"fc7304eb226edc43d23f1d4942662e0bd304d2e30a1ae88b2deeb35c7f63238c","X-Timestamp":"1737440837"},"params":{},"body":{},"timestamp":1737440837698}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"2a6fab28a5cdbc9891131e573112b0abdab120a98181d29ed8d2baa5f9000d1b","X-Timestamp":"1737440885"},"params":{},"body":{},"timestamp":1737440885666}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"2a6fab28a5cdbc9891131e573112b0abdab120a98181d29ed8d2baa5f9000d1b","X-Timestamp":"1737440885"},"params":{},"body":{},"timestamp":1737440885666}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"f5fff59abf7ed856e39b69028d9f8879a81e74415b212e92c91efac9c66437f9","X-Timestamp":"1737440895"},"params":{},"body":{},"timestamp":1737440895413}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"f5fff59abf7ed856e39b69028d9f8879a81e74415b212e92c91efac9c66437f9","X-Timestamp":"1737440895"},"params":{},"body":{},"timestamp":1737440895421}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"e2f10deeab74444703fb4f6f93f2e74fb30103da9ed96dd795740cb948ea4520","X-Timestamp":"1737440896"},"params":{},"body":{},"timestamp":1737440897288}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"e2f10deeab74444703fb4f6f93f2e74fb30103da9ed96dd795740cb948ea4520","X-Timestamp":"1737440896"},"params":{},"body":{},"timestamp":1737440897289}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"fc239cca6f7c1aae655f7049488f8148eed6bd78bf8006a475a8f9bd599bb245","X-Timestamp":"1737440899"},"params":{},"body":{},"timestamp":1737440900166}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"fc239cca6f7c1aae655f7049488f8148eed6bd78bf8006a475a8f9bd599bb245","X-Timestamp":"1737440899"},"params":{},"body":{},"timestamp":1737440900169}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"ea1317fb2897bb5c42e3c971934fdcde33d5e5bacdc4e2c461bce6df6d006e4e","X-Timestamp":"1737441042"},"params":{},"body":{},"timestamp":1737441043289}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"ea1317fb2897bb5c42e3c971934fdcde33d5e5bacdc4e2c461bce6df6d006e4e","X-Timestamp":"1737441042"},"params":{},"body":{},"timestamp":1737441043292}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"07fb919806a4fe4bb947e21ae476d53e949a14d8d912e4928dcb822c8fb5bf87","X-Timestamp":"1737441044"},"params":{},"body":{},"timestamp":1737441044675}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"07fb919806a4fe4bb947e21ae476d53e949a14d8d912e4928dcb822c8fb5bf87","X-Timestamp":"1737441044"},"params":{},"body":{},"timestamp":1737441044676}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"fdbf8e9cda3389c7ab0a39a9763e8dbe464be895e51a5700c7023b7b4237358a","X-Timestamp":"1737441048"},"params":{},"body":{},"timestamp":1737441049047}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"fdbf8e9cda3389c7ab0a39a9763e8dbe464be895e51a5700c7023b7b4237358a","X-Timestamp":"1737441048"},"params":{},"body":{},"timestamp":1737441049052}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"a95abed0d98a2428b58c8935cd891f03399f4bc018e8c41702ff7ca7620e30a6","X-Timestamp":"1737441082"},"params":{},"body":{},"timestamp":1737441082465}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a95abed0d98a2428b58c8935cd891f03399f4bc018e8c41702ff7ca7620e30a6","X-Timestamp":"1737441082"},"params":{},"body":{},"timestamp":1737441082472}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"ab43df3b389e7e420f525b454c927b1b93b7ef3f608730b418f399524a061de3","X-Timestamp":"1737441170"},"params":{},"body":{},"timestamp":1737441170664}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"ab43df3b389e7e420f525b454c927b1b93b7ef3f608730b418f399524a061de3","X-Timestamp":"1737441170"},"params":{},"body":{},"timestamp":1737441170665}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"1d994ee2ec323843e3647eb2673fe433772c0c45668464429bed5c4c77137dc9","X-Timestamp":"1737441194"},"params":{},"body":{},"timestamp":1737441194427}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"1d994ee2ec323843e3647eb2673fe433772c0c45668464429bed5c4c77137dc9","X-Timestamp":"1737441194"},"params":{},"body":{},"timestamp":1737441194428}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"d5353e944b2aebbaa47d527640001a8360f4d2a513a2e88e803de18fc48b3827","X-Timestamp":"1737441208"},"params":{},"body":{},"timestamp":1737441208429}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"d5353e944b2aebbaa47d527640001a8360f4d2a513a2e88e803de18fc48b3827","X-Timestamp":"1737441208"},"params":{},"body":{},"timestamp":1737441208430}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"6b66ddc6b347cb61916060bcf4b093b1ec165bfd3b789ebfe25bdd434126d33d","X-Timestamp":"1737441209"},"params":{},"body":{},"timestamp":1737441209692}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"6b66ddc6b347cb61916060bcf4b093b1ec165bfd3b789ebfe25bdd434126d33d","X-Timestamp":"1737441209"},"params":{},"body":{},"timestamp":1737441209693}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"0919714606b0f724e24254ed154279f4f789b59af9e9124480806b5e28f40110","X-Timestamp":"1737441210"},"params":{},"body":{},"timestamp":1737441210884}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"0919714606b0f724e24254ed154279f4f789b59af9e9124480806b5e28f40110","X-Timestamp":"1737441210"},"params":{},"body":{},"timestamp":1737441210885}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"d5d2ee3d16e2f2d05a214647c743ca06113ee760f625e7b60c55610a6f0332fe","X-Timestamp":"1737441230"},"params":{},"body":{},"timestamp":1737441230594}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"d5d2ee3d16e2f2d05a214647c743ca06113ee760f625e7b60c55610a6f0332fe","X-Timestamp":"1737441230"},"params":{},"body":{},"timestamp":1737441230595}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"1b443f1d6e3aab2627ce201bdc7e3ed3555b0261e8b29880fd2b5b2e20b12723","X-Timestamp":"1737441258"},"params":{},"body":{},"timestamp":1737441258796}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"1b443f1d6e3aab2627ce201bdc7e3ed3555b0261e8b29880fd2b5b2e20b12723","X-Timestamp":"1737441258"},"params":{},"body":{},"timestamp":1737441258797}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"4b79b8d5cd7a084da3cfbf744d0d30ae48a7c0b715ce484faa20bb04daf19609","X-Timestamp":"1737441323"},"params":{},"body":{},"timestamp":1737441324248}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"4b79b8d5cd7a084da3cfbf744d0d30ae48a7c0b715ce484faa20bb04daf19609","X-Timestamp":"1737441323"},"params":{},"body":{},"timestamp":1737441324250}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"4c130c38a8d814a844ffce35360282243d9cc0f87adf6b755f6724110097992e","X-Timestamp":"1737441326"},"params":{},"body":{},"timestamp":1737441326686}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"4c130c38a8d814a844ffce35360282243d9cc0f87adf6b755f6724110097992e","X-Timestamp":"1737441326"},"params":{},"body":{},"timestamp":1737441326687}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"21dd0a22e618f2db3940f1ed1f5c3426a6d61368019fa94c85e1d7008952b513","X-Timestamp":"1737441339"},"params":{},"body":{},"timestamp":1737441339230}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"21dd0a22e618f2db3940f1ed1f5c3426a6d61368019fa94c85e1d7008952b513","X-Timestamp":"1737441339"},"params":{},"body":{},"timestamp":1737441339232}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"0f5fd9bdcf71ba3fd2c2262746ffea36073b3774b93689bbfe482915a80fb89e","X-Timestamp":"1737441465"},"params":{},"body":{},"timestamp":1737441466461}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"0f5fd9bdcf71ba3fd2c2262746ffea36073b3774b93689bbfe482915a80fb89e","X-Timestamp":"1737441465"},"params":{},"body":{},"timestamp":1737441466462}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"0a7d6d3c31920b2682384c26d2341bc21547cbffb10663f39ca8e2b6aac25c46","X-Timestamp":"1737441468"},"params":{},"body":{},"timestamp":1737441468588}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"0a7d6d3c31920b2682384c26d2341bc21547cbffb10663f39ca8e2b6aac25c46","X-Timestamp":"1737441468"},"params":{},"body":{},"timestamp":1737441468590}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"dbf395d8e623672ae9d920f193c086240de1ed6a3c27d2331513beafb7e59191","X-Timestamp":"1737441472"},"params":{},"body":{},"timestamp":1737441472320}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"dbf395d8e623672ae9d920f193c086240de1ed6a3c27d2331513beafb7e59191","X-Timestamp":"1737441472"},"params":{},"body":{},"timestamp":1737441472324}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"f1d7c7c83349c1ba7dfdac9dd6a182ee4f48b27bfa87d0593d91a48539f44416","X-Timestamp":"1737441536"},"params":{},"body":{},"timestamp":1737441536181}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"f1d7c7c83349c1ba7dfdac9dd6a182ee4f48b27bfa87d0593d91a48539f44416","X-Timestamp":"1737441536"},"params":{},"body":{},"timestamp":1737441536182}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"96c170b54fa30e0f3b0f3bfa2488feec3e33eb9b9e8cd031b418ca1446c0429c","X-Timestamp":"1737442088"},"params":{},"body":{},"timestamp":1737442088730}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"96c170b54fa30e0f3b0f3bfa2488feec3e33eb9b9e8cd031b418ca1446c0429c","X-Timestamp":"1737442088"},"params":{},"body":{},"timestamp":1737442088732}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"7c4a6b34f028226c2ea42fb3a85720c79c808eff4a03b76790df08efe8a614a6","X-Timestamp":"1737442097"},"params":{},"body":{},"timestamp":1737442097884}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"7c4a6b34f028226c2ea42fb3a85720c79c808eff4a03b76790df08efe8a614a6","X-Timestamp":"1737442097"},"params":{},"body":{},"timestamp":1737442097885}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 32358
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"dc0fb217688ed0a884522684fd347ed22e265f9713a1b2fb836a4c7f737078da","X-Timestamp":"1737442359"},"params":{},"body":{},"timestamp":1737442359417}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"dc0fb217688ed0a884522684fd347ed22e265f9713a1b2fb836a4c7f737078da","X-Timestamp":"1737442359"},"params":{},"body":{},"timestamp":1737442359418}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"491ce8499b8112827e92a3a4790d04594979cff0008f7cc183c84855dd5c4091","X-Timestamp":"1737442369"},"params":{},"body":{},"timestamp":1737442370851}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"491ce8499b8112827e92a3a4790d04594979cff0008f7cc183c84855dd5c4091","X-Timestamp":"1737442369"},"params":{},"body":{},"timestamp":1737442370851}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"1ac1870e3bc3d1f6fca0f6d26052696f1adb2243b6cf424ae597042258e2ff7c","X-Timestamp":"1737442372"},"params":{},"body":{},"timestamp":1737442372442}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"1ac1870e3bc3d1f6fca0f6d26052696f1adb2243b6cf424ae597042258e2ff7c","X-Timestamp":"1737442372"},"params":{},"body":{},"timestamp":1737442372442}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"a8afe3f0574616ffe39e3ef15bf59fa9e7f98ddf12f9d464c09db4e34be7ce5f","X-Timestamp":"1737442404"},"params":{},"body":{},"timestamp":1737442405779}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a8afe3f0574616ffe39e3ef15bf59fa9e7f98ddf12f9d464c09db4e34be7ce5f","X-Timestamp":"1737442404"},"params":{},"body":{},"timestamp":1737442405780}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"21de06fe8ab25d9b307feb921d9c2bb5694641f6c57321aadfba099467269a26","X-Timestamp":"1737442417"},"params":{},"body":{},"timestamp":1737442417477}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"21de06fe8ab25d9b307feb921d9c2bb5694641f6c57321aadfba099467269a26","X-Timestamp":"1737442417"},"params":{},"body":{},"timestamp":1737442417477}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"86bb4463689aa4bc27a5a972e53432759215160f3b4524712ad16eb8b51f0f38","X-Timestamp":"1737442446"},"params":{},"body":{},"timestamp":1737442446122}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"86bb4463689aa4bc27a5a972e53432759215160f3b4524712ad16eb8b51f0f38","X-Timestamp":"1737442446"},"params":{},"body":{},"timestamp":1737442446122}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"f95a8183af74ea947d86240500c21b9421ceb66c67a6cbfce47bfc5d35f3c987","X-Timestamp":"1737442458"},"params":{},"body":{},"timestamp":1737442459375}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"f95a8183af74ea947d86240500c21b9421ceb66c67a6cbfce47bfc5d35f3c987","X-Timestamp":"1737442458"},"params":{},"body":{},"timestamp":1737442459375}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"6fe87b7c102d19ead58ce1e024547da738c91b95d2879b86324e2f71307adace","X-Timestamp":"1737442461"},"params":{},"body":{},"timestamp":1737442461301}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"6fe87b7c102d19ead58ce1e024547da738c91b95d2879b86324e2f71307adace","X-Timestamp":"1737442461"},"params":{},"body":{},"timestamp":1737442461302}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"0a14dd91e687fbe28b7d0dbbf952cdb69bc6d3742c876021a2e4aebb99e922f8","X-Timestamp":"1737442463"},"params":{},"body":{},"timestamp":1737442463968}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"0a14dd91e687fbe28b7d0dbbf952cdb69bc6d3742c876021a2e4aebb99e922f8","X-Timestamp":"1737442463"},"params":{},"body":{},"timestamp":1737442463972}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"e9c511a43f7f3ff42dd642050b8f8354008a9b7a6fdda766c3ea96b686aa7ab5","X-Timestamp":"1737449490"},"params":{},"body":{},"timestamp":1737449490216}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"e9c511a43f7f3ff42dd642050b8f8354008a9b7a6fdda766c3ea96b686aa7ab5","X-Timestamp":"1737449490"},"params":{},"body":{},"timestamp":1737449490219}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"c8428cf00828563a919c8f53c27ae6243b78377b31942fda50e96b08c5e5e4db","X-Timestamp":"1737449516"},"params":{},"body":{},"timestamp":1737449516695}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"c8428cf00828563a919c8f53c27ae6243b78377b31942fda50e96b08c5e5e4db","X-Timestamp":"1737449516"},"params":{},"body":{},"timestamp":1737449516696}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"1eeba4a08cd986f22dc10672c0b0ee442488ba0e3d69655e43bac935ef8267ac","X-Timestamp":"1737449536"},"params":{},"body":{},"timestamp":1737449536532}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"1eeba4a08cd986f22dc10672c0b0ee442488ba0e3d69655e43bac935ef8267ac","X-Timestamp":"1737449536"},"params":{},"body":{},"timestamp":1737449536535}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"cf51d6f72d53599b7117902e1ffd2a7b39f339a355d91e6fce2adff3b5a3caba","X-Timestamp":"1737449773"},"params":{},"body":{},"timestamp":1737449773201}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"cf51d6f72d53599b7117902e1ffd2a7b39f339a355d91e6fce2adff3b5a3caba","X-Timestamp":"1737449773"},"params":{},"body":{},"timestamp":1737449773204}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"b4ee0aaa197675cea899b80ed2c751ed05174e7b90176af84a2111c698f6c2d6","X-Timestamp":"1737449814"},"params":{},"body":{},"timestamp":1737449814588}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"b4ee0aaa197675cea899b80ed2c751ed05174e7b90176af84a2111c698f6c2d6","X-Timestamp":"1737449814"},"params":{},"body":{},"timestamp":1737449814589}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"98bacb7f90807c21daedefd3a091b14e1d30bf597af164620cc4bb2fc9a0e22b","X-Timestamp":"1737449841"},"params":{},"body":{},"timestamp":1737449841328}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"98bacb7f90807c21daedefd3a091b14e1d30bf597af164620cc4bb2fc9a0e22b","X-Timestamp":"1737449841"},"params":{},"body":{},"timestamp":1737449841329}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"b3ccd9b6840cb8ade1524a201e7ba45fcd6f6189c07936d965d50b606d7c03e1","X-Timestamp":"1737449918"},"params":{},"body":{},"timestamp":1737449918552}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"b3ccd9b6840cb8ade1524a201e7ba45fcd6f6189c07936d965d50b606d7c03e1","X-Timestamp":"1737449918"},"params":{},"body":{},"timestamp":1737449918553}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"6f46a0fcda6889a9e358938c4807d39c10b7dcd6fb34a91ec62d6d58d4f3c61b","X-Timestamp":"1737450394"},"params":{},"body":{},"timestamp":1737450394091}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"6f46a0fcda6889a9e358938c4807d39c10b7dcd6fb34a91ec62d6d58d4f3c61b","X-Timestamp":"1737450394"},"params":{},"body":{},"timestamp":1737450394093}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"a9a3e1dc67b21ef6e7727971886888538e0d336a4cb947ed4780cfb0c9f54bec","X-Timestamp":"1737450712"},"params":{},"body":{},"timestamp":1737450713480}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a9a3e1dc67b21ef6e7727971886888538e0d336a4cb947ed4780cfb0c9f54bec","X-Timestamp":"1737450712"},"params":{},"body":{},"timestamp":1737450713481}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"cbe68e6f417cedffb26076f848e864b852b43b6b6e0580e501819cfe9eb59072","X-Timestamp":"1737450715"},"params":{},"body":{},"timestamp":1737450715131}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"cbe68e6f417cedffb26076f848e864b852b43b6b6e0580e501819cfe9eb59072","X-Timestamp":"1737450715"},"params":{},"body":{},"timestamp":1737450715132}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"c4c241aa442feb23cee0625d9ad1d3b18e694fa0d59be0e6cf582aa7a3caf23a","X-Timestamp":"1737453116"},"params":{},"body":{},"timestamp":1737453116712}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"c4c241aa442feb23cee0625d9ad1d3b18e694fa0d59be0e6cf582aa7a3caf23a","X-Timestamp":"1737453116"},"params":{},"body":{},"timestamp":1737453116715}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"ed6bdbfea610456151be23ac559d6325bbcdd2c1e5ee502913d37eb8933c367d","X-Timestamp":"1737453295"},"params":{},"body":{},"timestamp":1737453295266}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"ed6bdbfea610456151be23ac559d6325bbcdd2c1e5ee502913d37eb8933c367d","X-Timestamp":"1737453295"},"params":{},"body":{},"timestamp":1737453295267}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"6f97efdc8cca10d03d32e07813a8f9ab4ed52d5c1f624997956c43da188545f8","X-Timestamp":"1737453313"},"params":{},"body":{},"timestamp":1737453313713}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"6f97efdc8cca10d03d32e07813a8f9ab4ed52d5c1f624997956c43da188545f8","X-Timestamp":"1737453313"},"params":{},"body":{},"timestamp":1737453313716}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"4146f77ab703c20abfe345c58bf2b03a94cb9d807aaca150b381183de156067b","X-Timestamp":"1737453428"},"params":{},"body":{},"timestamp":1737453428061}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"4146f77ab703c20abfe345c58bf2b03a94cb9d807aaca150b381183de156067b","X-Timestamp":"1737453428"},"params":{},"body":{},"timestamp":1737453428064}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"f809e19ffc4d9009b357da618ff1f743f084fc9e45d28fa63f0f812280f65a26","X-Timestamp":"1737453604"},"params":{},"body":{},"timestamp":1737453604379}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"f809e19ffc4d9009b357da618ff1f743f084fc9e45d28fa63f0f812280f65a26","X-Timestamp":"1737453604"},"params":{},"body":{},"timestamp":1737453604382}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"9ba1df958a0191759f52e9497ea4279eca50cfe530e78818684d08c96ba3d171","X-Timestamp":"1737453611"},"params":{},"body":{},"timestamp":1737453611678}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"9ba1df958a0191759f52e9497ea4279eca50cfe530e78818684d08c96ba3d171","X-Timestamp":"1737453611"},"params":{},"body":{},"timestamp":1737453611679}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"731c011325e54abd5ff966b2b018d26af4dc145055d2a7d2925bf01c365b4565","X-Timestamp":"1737453635"},"params":{},"body":{},"timestamp":1737453635629}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"731c011325e54abd5ff966b2b018d26af4dc145055d2a7d2925bf01c365b4565","X-Timestamp":"1737453635"},"params":{},"body":{},"timestamp":1737453635630}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"54352ac5af552c6c32a74511135b925ddf5c081708ad68be330be461df9a7313","X-Timestamp":"1737477499"},"params":{},"body":{},"timestamp":1737477499112}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"54352ac5af552c6c32a74511135b925ddf5c081708ad68be330be461df9a7313","X-Timestamp":"1737477499"},"params":{},"body":{},"timestamp":1737477499113}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"f483198ad30cf5bc376042c44d12e56833f143afe11d1ff8d7ad3ac198e62263","X-Timestamp":"1737477956"},"params":{},"body":{},"timestamp":1737477956305}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"f483198ad30cf5bc376042c44d12e56833f143afe11d1ff8d7ad3ac198e62263","X-Timestamp":"1737477956"},"params":{},"body":{},"timestamp":1737477956306}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"965615474f41adc11dcff9db5d12c22efe73a27f73fd170b10b6144960695f45","X-Timestamp":"1737477991"},"params":{},"body":{},"timestamp":1737477991046}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"965615474f41adc11dcff9db5d12c22efe73a27f73fd170b10b6144960695f45","X-Timestamp":"1737477991"},"params":{},"body":{},"timestamp":1737477991047}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-insert request: {"event":"labelInsert","headers":{"X-Signature":"a361fdb04137a14355519bd55e4892fe6e75c5ce329f8feb2c5c408fa3f3ed17","X-Timestamp":"1737477993"},"params":{},"body":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1","label":"test","chain":"ETH","entity":"","tracking":false,"comment":""},"timestamp":1737477993840}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"4dcb2949d936087cb5fe61c5054ba3adea6d4b674d8e3333d0cf698437556220","X-Timestamp":"1737478281"},"params":{},"body":{},"timestamp":1737478281328}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"4dcb2949d936087cb5fe61c5054ba3adea6d4b674d8e3333d0cf698437556220","X-Timestamp":"1737478281"},"params":{},"body":{},"timestamp":1737478281332}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"3b29eb043fb9cac894fe96284fecf8f77ad2407693a79e0a785e2cd52c801eb5","X-Timestamp":"1737478537"},"params":{},"body":{},"timestamp":1737478538044}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"b96ae50a338fef5b8e3dad456213d48875af3a1452665e611332b048f5590c0f","X-Timestamp":"1737478538"},"params":{},"body":{},"timestamp":1737478538046}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"ad3f02f03e13b226d02f9b3c0872eb2b53cfb30487b891cded9f7ae2f86775ee","X-Timestamp":"1737478662"},"params":{},"body":{},"timestamp":1737478662117}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"ad3f02f03e13b226d02f9b3c0872eb2b53cfb30487b891cded9f7ae2f86775ee","X-Timestamp":"1737478662"},"params":{},"body":{},"timestamp":1737478662118}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"956c0e00013ec00241cc3793a7f11b5c4588c14938161041d25f51cf52e58f94","X-Timestamp":"1737478832"},"params":{},"body":{},"timestamp":1737478832826}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"956c0e00013ec00241cc3793a7f11b5c4588c14938161041d25f51cf52e58f94","X-Timestamp":"1737478832"},"params":{},"body":{},"timestamp":1737478832828}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"31d555a2c04bef74ac564f0712f363026a7af85222400b29ca59e9e14f5a148f","X-Timestamp":"1737478949"},"params":{},"body":{},"timestamp":1737478950028}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"31d555a2c04bef74ac564f0712f363026a7af85222400b29ca59e9e14f5a148f","X-Timestamp":"1737478949"},"params":{},"body":{},"timestamp":1737478950030}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"d4012ba3b303807387123c91b8228b78dca13dca7593d8d1cbac0e0cb3199bb2","X-Timestamp":"1737479346"},"params":{},"body":{},"timestamp":1737479346532}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"d4012ba3b303807387123c91b8228b78dca13dca7593d8d1cbac0e0cb3199bb2","X-Timestamp":"1737479346"},"params":{},"body":{},"timestamp":1737479346545}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"9e8c1408edc37d003156063b867b1021902ba934d598f543ca57a54262bf9d21","X-Timestamp":"1737479395"},"params":{},"body":{},"timestamp":1737479395648}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"9e8c1408edc37d003156063b867b1021902ba934d598f543ca57a54262bf9d21","X-Timestamp":"1737479395"},"params":{},"body":{},"timestamp":1737479395651}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"9e8c1408edc37d003156063b867b1021902ba934d598f543ca57a54262bf9d21","X-Timestamp":"1737479395"},"params":{},"body":{},"timestamp":1737479395653}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"4ee19f86a3e05c82815768d0c6b7d71089023a994999add5ea993bcc1879ef5b","X-Timestamp":"1737479408"},"params":{},"body":{},"timestamp":1737479408571}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"4ee19f86a3e05c82815768d0c6b7d71089023a994999add5ea993bcc1879ef5b","X-Timestamp":"1737479408"},"params":{},"body":{},"timestamp":1737479408572}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"4ee19f86a3e05c82815768d0c6b7d71089023a994999add5ea993bcc1879ef5b","X-Timestamp":"1737479408"},"params":{},"body":{},"timestamp":1737479408577}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"844c6523a383f9742f38e007bb2f0bbd36b18abd40ead886c71ba7e3ad8c4611","X-Timestamp":"1737553204"},"params":{},"body":{},"timestamp":1737553204458}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"844c6523a383f9742f38e007bb2f0bbd36b18abd40ead886c71ba7e3ad8c4611","X-Timestamp":"1737553204"},"params":{},"body":{},"timestamp":1737553204460}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"844c6523a383f9742f38e007bb2f0bbd36b18abd40ead886c71ba7e3ad8c4611","X-Timestamp":"1737553204"},"params":{},"body":{},"timestamp":1737553204462}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"824211994f37e032df8fd079645a254a8bd8e472d3196f14393c5bbbf89d479d","X-Timestamp":"1737553252"},"params":{},"body":{},"timestamp":1737553252818}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"824211994f37e032df8fd079645a254a8bd8e472d3196f14393c5bbbf89d479d","X-Timestamp":"1737553252"},"params":{},"body":{},"timestamp":1737553252819}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"824211994f37e032df8fd079645a254a8bd8e472d3196f14393c5bbbf89d479d","X-Timestamp":"1737553252"},"params":{},"body":{},"timestamp":1737553252820}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"1c15c2d0618667265fe0e2319e4e6d04c9e6054edb9292bf7e44d1294200b2e3","X-Timestamp":"1737553285"},"params":{},"body":{},"timestamp":1737553285404}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"1c15c2d0618667265fe0e2319e4e6d04c9e6054edb9292bf7e44d1294200b2e3","X-Timestamp":"1737553285"},"params":{},"body":{},"timestamp":1737553285409}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"1c15c2d0618667265fe0e2319e4e6d04c9e6054edb9292bf7e44d1294200b2e3","X-Timestamp":"1737553285"},"params":{},"body":{},"timestamp":1737553285411}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"f63e25e462a6504a3d8cfb7492ef13d77872893308540ee1d31ccc79cf791365","X-Timestamp":"1737553337"},"params":{},"body":{},"timestamp":1737553337201}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"f63e25e462a6504a3d8cfb7492ef13d77872893308540ee1d31ccc79cf791365","X-Timestamp":"1737553337"},"params":{},"body":{},"timestamp":1737553337213}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"f63e25e462a6504a3d8cfb7492ef13d77872893308540ee1d31ccc79cf791365","X-Timestamp":"1737553337"},"params":{},"body":{},"timestamp":1737553337216}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"ae6b2289a096520d1c8fdb78e0778c88ed6558f1e250830cb9b12106fb330eaa","X-Timestamp":"1737553354"},"params":{},"body":{},"timestamp":1737553354656}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"ae6b2289a096520d1c8fdb78e0778c88ed6558f1e250830cb9b12106fb330eaa","X-Timestamp":"1737553354"},"params":{},"body":{},"timestamp":1737553354660}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"ae6b2289a096520d1c8fdb78e0778c88ed6558f1e250830cb9b12106fb330eaa","X-Timestamp":"1737553354"},"params":{},"body":{},"timestamp":1737553354669}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"7b82c8a156a21ba5db1a015eff55603b9fbf8a70ed3e306c92f983a53368329c","X-Timestamp":"1737553357"},"params":{},"body":{},"timestamp":1737553357703}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"7b82c8a156a21ba5db1a015eff55603b9fbf8a70ed3e306c92f983a53368329c","X-Timestamp":"1737553357"},"params":{},"body":{},"timestamp":1737553357704}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"7b82c8a156a21ba5db1a015eff55603b9fbf8a70ed3e306c92f983a53368329c","X-Timestamp":"1737553357"},"params":{},"body":{},"timestamp":1737553357708}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"649c5a022db818b9d26d78c11c77663459f4e0c2c8b82c7a03ebe3a0846fd2a6","X-Timestamp":"1737553389"},"params":{},"body":{},"timestamp":1737553389984}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"649c5a022db818b9d26d78c11c77663459f4e0c2c8b82c7a03ebe3a0846fd2a6","X-Timestamp":"1737553389"},"params":{},"body":{},"timestamp":1737553389986}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"649c5a022db818b9d26d78c11c77663459f4e0c2c8b82c7a03ebe3a0846fd2a6","X-Timestamp":"1737553389"},"params":{},"body":{},"timestamp":1737553389987}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"f06360c08850da254baafbcda6468d2888e2cfe45134a8633f2b1cc7ec72f455","X-Timestamp":"1737553400"},"params":{},"body":{},"timestamp":1737553401049}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"f06360c08850da254baafbcda6468d2888e2cfe45134a8633f2b1cc7ec72f455","X-Timestamp":"1737553400"},"params":{},"body":{},"timestamp":1737553401050}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"f06360c08850da254baafbcda6468d2888e2cfe45134a8633f2b1cc7ec72f455","X-Timestamp":"1737553400"},"params":{},"body":{},"timestamp":1737553401052}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"282b895d1e4d6e47d3d808d5d8964457d06707c64f7569f0d71381febe958e4a","X-Timestamp":"1737553401"},"params":{},"body":{},"timestamp":1737553401891}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"282b895d1e4d6e47d3d808d5d8964457d06707c64f7569f0d71381febe958e4a","X-Timestamp":"1737553401"},"params":{},"body":{},"timestamp":1737553401892}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"282b895d1e4d6e47d3d808d5d8964457d06707c64f7569f0d71381febe958e4a","X-Timestamp":"1737553401"},"params":{},"body":{},"timestamp":1737553401893}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"6f9dc39287b37f04cd28039debecf042ce28de7d0cf882bca98f0b06ca5c3e20","X-Timestamp":"1737553402"},"params":{},"body":{},"timestamp":1737553402523}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"6f9dc39287b37f04cd28039debecf042ce28de7d0cf882bca98f0b06ca5c3e20","X-Timestamp":"1737553402"},"params":{},"body":{},"timestamp":1737553402524}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"6f9dc39287b37f04cd28039debecf042ce28de7d0cf882bca98f0b06ca5c3e20","X-Timestamp":"1737553402"},"params":{},"body":{},"timestamp":1737553402531}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a8eda04455f60e2afb2f928b5dd7ee3426593d73a60d64e11f129d0dc32543c6","X-Timestamp":"1737553927"},"params":{},"body":{},"timestamp":1737553927446}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"a8eda04455f60e2afb2f928b5dd7ee3426593d73a60d64e11f129d0dc32543c6","X-Timestamp":"1737553927"},"params":{},"body":{},"timestamp":1737553927447}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"a8eda04455f60e2afb2f928b5dd7ee3426593d73a60d64e11f129d0dc32543c6","X-Timestamp":"1737553927"},"params":{},"body":{},"timestamp":1737553927447}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"db0252cb6702a7c13dc6c425c9e92ead26f120d55ed88538de150a651fe26418","X-Timestamp":"1737553940"},"params":{},"body":{},"timestamp":1737553941132}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"db0252cb6702a7c13dc6c425c9e92ead26f120d55ed88538de150a651fe26418","X-Timestamp":"1737553940"},"params":{},"body":{},"timestamp":1737553941136}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"db0252cb6702a7c13dc6c425c9e92ead26f120d55ed88538de150a651fe26418","X-Timestamp":"1737553940"},"params":{},"body":{},"timestamp":1737553941138}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"e64b5c189ae7898e400f7f9966208192689382e83d6475c5fbf0c381e85fd0b5","X-Timestamp":"1737553942"},"params":{},"body":{},"timestamp":1737553942113}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"e64b5c189ae7898e400f7f9966208192689382e83d6475c5fbf0c381e85fd0b5","X-Timestamp":"1737553942"},"params":{},"body":{},"timestamp":1737553942114}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"e64b5c189ae7898e400f7f9966208192689382e83d6475c5fbf0c381e85fd0b5","X-Timestamp":"1737553942"},"params":{},"body":{},"timestamp":1737553942115}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"acea0a7fbd0bc89032c19fc42a80e0b5e4c66257cd5348d7206ff94790a23fab","X-Timestamp":"1737553943"},"params":{},"body":{},"timestamp":1737553943032}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"acea0a7fbd0bc89032c19fc42a80e0b5e4c66257cd5348d7206ff94790a23fab","X-Timestamp":"1737553943"},"params":{},"body":{},"timestamp":1737553943033}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"acea0a7fbd0bc89032c19fc42a80e0b5e4c66257cd5348d7206ff94790a23fab","X-Timestamp":"1737553943"},"params":{},"body":{},"timestamp":1737553943034}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a667c3d1f3c8c2cffd75b3bfade0271bedf556077901740920257b66041cd090","X-Timestamp":"1737553975"},"params":{},"body":{},"timestamp":1737553975244}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"a667c3d1f3c8c2cffd75b3bfade0271bedf556077901740920257b66041cd090","X-Timestamp":"1737553975"},"params":{},"body":{},"timestamp":1737553975250}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"a667c3d1f3c8c2cffd75b3bfade0271bedf556077901740920257b66041cd090","X-Timestamp":"1737553975"},"params":{},"body":{},"timestamp":1737553975251}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"3fbfcfb20aab3f8c68d2289f54304f7996183686a5085291500a42de66ab2100","X-Timestamp":"1737557343"},"params":{},"body":{},"timestamp":1737557343500}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"3fbfcfb20aab3f8c68d2289f54304f7996183686a5085291500a42de66ab2100","X-Timestamp":"1737557343"},"params":{},"body":{},"timestamp":1737557343501}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"3fbfcfb20aab3f8c68d2289f54304f7996183686a5085291500a42de66ab2100","X-Timestamp":"1737557343"},"params":{},"body":{},"timestamp":1737557343502}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"ff5a5ea1c8eb27e18240b6038dbaa197128e2ac8bc220dd249384c9d925a32ba","X-Timestamp":"1737557563"},"params":{},"body":{},"timestamp":1737557563149}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"ff5a5ea1c8eb27e18240b6038dbaa197128e2ac8bc220dd249384c9d925a32ba","X-Timestamp":"1737557563"},"params":{},"body":{},"timestamp":1737557563152}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"ff5a5ea1c8eb27e18240b6038dbaa197128e2ac8bc220dd249384c9d925a32ba","X-Timestamp":"1737557563"},"params":{},"body":{},"timestamp":1737557563154}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"3f643484f5bc6880c0fdce298dd2899529f0fd2f3e2f935e7b1df0cf054c259b","X-Timestamp":"1737636694"},"params":{},"body":{},"timestamp":1737636694598}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"3f643484f5bc6880c0fdce298dd2899529f0fd2f3e2f935e7b1df0cf054c259b","X-Timestamp":"1737636694"},"params":{},"body":{},"timestamp":1737636694601}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"3f643484f5bc6880c0fdce298dd2899529f0fd2f3e2f935e7b1df0cf054c259b","X-Timestamp":"1737636694"},"params":{},"body":{},"timestamp":1737636694602}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"87a0aa86e45c54200706edf0ac6be6afdd8842ebf06a19919840f1acc8c12924","X-Timestamp":"1737637146"},"params":{},"body":{},"timestamp":1737637146587}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"87a0aa86e45c54200706edf0ac6be6afdd8842ebf06a19919840f1acc8c12924","X-Timestamp":"1737637146"},"params":{},"body":{},"timestamp":1737637146588}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"87a0aa86e45c54200706edf0ac6be6afdd8842ebf06a19919840f1acc8c12924","X-Timestamp":"1737637146"},"params":{},"body":{},"timestamp":1737637146589}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"4632be052046c6feacc440e9924a7a9612fad5e5654bdac0b5d7c055922d928d","X-Timestamp":"1737651112"},"params":{},"body":{},"timestamp":1737651112243}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"4632be052046c6feacc440e9924a7a9612fad5e5654bdac0b5d7c055922d928d","X-Timestamp":"1737651112"},"params":{},"body":{},"timestamp":1737651112246}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"4632be052046c6feacc440e9924a7a9612fad5e5654bdac0b5d7c055922d928d","X-Timestamp":"1737651112"},"params":{},"body":{},"timestamp":1737651112250}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"634ac8894de8ad5b1091cb00e86f274bcfde21663aa824136ae779095a57c308","X-Timestamp":"1737651158"},"params":{},"body":{},"timestamp":1737651159018}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"634ac8894de8ad5b1091cb00e86f274bcfde21663aa824136ae779095a57c308","X-Timestamp":"1737651158"},"params":{},"body":{},"timestamp":1737651159020}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"634ac8894de8ad5b1091cb00e86f274bcfde21663aa824136ae779095a57c308","X-Timestamp":"1737651158"},"params":{},"body":{},"timestamp":1737651159027}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"3013d96bd5f37670dffe2ef594866b912fe1d2e3a8794e876f88efc5056d2f27","X-Timestamp":"1737651240"},"params":{},"body":{},"timestamp":1737651240817}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"3013d96bd5f37670dffe2ef594866b912fe1d2e3a8794e876f88efc5056d2f27","X-Timestamp":"1737651240"},"params":{},"body":{},"timestamp":1737651240818}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"3013d96bd5f37670dffe2ef594866b912fe1d2e3a8794e876f88efc5056d2f27","X-Timestamp":"1737651240"},"params":{},"body":{},"timestamp":1737651240818}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a22c59ab7fba3fc99946ba88e05f141955770579b480e7aafc5d36b34318bff7","X-Timestamp":"1737651368"},"params":{},"body":{},"timestamp":1737651368621}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"a22c59ab7fba3fc99946ba88e05f141955770579b480e7aafc5d36b34318bff7","X-Timestamp":"1737651368"},"params":{},"body":{},"timestamp":1737651368623}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"a22c59ab7fba3fc99946ba88e05f141955770579b480e7aafc5d36b34318bff7","X-Timestamp":"1737651368"},"params":{},"body":{},"timestamp":1737651368630}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"49b36e523c92f3a8323fdb8ae81e5c8b14d0ac291e28b562de9a9082c1396b2c","X-Timestamp":"1737651416"},"params":{},"body":{},"timestamp":1737651416828}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"49b36e523c92f3a8323fdb8ae81e5c8b14d0ac291e28b562de9a9082c1396b2c","X-Timestamp":"1737651416"},"params":{},"body":{},"timestamp":1737651416829}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"49b36e523c92f3a8323fdb8ae81e5c8b14d0ac291e28b562de9a9082c1396b2c","X-Timestamp":"1737651416"},"params":{},"body":{},"timestamp":1737651416830}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a1af81264ecb105309b9370738b68bdb4c0ffd0b2a73a3e1fec35468df453b50","X-Timestamp":"1737651471"},"params":{},"body":{},"timestamp":1737651472013}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"a1af81264ecb105309b9370738b68bdb4c0ffd0b2a73a3e1fec35468df453b50","X-Timestamp":"1737651471"},"params":{},"body":{},"timestamp":1737651472016}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"a1af81264ecb105309b9370738b68bdb4c0ffd0b2a73a3e1fec35468df453b50","X-Timestamp":"1737651471"},"params":{},"body":{},"timestamp":1737651472020}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"ba078c2e8d8cafc006f1b9204e475ced95be51d0c416d9e06651822efbb9261d","X-Timestamp":"1737651486"},"params":{},"body":{},"timestamp":1737651486603}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"ba078c2e8d8cafc006f1b9204e475ced95be51d0c416d9e06651822efbb9261d","X-Timestamp":"1737651486"},"params":{},"body":{},"timestamp":1737651486604}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"ba078c2e8d8cafc006f1b9204e475ced95be51d0c416d9e06651822efbb9261d","X-Timestamp":"1737651486"},"params":{},"body":{},"timestamp":1737651486605}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"63ff1307838dbd27d090cc3194ae159b03e80fc8d1938683fe48d474a24ebdcb","X-Timestamp":"1737652005"},"params":{},"body":{},"timestamp":1737652005912}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"63ff1307838dbd27d090cc3194ae159b03e80fc8d1938683fe48d474a24ebdcb","X-Timestamp":"1737652005"},"params":{},"body":{},"timestamp":1737652005915}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"63ff1307838dbd27d090cc3194ae159b03e80fc8d1938683fe48d474a24ebdcb","X-Timestamp":"1737652005"},"params":{},"body":{},"timestamp":1737652005921}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-insert request: {"event":"labelInsert","headers":{"X-Signature":"f46207a029b06a21d07331d8b33bd3df06af1b842d44554c11478a36357ea1c0","X-Timestamp":"1737652010"},"params":{},"body":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1","label":"test","chain":"ETH","entity":"","tracking":false,"comment":""},"timestamp":1737652010820}
+error: [WebSocket] label-insert Error: E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: "0x0000000001e4ef00d069e71d6ba041b0a16f7ea1" } {"code":11000,"errorResponse":{"code":11000,"errmsg":"E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: \"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1\" }","index":0,"keyPattern":{"addr":1},"keyValue":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1"}},"index":0,"keyPattern":{"addr":1},"keyValue":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1"},"stack":"MongoServerError: E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: \"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1\" }\n    at InsertOneOperation.execute (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/insert.js:51:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async tryOperation (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/execute_operation.js:203:20)\n    at async executeOperation (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/execute_operation.js:73:16)\n    at async Collection.insertOne (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/collection.js:157:16)\n    at async MongoDBClient.createOne (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/mongoDBClient.js:62:22)\n    at async labelInsert (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:788:9)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:927:30)"}
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"24601f451e7649c4b0a78eb9d19aaede05f7d36696b9fe262f745f1b45190df8","X-Timestamp":"1737658996"},"params":{},"body":{},"timestamp":1737658996992}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"24601f451e7649c4b0a78eb9d19aaede05f7d36696b9fe262f745f1b45190df8","X-Timestamp":"1737658996"},"params":{},"body":{},"timestamp":1737658996994}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"24601f451e7649c4b0a78eb9d19aaede05f7d36696b9fe262f745f1b45190df8","X-Timestamp":"1737658996"},"params":{},"body":{},"timestamp":1737658996995}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-insert request: {"event":"labelInsert","headers":{"X-Signature":"c8fbc9d53ae689437ccd72b8571742765434ee9858dbbb6feff1e198da2e54dd","X-Timestamp":"1737659011"},"params":{},"body":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1","label":"test","chain":"ETH","entity":"","tracking":false,"comment":""},"timestamp":1737659011712}
+error: [WebSocket] label-insert Error: E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: "0x0000000001e4ef00d069e71d6ba041b0a16f7ea1" } {"code":11000,"errorResponse":{"code":11000,"errmsg":"E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: \"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1\" }","index":0,"keyPattern":{"addr":1},"keyValue":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1"}},"index":0,"keyPattern":{"addr":1},"keyValue":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1"},"stack":"MongoServerError: E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: \"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1\" }\n    at InsertOneOperation.execute (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/insert.js:51:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async tryOperation (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/execute_operation.js:203:20)\n    at async executeOperation (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/execute_operation.js:73:16)\n    at async Collection.insertOne (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/collection.js:157:16)\n    at async MongoDBClient.createOne (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/mongoDBClient.js:62:22)\n    at async labelInsert (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:788:9)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:939:13)"}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"0b90ea1ff78cbc9a8fc0c88d8f83fd01fa0716d13b1c9d942d92e8086411eed3","X-Timestamp":"1737659388"},"params":{},"body":{},"timestamp":1737659388553}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"0b90ea1ff78cbc9a8fc0c88d8f83fd01fa0716d13b1c9d942d92e8086411eed3","X-Timestamp":"1737659388"},"params":{},"body":{},"timestamp":1737659388554}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"0b90ea1ff78cbc9a8fc0c88d8f83fd01fa0716d13b1c9d942d92e8086411eed3","X-Timestamp":"1737659388"},"params":{},"body":{},"timestamp":1737659388555}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-insert request: {"event":"labelInsert","headers":{"X-Signature":"564865c6fc8d8cd19f1a4d80d68624b0cfe6b9918ff05c2b3b089456caa1cc83","X-Timestamp":"1737659396"},"params":{},"body":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1","label":"test","chain":"ETH","entity":"","tracking":false,"comment":""},"timestamp":1737659396329}
+error: [WebSocket] label-insert Error: E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: "0x0000000001e4ef00d069e71d6ba041b0a16f7ea1" } {"code":11000,"errorResponse":{"code":11000,"errmsg":"E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: \"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1\" }","index":0,"keyPattern":{"addr":1},"keyValue":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1"}},"index":0,"keyPattern":{"addr":1},"keyValue":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1"},"stack":"MongoServerError: E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: \"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1\" }\n    at InsertOneOperation.execute (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/insert.js:51:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async tryOperation (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/execute_operation.js:203:20)\n    at async executeOperation (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/execute_operation.js:73:16)\n    at async Collection.insertOne (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/collection.js:157:16)\n    at async MongoDBClient.createOne (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/mongoDBClient.js:62:22)\n    at async labelInsert (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:788:9)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:932:53)"}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-insert request: {"event":"labelInsert","headers":{"X-Signature":"fd7534e55dc0a9df38f8871dad06c53ffda36043d8e1d3cdc13e84039efc19e5","X-Timestamp":"1737659407"},"params":{},"body":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1","label":"test","chain":"ETH","entity":"","tracking":false,"comment":""},"timestamp":1737659407583}
+error: [WebSocket] label-insert Error: E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: "0x0000000001e4ef00d069e71d6ba041b0a16f7ea1" } {"code":11000,"errorResponse":{"code":11000,"errmsg":"E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: \"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1\" }","index":0,"keyPattern":{"addr":1},"keyValue":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1"}},"index":0,"keyPattern":{"addr":1},"keyValue":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1"},"stack":"MongoServerError: E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: \"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1\" }\n    at InsertOneOperation.execute (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/insert.js:51:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async tryOperation (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/execute_operation.js:203:20)\n    at async executeOperation (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/execute_operation.js:73:16)\n    at async Collection.insertOne (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/collection.js:157:16)\n    at async MongoDBClient.createOne (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/mongoDBClient.js:62:22)\n    at async labelInsert (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:788:9)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:932:53)"}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"7fc4c12a3ecb379ae76763211ce631f9e48721370f41ce4002ed9d9dc872b228","X-Timestamp":"1737659580"},"params":{},"body":{},"timestamp":1737659580533}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"7fc4c12a3ecb379ae76763211ce631f9e48721370f41ce4002ed9d9dc872b228","X-Timestamp":"1737659580"},"params":{},"body":{},"timestamp":1737659580544}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"7fc4c12a3ecb379ae76763211ce631f9e48721370f41ce4002ed9d9dc872b228","X-Timestamp":"1737659580"},"params":{},"body":{},"timestamp":1737659580545}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-insert request: {"event":"labelInsert","headers":{"X-Signature":"b74aca94a9afe9b4b85db0e0665d9044336ae6f6a75939a1c753dfe3d81c4960","X-Timestamp":"1737659588"},"params":{},"body":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1","label":"test","chain":"ETH","entity":"","tracking":false,"comment":""},"timestamp":1737659588594}
+error: [WebSocket] label-insert Error: E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: "0x0000000001e4ef00d069e71d6ba041b0a16f7ea1" } {"code":11000,"errorResponse":{"code":11000,"errmsg":"E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: \"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1\" }","index":0,"keyPattern":{"addr":1},"keyValue":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1"}},"index":0,"keyPattern":{"addr":1},"keyValue":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1"},"stack":"MongoServerError: E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: \"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1\" }\n    at InsertOneOperation.execute (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/insert.js:51:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async tryOperation (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/execute_operation.js:203:20)\n    at async executeOperation (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/execute_operation.js:73:16)\n    at async Collection.insertOne (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/collection.js:157:16)\n    at async MongoDBClient.createOne (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/mongoDBClient.js:62:22)\n    at async labelInsert (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:788:9)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:932:53)"}
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a6847d41ecb60387dddf8b807ed773c057d1e67696f7bbd2d469b2b166cf7ea4","X-Timestamp":"1737659615"},"params":{},"body":{},"timestamp":1737659615818}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"a6847d41ecb60387dddf8b807ed773c057d1e67696f7bbd2d469b2b166cf7ea4","X-Timestamp":"1737659615"},"params":{},"body":{},"timestamp":1737659615819}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"a6847d41ecb60387dddf8b807ed773c057d1e67696f7bbd2d469b2b166cf7ea4","X-Timestamp":"1737659615"},"params":{},"body":{},"timestamp":1737659615820}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-insert request: {"event":"labelInsert","headers":{"X-Signature":"8c7d766d86fe2effa048d58c7a20b40df8038805e73a3623095e4043472b28c2","X-Timestamp":"1737659620"},"params":{},"body":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1","label":"test","chain":"ETH","entity":"","tracking":false,"comment":""},"timestamp":1737659620212}
+error: [WebSocket] label-insert Error: E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: "0x0000000001e4ef00d069e71d6ba041b0a16f7ea1" } {"code":11000,"errorResponse":{"code":11000,"errmsg":"E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: \"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1\" }","index":0,"keyPattern":{"addr":1},"keyValue":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1"}},"index":0,"keyPattern":{"addr":1},"keyValue":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1"},"stack":"MongoServerError: E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: \"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1\" }\n    at InsertOneOperation.execute (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/insert.js:51:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async tryOperation (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/execute_operation.js:203:20)\n    at async executeOperation (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/execute_operation.js:73:16)\n    at async Collection.insertOne (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/collection.js:157:16)\n    at async MongoDBClient.createOne (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/mongoDBClient.js:62:22)\n    at async labelInsert (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:788:9)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:932:53)"}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"f1bbcd2fe678278edcf95bfa940bbb48a20eaca0428cf9507f1618d4fbefa96f","X-Timestamp":"1737659815"},"params":{},"body":{},"timestamp":1737659815577}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"f1bbcd2fe678278edcf95bfa940bbb48a20eaca0428cf9507f1618d4fbefa96f","X-Timestamp":"1737659815"},"params":{},"body":{},"timestamp":1737659815579}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"f1bbcd2fe678278edcf95bfa940bbb48a20eaca0428cf9507f1618d4fbefa96f","X-Timestamp":"1737659815"},"params":{},"body":{},"timestamp":1737659815580}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-insert request: {"event":"labelInsert","headers":{"X-Signature":"2f49f5baeffc2b4991d606958c377b10483197da389fcb133ebf87d4b4fdb1f3","X-Timestamp":"1737659827"},"params":{},"body":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1","label":"test","chain":"ETH","entity":"","tracking":false,"comment":""},"timestamp":1737659827989}
+error: [WebSocket] label-insert Error: E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: "0x0000000001e4ef00d069e71d6ba041b0a16f7ea1" } {"code":11000,"errorResponse":{"code":11000,"errmsg":"E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: \"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1\" }","index":0,"keyPattern":{"addr":1},"keyValue":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1"}},"index":0,"keyPattern":{"addr":1},"keyValue":{"addr":"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1"},"stack":"MongoServerError: E11000 duplicate key error collection: codys.labelAddrs index: addr_1 dup key: { addr: \"0x0000000001e4ef00d069e71d6ba041b0a16f7ea1\" }\n    at InsertOneOperation.execute (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/insert.js:51:19)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async tryOperation (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/execute_operation.js:203:20)\n    at async executeOperation (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/operations/execute_operation.js:73:16)\n    at async Collection.insertOne (/mnt/870-evo-1/server-dev/Javascript/codysBackend/node_modules/mongodb/lib/collection.js:157:16)\n    at async MongoDBClient.createOne (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/mongoDBClient.js:62:22)\n    at async labelInsert (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:788:9)\n    at async WebSocket.<anonymous> (file:///mnt/870-evo-1/server-dev/Javascript/codysBackend/src/server.js:932:53)"}
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"ca401e865f215aaa543fdad78a5171a42650d0e55e9fc6a7405d8b1adfb89d8c","X-Timestamp":"1738245005"},"params":{},"body":{},"timestamp":1738245005206}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"ca401e865f215aaa543fdad78a5171a42650d0e55e9fc6a7405d8b1adfb89d8c","X-Timestamp":"1738245005"},"params":{},"body":{},"timestamp":1738245005207}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"ca401e865f215aaa543fdad78a5171a42650d0e55e9fc6a7405d8b1adfb89d8c","X-Timestamp":"1738245005"},"params":{},"body":{},"timestamp":1738245005208}
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client ::ffff:100.86.126.128 sent label-get request: {"event":"labelGet","headers":{"X-Signature":"a026bb461a0712e47a54c56adeb4372cf6b2c145fbde21899eda89cb03d9e998","X-Timestamp":"1740735289"},"params":{},"body":{},"timestamp":1740735289617}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent entity-get request: {"event":"entityGet","headers":{"X-Signature":"a026bb461a0712e47a54c56adeb4372cf6b2c145fbde21899eda89cb03d9e998","X-Timestamp":"1740735289"},"params":{},"body":{},"timestamp":1740735289618}
+info: [WebSocket] Client ::ffff:100.86.126.128 sent chain-get request: {"event":"chainGet","headers":{"X-Signature":"a026bb461a0712e47a54c56adeb4372cf6b2c145fbde21899eda89cb03d9e998","X-Timestamp":"1740735289"},"params":{},"body":{},"timestamp":1740735289618}
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: [WebSocket] Client connected. Current clients: 1
+info: [WebSocket] Client connected. Current clients: 1
+info: Listening on 25833
+info: Listening on 25833

@@ -1,0 +1,27 @@
+@font-face {
+  font-family: 'BeauFort';
+  src: url('../fonts/beaufort_medium.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'D2Coding';
+  src: url('../fonts/d2coding.ttf') format('truetype');
+}
+
+body {
+  font-family: 'BeauFort', Arial, sans-serif;
+  margin: 20px;
+  }
+  
+  h1 {
+    text-align: center;
+  }
+  
+  .target {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .target h2 {
+    margin-top: 0;
+  }

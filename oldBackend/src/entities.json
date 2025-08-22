@@ -1,0 +1,457 @@
+[{
+  "_id": {
+    "$oid": "67750e064ef57c3ca3fcf28e"
+  },
+  "entities": {
+    "Upbit Hot": {
+      "code": "upbit-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/117/small/upbit.png",
+      "comment": ""
+    },
+    "OKX Hot": {
+      "code": "okx-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/96/small/WeChat_Image_20220117220452.png",
+      "comment": ""
+    },
+    "OKX": {
+      "code": "okx",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/96/small/WeChat_Image_20220117220452.png",
+      "comment": ""
+    },
+    "DWF Labs": {
+      "code": "dwf-labs",
+      "tracking": false,
+      "image": "https://platform.arkhamintelligence.com/_next/image?url=https%3A%2F%2Fassets.arkhamintelligence.com%2Fentities%2Fdwf-labs.png&w=3840&q=75",
+      "comment": ""
+    },
+    "Crypto.com": {
+      "code": "cryptocom",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/589/small/h2oMjPp6_400x400.jpg",
+      "comment": ""
+    },
+    "Kraken Deposit": {
+      "code": "kraken-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/29/small/kraken.jpg",
+      "comment": ""
+    },
+    "Bitfinex Deposit": {
+      "code": "bitfinex-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/4/small/BItfinex.png",
+      "comment": ""
+    },
+    "FTX Hot": {
+      "code": "ftx-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/coins/images/9026/standard/F.png",
+      "comment": ""
+    },
+    "Zipmex": {
+      "code": "zipmex",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/616/small/ZMT_Token.png",
+      "comment": ""
+    },
+    "Bitforex": {
+      "code": "bitforex",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/214/small/BitForex-Logo.png",
+      "comment": ""
+    },
+    "MEXC Cold": {
+      "code": "mexc-cold",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/409/small/MEXC_logo_square.jpeg",
+      "comment": ""
+    },
+    "Bybit": {
+      "code": "bybit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/698/small/bybit_spot.png",
+      "comment": ""
+    },
+    "Zipmex Deposit": {
+      "code": "zipmex-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/616/small/ZMT_Token.png",
+      "comment": ""
+    },
+    "Gopax Hot": {
+      "code": "gopax-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/144/small/gopax.jpg",
+      "comment": ""
+    },
+    "Upbit NFT": {
+      "code": "upbit-nft",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/117/small/upbit.png",
+      "comment": ""
+    },
+    "Coinone": {
+      "code": "coinone",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/20/small/coinone_circle_500x500.png",
+      "comment": ""
+    },
+    "Kucoin Hot": {
+      "code": "kucoin-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/61/small/kucoin.png",
+      "comment": ""
+    },
+    "Upbit Cold": {
+      "code": "upbit-cold",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/117/small/upbit.png",
+      "comment": ""
+    },
+    "Huobi Deposit": {
+      "code": "huobi-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/25/small/logo_V_colour_black.png",
+      "comment": ""
+    },
+    "OKX Deposit": {
+      "code": "okx-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/96/small/WeChat_Image_20220117220452.png",
+      "comment": ""
+    },
+    "Huobi Hot": {
+      "code": "huobi-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/25/small/logo_V_colour_black.png",
+      "comment": ""
+    },
+    "Binance Hot": {
+      "code": "binance-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/52/small/binance.jpg",
+      "comment": ""
+    },
+    "Bitget Deposit": {
+      "code": "bitget-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/540/small/2023-07-25_21.47.43.jpg",
+      "comment": ""
+    },
+    "Bitget Hot": {
+      "code": "bitget-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/540/small/2023-07-25_21.47.43.jpg",
+      "comment": ""
+    },
+    "Gopax Deposit": {
+      "code": "gopax-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/144/small/gopax.jpg",
+      "comment": ""
+    },
+    "Bithumb Hot": {
+      "code": "bithumb-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/6/small/bithumb_BI.png",
+      "comment": ""
+    },
+    "Indodax Deposit": {
+      "code": "indodax-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/3/small/logogram-Indodax-new-_JPG_format.jpg",
+      "comment": ""
+    },
+    "FTX Cold": {
+      "code": "ftx-cold",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/coins/images/9026/standard/F.png",
+      "comment": ""
+    },
+    "Binance Deposit": {
+      "code": "binance-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/52/small/binance.jpg",
+      "comment": ""
+    },
+    "Bybit Hot": {
+      "code": "bybit-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/698/small/bybit_spot.png",
+      "comment": ""
+    },
+    "MEXC Hot": {
+      "code": "mexc-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/409/small/MEXC_logo_square.jpeg",
+      "comment": ""
+    },
+    "Crypto.com Hot": {
+      "code": "cryptocom-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/589/small/h2oMjPp6_400x400.jpg",
+      "comment": ""
+    },
+    "Kraken": {
+      "code": "kraken",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/29/small/kraken.jpg",
+      "comment": ""
+    },
+    "Coinbase Prime Deposit": {
+      "code": "coinbase-prime-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/23/small/Coinbase_Coin_Primary.png",
+      "comment": ""
+    },
+    "Coinbase Prime": {
+      "code": "coinbase-prime",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/23/small/Coinbase_Coin_Primary.png",
+      "comment": ""
+    },
+    "Coinbase Prime Hot": {
+      "code": "coinbase-prime-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/23/small/Coinbase_Coin_Primary.png",
+      "comment": ""
+    },
+    "Crypto.com Deposit": {
+      "code": "cryptocom-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/589/small/h2oMjPp6_400x400.jpg",
+      "comment": ""
+    },
+    "Bybit Deposit": {
+      "code": "bybit-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/698/small/bybit_spot.png",
+      "comment": ""
+    },
+    "Circle Deposit": {
+      "code": "circle-deposit",
+      "tracking": false,
+      "image": "https://platform.arkhamintelligence.com/_next/image?url=https%3A%2F%2Fassets.arkhamintelligence.com%2Fentities%2Fcircle.png&w=3840&q=75",
+      "comment": ""
+    },
+    "Circle Hot": {
+      "code": "circle-hot",
+      "tracking": false,
+      "image": "https://platform.arkhamintelligence.com/_next/image?url=https%3A%2F%2Fassets.arkhamintelligence.com%2Fentities%2Fcircle.png&w=3840&q=75",
+      "comment": ""
+    },
+    "Upbit Deposit": {
+      "code": "upbit-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/117/small/upbit.png",
+      "comment": ""
+    },
+    "Coinone Hot": {
+      "code": "coinone-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/20/small/coinone_circle_500x500.png",
+      "comment": ""
+    },
+    "Binance": {
+      "code": "binance",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/52/small/binance.jpg",
+      "comment": ""
+    },
+    "Bithumb Deposit": {
+      "code": "bithumb-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/6/small/bithumb_BI.png",
+      "comment": ""
+    },
+    "FTX Deposit": {
+      "code": "ftx-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/coins/images/9026/standard/F.png",
+      "comment": ""
+    },
+    "MEXC Deposit": {
+      "code": "mexc-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/409/small/MEXC_logo_square.jpeg",
+      "comment": ""
+    },
+    "Coinbase": {
+      "code": "coinbase",
+      "tracking": false,
+      "image": "https://assets.arkhamintelligence.com/entities/coinbase.png",
+      "comment": ""
+    },
+    "Coinbase Hot": {
+      "code": "coinbase-hot",
+      "tracking": false,
+      "image": "https://assets.arkhamintelligence.com/entities/coinbase.png",
+      "comment": ""
+    },
+    "Coinbase Deposit": {
+      "code": "coinbase-deposit",
+      "tracking": false,
+      "image": "https://assets.arkhamintelligence.com/entities/coinbase.png",
+      "comment": ""
+    },
+    "Gate.io Cold": {
+      "code": "gateio-cold",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/60/small/gate_io_logo1.jpg",
+      "comment": ""
+    },
+    "Kraken Hot": {
+      "code": "kraken-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/29/small/kraken.jpg",
+      "comment": ""
+    },
+    "Kucoin": {
+      "code": "kucoin",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/61/small/kucoin.png",
+      "comment": ""
+    },
+    "Kucoin Deposit": {
+      "code": "kucoin-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/61/small/kucoin.png",
+      "comment": ""
+    },
+    "Binance US Hot": {
+      "code": "binance-us-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/469/small/Binance.png",
+      "comment": ""
+    },
+    "Upbit": {
+      "code": "upbit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/117/small/upbit.png",
+      "comment": ""
+    },
+    "Gate.io Hot": {
+      "code": "gateio-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/60/small/gate_io_logo1.jpg",
+      "comment": ""
+    },
+    "Gate.io Deposit": {
+      "code": "gateio-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/60/small/gate_io_logo1.jpg",
+      "comment": ""
+    },
+    "Coinone Deposit": {
+      "code": "coinone-deposit",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/20/small/coinone_circle_500x500.png",
+      "comment": ""
+    },
+    "Bithumb": {
+      "code": "bithumb",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/6/small/bithumb_BI.png",
+      "comment": ""
+    },
+    "Gate.io": {
+      "code": "gateio",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/60/small/gate_io_logo1.jpg",
+      "comment": ""
+    },
+    "Binance Cold": {
+      "code": "binance-cold",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/52/small/binance.jpg",
+      "comment": ""
+    },
+    "BingX Hot": {
+      "code": "bingx-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/812/small/YtFwQwJr_400x400.jpg",
+      "comment": ""
+    },
+    "Bitfinex Hot": {
+      "code": "bitfinex-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/4/small/BItfinex.png",
+      "comment": ""
+    },
+    "GCR": {
+      "code": "gcr",
+      "tracking": false,
+      "image": "https://platform.arkhamintelligence.com/_next/image?url=https%3A%2F%2Fassets.arkhamintelligence.com%2Fentities%2Fgiganticrebirth.png&w=3840&q=75",
+      "comment": ""
+    },
+    "GSR": {
+      "code": "gsr",
+      "tracking": false,
+      "image": "https://platform.arkhamintelligence.com/_next/image?url=https%3A%2F%2Fassets.arkhamintelligence.com%2Fentities%2Fgsr-markets.png&w=3840&q=75",
+      "comment": ""
+    },
+    "Deepcoin Hot": {
+      "code": "deepcoin-hot",
+      "tracking": false,
+      "image": "https://assets.coingecko.com/markets/images/1005/small/deepcoin.jpeg",
+      "comment": ""
+    },
+    "Backpack Deposit": {
+      "code": "backpack-deposit",
+      "tracking": false,
+      "image": "https://raw.githubusercontent.com/coral-xyz/backpack/master/assets/backpack.png",
+      "comment": ""
+    },
+    "Backpack Hot": {
+      "code": "backpack-hot",
+      "tracking": false,
+      "image": "https://raw.githubusercontent.com/coral-xyz/backpack/master/assets/backpack.png",
+      "comment": ""
+    },
+    "Amber Group": {
+      "code": "amber-group",
+      "tracking": false,
+      "image": "https://static.arkhamintelligence.com/entities/amber.png",
+      "comment": ""
+    },
+    "Flow Traders": {
+      "code": "flow-traders",
+      "tracking": false,
+      "image": "https://static.arkhamintelligence.com/entities/flow-traders.png",
+      "comment": ""
+    },
+    "Wintermute": {
+      "code": "wintermute",
+      "tracking": false,
+      "image": "https://static.arkhamintelligence.com/entities/wintermute.png",
+      "comment": ""
+    },
+    "BtcTurk Hot": {
+      "code": "btcturk-hot",
+      "tracking": false,
+      "image": "https://static.arkhamintelligence.com/entities/btcturk.png",
+      "comment": ""
+    },
+    "BtcTurk Deposit": {
+      "code": "btcturk-deposit",
+      "tracking": false,
+      "image": "https://static.arkhamintelligence.com/entities/btcturk.png",
+      "comment": ""
+    },
+    "BtcTurk": {
+      "code": "btcturk-cold",
+      "tracking": false,
+      "image": "https://static.arkhamintelligence.com/entities/btcturk.png",
+      "comment": ""
+    },
+    "BtcTurk Cold": {
+      "code": "btcturk-cold",
+      "tracking": false,
+      "image": "https://static.arkhamintelligence.com/entities/btcturk.png",
+      "comment": ""
+    }
+  }
+}]

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Wallet Tracker</title>
+        <!-- DataTables CSS -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
+        <!-- Preload custom font for better performance -->
+        <link rel="preload" href="/fonts/beaufort_medium.ttf" as="font" type="font/ttf" crossorigin>
+        <link rel="preload" href="/fonts/d2coding.ttf" as="font" type="font/ttf" crossorigin>
+        <!-- Custom CSS -->
+        <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    </head>
+    <body>
+      <div id="loginForm" class="login-container">
+        <h2>Login</h2>
+        <form id="login">
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+      </div>
+
+      <div id="content" style="display: none">
+        <header>
+            <h1>Wallet Tracker</h1>
+            <button id="logoutBtn">Logout</button>
+        </header>
+
+        <div class="stats-container">
+            <div class="stat-item">
+                <strong>Wallets being tracked:</strong>
+                <span id="walletTracking"></span>
+            </div>
+            <div class="stat-item">
+                <strong>Total wallet count:</strong>
+                <span id="walletTotal"></span>
+            </div>
+            <div class="stat-item">
+                <strong>Total entity count:</strong>
+                <span id="entityTotal"></span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <h2>Wallet List</h2>
+            <div class="filter-container">
+                <label for="chainFilter">Filter by Chain:</label>
+                <select id="chainFilter">
+                    <option value="">All</option>
+                </select>
+                <button id="bulkDeleteBtn" class="bulk-delete-btn" style="display:none;">Delete Selected</button>
+            </div>
+            <table id="walletTable" class="display">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll"></th>
+                        <th>Wallet Address</th>
+                        <th>Chain</th>
+                        <th>Entity</th>
+                        <th>Comment</th>
+                        <th>Label</th>
+                        <th>Tracking</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+      </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js"></script>
+        <script src="/js/main.js"></script>
+    </body>
+</html>
