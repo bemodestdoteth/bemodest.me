@@ -1,0 +1,34 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "strict": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "outDir": "./dist",
+        "baseUrl": ".",
+        "paths": {
+            "@/*": [
+                "src/*"
+            ],
+            "@shared/*": [
+                "src/shared/*"
+            ],
+            "@utils/*": [
+                "src/utils/*"
+            ],
+            "@services/*": [
+                "src/services/*"
+            ],
+            "@bemodest/utils": [
+                "../utils/src"
+            ]
+        }
+    },
+    "include": [
+        "src/**/*.ts"
+    ]
+}

@@ -1,8 +1,0 @@
-version: '3'
-services:
-  codys-backend:
-    build: .
-    ports:
-      - "32358:32358"
-    env_file:
-      - .env

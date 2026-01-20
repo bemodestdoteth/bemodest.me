@@ -1,0 +1,33 @@
+# Development files
+src/
+*.ts
+tsconfig.json
+vite.config.js
+
+# Tests
+**/*.test.ts
+**/*.spec.ts
+**/__tests__/
+
+# Documentation
+README.md
+*.md
+
+# Build artifacts
+node_modules/
+.vite/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# OS
+.DS_Store
+Thumbs.db

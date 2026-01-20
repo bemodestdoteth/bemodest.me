@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>BeModest - Address Lookup</title>
+    <link rel="stylesheet" href="styles.css" type="text/css" />
+    <link rel="stylesheet" href="modern-styles.css" type="text/css" />
+    <link rel="stylesheet" href="dropdown.css" type="text/css" />
+</head>
+
+<body id="ext-etheraddresslookup-popup" class="animate-fade-in-up">
+    <div id="content" class="glass" style="border-radius: 12px; padding: 20px;">
+        <h4 class="text-center"
+            style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            Address Lookup</h4>
+
+        <div>
+            <ul class="ext-etheraddresslookup-nav ext-etheraddresslookup-nav-tabs" id="ext-etheraddresslookup-tab"
+                role="tablist" style="margin-bottom: 1rem">
+                <li class="ext-etheraddresslookup-nav-item">
+                    <a class="ext-etheraddresslookup-nav-link active" id="ext-etheraddresslookup-options-tab"
+                        data-tab="options" href="#">Options</a>
+                </li>
+                <li class="ext-etheraddresslookup-nav-item">
+                    <a class="ext-etheraddresslookup-nav-link" id="ext-etheraddresslookup-labels-tab" data-tab="labels"
+                        href="#">Labels</a>
+                </li>
+                <li class="ext-etheraddresslookup-nav-item">
+                    <a class="ext-etheraddresslookup-nav-link" id="ext-etheraddresslookup-entities-tab"
+                        data-tab="entities" href="#">Entities</a>
+                </li>
+                <li class="ext-etheraddresslookup-nav-item">
+                    <a class="ext-etheraddresslookup-nav-link" id="ext-etheraddresslookup-chains-tab" data-tab="chains"
+                        href="#">Chains</a>
+                </li>
+            </ul>
+
+            <div class="ext-etheraddresslookup-tab-content" id="ext-etheraddresslookup-tab-content">
+
+                <!-- OPTIONS PANEL -->
+                <div class="ext-etheraddresslookup-tab-pane fade active show" id="ext-etheraddresslookup-options">
+                    <div style="padding: 10px;">
+                        <h5>Authentication</h5>
+                        <p style="font-size: 12px; color: #666;">Connect to the API server to sync labels and entities.
+                        </p>
+
+                        <!-- Login Instructions -->
+                        <div id="ext-auth-instructions">
+                            <p style="font-size: 12px;">
+                                1. Login to the web interface<br>
+                                2. Click "Extension Token" button in web app<br>
+                                3. Click "Get Token" below to authenticate
+                            </p>
+                            <button id="ext-get-token-btn" class="btn btn-success btn-small">Get Token from Web</button>
+                            <div id="ext-auth-status" style="display:none; font-size: 11px; margin-top: 5px;"></div>
+                            <div id="ext-auth-error"
+                                style="display:none; color: red; font-size: 11px; margin-top: 5px;"></div>
+                        </div>
+
+                        <!-- Authenticated View -->
+                        <div id="ext-auth-view" style="display: none;">
+                            <p style="color: green; font-size: 12px;">✓ Connected to API</p>
+                            <button id="ext-logout-btn" class="btn btn-sm btn-error">Logout</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LABELS PANEL -->
+                <div class="ext-etheraddresslookup-tab-pane fade" id="ext-etheraddresslookup-labels">
+
+                    <!-- Label Management Section -->
+                    <div style="margin-bottom: 20px;">
+                        <p><b>Label Management:</b></p>
+                        <button class="btn btn-sm btn-error" id="ext-etheraddresslookup-reset"
+                            style="margin-bottom: 10px;">
+                            <img width="16" height="16" src="images/flag.png"> Clear label data
+                        </button>
+                        <div id="ext-etheraddresslookup-download-labels">
+                            <button id="download-csv" class="btn btn-success btn-small">Download Whole Labels as
+                                CSV</button>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- New Label -->
+                    <div id="ext-etheraddresslookup-new-labels">
+                        <p><b>New Label:</b></p>
+                        <form id="ext-etheraddresslookup-new-label-form">
+                            <input class="form-control" type="text" name="label-name" id="label-name"
+                                placeholder="Label Name" />
+                            <input class="form-control" type="text" name="label-address" id="label-address"
+                                placeholder="Wallet Address" />
+                            <input class="form-control" type="text" name="label-comment" id="label-comment"
+                                placeholder="Comment (Optional)" />
+                            <select class="form-control" name="label-entity" id="label-entity">
+                                <option value="" style="color: #AFAFAF;" disabled selected hidden>Entity (Optional)
+                                </option>
+                            </select>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="label-track" id="label-track" />
+                                <label class="form-check-label" for="label-track">Track This Wallet</label>
+                            </div>
+                            <div class="form-control" name="label-chain" id="label-chain"></div>
+                            <button class="btn btn-success btn-small" type="submit">Save</button>
+                        </form>
+                    </div>
+
+                    <hr />
+
+                    <!-- Existing Labels -->
+                    <form id="form-label-search">
+                        <input type="text" id="ext-etheraddresslookup-search-label" placeholder="Search by name"><br>
+                    </form>
+                    <div>
+                        <p><b>Current Labels: <span id="label-count">0</span></b></p>
+                        <div id="ext-etheraddresslookup-current-labels" style="max-height: 300px; overflow-y: auto;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ENTITIES PANEL -->
+                <div class="ext-etheraddresslookup-tab-pane fade" id="ext-etheraddresslookup-entities">
+
+                    <!-- New Entity Form -->
+                    <div id="ext-etheraddresslookup-new-entities">
+                        <p><b>New Entity:</b></p>
+                        <form id="form-add-entities">
+                            <input class="form-control" type="text" id="entity-name" placeholder="Entity Name"
+                                required />
+
+                            <!-- Image Input Section -->
+                            <div style="margin-bottom: 10px;">
+                                <input type="file" id="entity-image-file" accept="image/*" class="form-control"
+                                    style="font-size: 12px;" />
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                    <small style="color: #666;">Max size: 1MB</small>
+                                    <button type="button" id="btn-toggle-image-grid" class="btn btn-sm btn-info"
+                                        style="font-size: 10px;">Select Existing Icon</button>
+                                </div>
+                                <input class="form-control" type="text" id="entity-image-filename"
+                                    placeholder="Image Filename (e.g. icon.png)"
+                                    style="margin-top: 5px; font-size: 12px;" />
+                                <input type="hidden" id="entity-image" /> <!-- Stores Base64 -->
+
+                                <!-- Hidden Grid for existing images -->
+                                <div id="entity-image-grid"
+                                    style="display: none; flex-wrap: wrap; gap: 5px; margin-top: 10px; max-height: 100px; overflow-y: auto; border: 1px solid #ddd; padding: 5px;">
+                                    <!-- Populated by JS -->
+                                </div>
+                                <div id="selected-image-preview" style="margin-top: 5px; display: none;">
+                                    <small>Selected:</small> <img id="preview-img" src=""
+                                        style="width: 20px; height: 20px; vertical-align: middle;">
+                                </div>
+                            </div>
+
+                            <input class="form-control" type="text" id="entity-comment"
+                                placeholder="Comment (Optional)" />
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="entity-track" />
+                                <label class="form-check-label" for="entity-track">Track This Entity</label>
+                            </div>
+
+                            <button class="btn btn-success btn-small" type="submit">Save Entity</button>
+                        </form>
+                    </div>
+
+                    <hr />
+
+                    <!-- Entity List -->
+                    <form id="form-entity-search">
+                        <input type="text" id="ext-etheraddresslookup-search-entity" placeholder="Search by name"><br>
+                    </form>
+                    <div id="ext-etheraddresslookup-entities-container">
+                        <p><b>Current Entities: <span id="entity-count">0</span></b></p>
+                        <!-- Replaced select with custom div container for rich display -->
+                        <div id="ext-etheraddresslookup-current-entities" style="max-height: 300px; overflow-y: auto;">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CHAINS PANEL -->
+                <div class="ext-etheraddresslookup-tab-pane fade" id="ext-etheraddresslookup-chains">
+                    <div id="ext-etheraddresslookup-new-chains">
+                        <p><b>New Chain:</b></p>
+                        <form id="form-add-chains">
+                            <input class="form-control" type="text" id="chain-name"
+                                placeholder="Chain Name (e.g. Ethereum)" required />
+                            <input class="form-control" type="text" id="chain-code" placeholder="Code (e.g. ETH)"
+                                required pattern="[A-Z]+" title="Uppercase letters only" />
+                            <input class="form-control" type="text" id="chain-explorer-prefix"
+                                placeholder="Explorer Prefix (e.g. https://etherscan.io/address/)" required />
+                            <input class="form-control" type="text" id="chain-explorer-postfix"
+                                placeholder="Explorer Postfix (Optional)" />
+
+                            <div style="margin: 10px 0; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                                <label style="font-size: 12px; font-weight: bold;">Appearance</label>
+
+                                <div style="margin-top: 5px; font-size: 11px; margin-bottom: 10px;">
+                                    <label style="margin-right: 10px;"><input type="radio" name="bgType" value="single"
+                                            checked> Single</label>
+                                    <label style="margin-right: 10px;"><input type="radio" name="bgType"
+                                            value="gradient2"> 2-Color</label>
+                                    <label><input type="radio" name="bgType" value="gradient3"> 3-Color</label>
+                                </div>
+
+                                <div style="display: flex; gap: 5px; align-items: center;">
+                                    <div id="color-start-group" style="flex: 1;">
+                                        <label style="font-size: 10px;">Start</label>
+                                        <input type="color" id="chain-bgcolor-start" value="#3498DB"
+                                            style="width: 100%; height: 30px; padding: 0;">
+                                    </div>
+                                    <div id="color-mid-group" style="flex: 1; display: none;">
+                                        <label style="font-size: 10px;">Middle</label>
+                                        <input type="color" id="chain-bgcolor-mid" value="#9B59B6"
+                                            style="width: 100%; height: 30px; padding: 0;">
+                                    </div>
+                                    <div id="color-end-group" style="flex: 1; display: none;">
+                                        <label style="font-size: 10px;">End</label>
+                                        <input type="color" id="chain-bgcolor-end" value="#8E44AD"
+                                            style="width: 100%; height: 30px; padding: 0;">
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 10px;">
+                                    <label style="font-size: 10px;">Font Color</label>
+                                    <select id="chain-font-color" class="form-control"
+                                        style="height: 30px; font-size: 12px; padding: 2px;">
+                                        <option value="#EFEFEF">White (#EFEFEF)</option>
+                                        <option value="#303030">Dark (#303030)</option>
+                                    </select>
+                                </div>
+                                <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">
+                                    <span style="font-size: 11px;">Preview:</span>
+                                    <div id="chain-color-preview"
+                                        style="width: 30px; height: 30px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px;">
+                                        C</div>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 10px;">
+                                <textarea class="form-control" id="chain-regex" rows="6"
+                                    placeholder="Address Regex Patterns (one per line)"
+                                    style="font-family: monospace; font-size: 11px; resize: vertical;"></textarea>
+                                <button type="button" id="btn-convert-regex" class="btn btn-sm btn-info"
+                                    style="margin-top: 5px; width: 100%;">Convert to Extraction Mode</button>
+                                <div style="font-size: 10px; color: #666; margin-top: 2px;">Default: EVM / 0x... (40
+                                    chars) | Multiple patterns supported</div>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="chain-case-sensitive" />
+                                <label class="form-check-label" for="chain-case-sensitive">Case Sensitive
+                                    Addresses</label>
+                            </div>
+
+                            <button class="btn btn-success btn-small" type="submit">Save Chain</button>
+                        </form>
+                    </div>
+
+                    <hr />
+
+                    <div id="ext-etheraddresslookup-chains-container">
+                        <form id="form-chain-search">
+                            <input type="text" id="ext-etheraddresslookup-search-chain"
+                                placeholder="Search by name"><br>
+                        </form>
+                        <p><b>Current Chains: <span id="chain-count">0</span></b></p>
+                        <div id="ext-chain-list-container" style="max-height: 300px; overflow-y: auto;">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="footer">
+            <small><strong>Version:</strong> <span id="ext-manifest_version"></span> &mdash; BETA</small>
+        </div>
+    </div>
+
+    <script type="module" src="labels.ts"></script>
+</body>
+
+</html>

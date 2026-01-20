@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      env_file:
+        - apps/api/.env
+    container_name: bemodest-api
+    restart: always
+    ports:
+      - "${PORT}:${PORT}"

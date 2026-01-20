@@ -1,0 +1,80 @@
+{
+  "manifest_version": 3,
+  "name": "EtherAddressLookup",
+  "short_name": "EtherAddressLookup",
+  "description": "Adds links to strings that look like Ethereum addresses to your favorite blockchain explorer.",
+  "version": "1.23.1",
+  "background": {
+    "service_worker": "src/background/index.ts"
+  },
+  "action": {
+    "default_icon": "images/ether-128x128.png",
+    "default_popup": "src/popup/index.html",
+    "default_title": "EtherAddressLookup"
+  },
+  "commands": {
+    "convert_addresses": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+E"
+      },
+      "description": "Convert Ethereum addresses to links"
+    }
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "unlimitedStorage",
+    "cookies"
+  ],
+  "host_permissions": [
+    "http://localhost:25833/*",
+    "http://dev.bemodest.me:25833/*",
+    "https://api.bemodest.me/*"
+  ],
+  "optional_permissions": [],
+  "content_scripts": [
+    {
+      "run_at": "document_start",
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "src/vendor/blockies.ts"
+      ]
+    },
+    {
+      "run_at": "document_end",
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "src/vendor/web3.ts",
+        "src/shared/constants.ts",
+        "src/shared/labels.ts",
+        "src/shared/entities.ts",
+        "src/content/dom-manipulator.ts",
+        "src/content/index.ts",
+        "src/utils/modal.ts"
+      ]
+    }
+  ],
+  "icons": {
+    "16": "images/ether-16x16.png",
+    "48": "images/ether-48x48.png",
+    "128": "images/ether-128x128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "images/powered-by-quiknode.png",
+        "fonts/beaufort_medium.ttf"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+
+/* Dropdown Container */
+#label-chain {
+    position: relative;
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+/* Header (Selected Value) */
+#label-dropdown-value {
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #ddd;
+}
+
+#label-dropdown-value::after {
+    content: '▼';
+    font-size: 10px;
+    margin-left: 8px;
+}
+
+/* Options Container */
+.ext-etheraddresslookup-dropdown-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-top: 4px;
+}
+
+/* Open State */
+#label-chain.open .ext-etheraddresslookup-dropdown-options {
+    display: block;
+}
+
+/* Individual Options */
+.custom-option {
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.custom-option:hover {
+    filter: brightness(0.9);
+}

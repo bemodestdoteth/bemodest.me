@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Wallet Tracker - Tracking</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Preload custom font for better performance -->
+    <link rel="preload" href="/fonts/beaufort_medium.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="/fonts/d2coding.ttf" as="font" type="font/ttf" crossorigin>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+
+<body>
+    <div id="loginForm" class="login-container">
+        <h2>Login</h2>
+        <form id="login">
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <div id="content" style="display: none">
+        <header>
+            <h1>Wallet Tracker</h1>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div id="connectionStatus" class="connection-status disconnected">
+                    <span class="status-indicator"></span>
+                    <span class="status-text">Disconnected</span>
+                </div>
+                <button id="extensionBtn" style="background-color: #4CAF50;">Extension Token</button>
+                <button id="logoutBtn">Logout</button>
+            </div>
+        </header>
+
+        <!-- Extension Token Modal -->
+        <div id="extensionModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3>Extension Authentication</h3>
+                <p>Your extension is now authorized! Open the extension popup and click "Get Token from Web" button.</p>
+                <p style="font-size: 12px; color: #666;">Token expires in 30 days.</p>
+            </div>
+        </div>
+
+        <div class="grid-list-container">
+            <a href="/" class="grid-list-item">
+                <span>Dashboard</span>
+            </a>
+            <!-- Placeholder for future pages -->
+        </div>
+
+        <!-- Void content for now -->
+        <div class="table-container">
+            <h2>Tracking</h2>
+            <p>Work in progress.</p>
+        </div>
+    </div>
+
+    <!-- Socket.IO Client -->
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+
+</html>
