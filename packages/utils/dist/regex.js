@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.transformToExtractionPattern = transformToExtractionPattern;
+exports.compileChainRegexes = compileChainRegexes;
 /**
  * @name convertToExtractionPattern
  * @desc Converts a strict regex pattern (e.g., ^[...]$) into an extraction pattern with delimiters (RULES Q-2002)
@@ -25,4 +26,48 @@ function transformToExtractionPattern(pattern) {
     // EOSIO/Antelope names specific delimiters plus brackets for bulk lists
     // Using double backslashes for string-based regex representation
     return `/(^|\\s|:|-|\\[)(${inner})($|\\s|\\])/gi`;
+}
+/**
+ * Compiles address regex patterns from chains into native RegExp objects.
+ * Also generates regex fingerprints for compatibility checking.
+ * @param {Array<any>} chains - Array of chain documents
+ * @returns {{ chainRegexMap: Record<string, RegExp[]>, regexFingerprintMap: Record<string, string> }}
+ */
+function compileChainRegexes(chains) {
+    const chainRegexMap = {};
+    const regexFingerprintMap = {};
+    chains.forEach(chainDoc => {
+        if (chainDoc.caip2 && chainDoc.addrRegexPatterns && chainDoc.addrRegexPatterns.length > 0) {
+            const baseFlags = chainDoc.addrCaseSensitive === false ? 'i' : '';
+            chainRegexMap[chainDoc.caip2] = chainDoc.addrRegexPatterns.map((patternStr) => {
+                let finalPattern = patternStr;
+                let finalFlags = baseFlags;
+                if (patternStr.startsWith('/') && patternStr.lastIndexOf('/') > 0) {
+                    const lastSlashIndex = patternStr.lastIndexOf('/');
+                    finalPattern = patternStr.substring(1, lastSlashIndex);
+                    const patternFlags = patternStr.substring(lastSlashIndex + 1);
+                    const mergedFlags = new Set([...finalFlags, ...patternFlags]);
+                    mergedFlags.delete('g');
+                    mergedFlags.delete('y');
+                    finalFlags = Array.from(mergedFlags).join('');
+                }
+                else {
+                    const mergedFlags = new Set([...finalFlags]);
+                    mergedFlags.delete('g');
+                    mergedFlags.delete('y');
+                    finalFlags = Array.from(mergedFlags).join('');
+                }
+                try {
+                    return new RegExp(finalPattern, finalFlags);
+                }
+                catch (e) {
+                    console.error(`Invalid regex pattern for ${chainDoc.caip2}: ${patternStr}`);
+                    return null;
+                }
+            }).filter((r) => r !== null);
+            // Build fingerprint for same-regex constraint
+            regexFingerprintMap[chainDoc.caip2] = JSON.stringify([...chainDoc.addrRegexPatterns].sort());
+        }
+    });
+    return { chainRegexMap, regexFingerprintMap };
 }

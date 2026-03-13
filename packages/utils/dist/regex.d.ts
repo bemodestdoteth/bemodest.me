@@ -6,3 +6,13 @@
  * @example convertToExtractionPattern('^[1-5a-z\\.]{1,12}$') // returns '/(^|\\s|:|-|\\[)([1-5a-z\\.]{1,12})($|\\s|\\])/gi'
  */
 export declare function transformToExtractionPattern(pattern: string): string;
+/**
+ * Compiles address regex patterns from chains into native RegExp objects.
+ * Also generates regex fingerprints for compatibility checking.
+ * @param {Array<any>} chains - Array of chain documents
+ * @returns {{ chainRegexMap: Record<string, RegExp[]>, regexFingerprintMap: Record<string, string> }}
+ */
+export declare function compileChainRegexes(chains: any[]): {
+    chainRegexMap: Record<string, RegExp[]>;
+    regexFingerprintMap: Record<string, string>;
+};

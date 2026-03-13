@@ -347,4 +347,87 @@ export class MongoDBClient {
   base64ToDataURI(base64, mimeType = 'image/png') {
     return `data:${mimeType};base64,${base64}`;
   }
+
+  // --------------------
+  // Domain-Specific Helpers
+  // --------------------
+
+  /**
+   * Fetches chains with aggregated label counts
+   * @async
+   * @param {string} chainsCollection - Name of chains collection
+   * @param {string} addrsCollection - Name of addresses collection
+   * @param {object} query - Query filter for chains
+   * @returns {Promise<Array>} - Enriched chains
+   */
+  async getChainsWithCounts(chainsCollection, addrsCollection, query = {}) {
+    const chains = await this.readMany(chainsCollection, query);
+
+    // Aggregate label counts per chain (unwind array → count each chain independently)
+    const labelCounts = await this.aggregate(addrsCollection, [
+      { $unwind: "$chains" },
+      { $group: { _id: "$chains", count: { $sum: 1 } } }
+    ]);
+
+    // Create map for O(1) lookup
+    const countMap = {};
+    labelCounts.forEach(item => {
+      if (item._id) countMap[item._id] = item.count;
+    });
+
+    // Normalize data
+    return chains.map(chain => ({
+      ...chain,
+      _id: chain._id.toString(),
+      code: chain.annotation?.code || chain.chain,
+      labelCount: countMap[chain.caip2] || 0
+    }));
+  }
+
+  /**
+   * Building coingeckoToCAIP2Mapping dynamically from chains collection
+   * @async
+   * @param {string} chainsCollection - Name of chains collection
+   * @returns {Promise<Record<string, string>>}
+   */
+  async getCoingeckoToCAIP2Mapping(chainsCollection) {
+    const chainsResult = await this.readMany(chainsCollection, {}, {
+      projection: { "annotation.coingecko": 1, "caip2": 1, "_id": 0 }
+    });
+
+    const mapping = {};
+    chainsResult.forEach(chain => {
+      if (chain.annotation?.coingecko && chain.caip2) {
+        mapping[chain.annotation.coingecko] = chain.caip2;
+      }
+    });
+    return mapping;
+  }
+
+  /**
+   * Enriches label data with entity images from entities collection
+   * @async
+   * @param {Array<object>} labels - Array of label objects to enrich
+   * @param {string} entitiesCollection - Name of entities collection
+   * @returns {Promise<Array<object>>} Enriched labels
+   */
+  async enrichLabelsWithEntityImages(labels, entitiesCollection) {
+    if (!Array.isArray(labels) || labels.length === 0) return labels;
+
+    const entities = await this.readMany(entitiesCollection, {}, { projection: { _id: 0, name: 1, image: 1 } });
+    const entityMap = {};
+    entities.forEach(entity => {
+      if (entity.name && entity.image) {
+        entityMap[entity.name] = this.base64ToDataURI(entity.image);
+      }
+    });
+
+    labels.forEach(label => {
+      if (label.entity && entityMap[label.entity]) {
+        label.entityImage = entityMap[label.entity];
+      }
+    });
+
+    return labels;
+  }
 }

@@ -1,4 +1,5 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import crypto from 'node:crypto';
+import { validateSignature as sharedValidateSignature, compileChainRegexes as sharedCompileChainRegexes } from '@bemodest/utils';
 import { COLLECTION_CHAINS, COLLECTION_ENTITES, COLLECTION_ADDRS, STATS_CUTOFF_MS, SNAPPER_API_SECRET } from '../config/env.js';
 import logger from '../config/logger.js';
 
@@ -9,34 +10,12 @@ import logger from '../config/logger.js';
  * @returns {Promise<Array>} - Enriched chains
  */
 export async function getChainsWithCounts(dbClient, query = {}) {
-    const chains = await dbClient.readMany(COLLECTION_CHAINS, query);
-
-    // Aggregate label counts per chain (unwind array → count each chain independently)
-    const labelCounts = await dbClient.aggregate(COLLECTION_ADDRS, [
-        { $unwind: "$chains" },
-        { $group: { _id: "$chains", count: { $sum: 1 } } }
-    ]);
-
-    // Create map for O(1) lookup
-    const countMap = {};
-    labelCounts.forEach(item => {
-        if (item._id) countMap[item._id] = item.count;
-    });
-
-    // Normalize data
-    return chains.map(chain => ({
-        ...chain,
-        _id: chain._id.toString(),
-        code: chain.annotation?.code || chain.chain, // preserve backward compatibility if needed locally
-        labelCount: countMap[chain.caip2] || 0
-    }));
+    return dbClient.getChainsWithCounts(COLLECTION_CHAINS, COLLECTION_ADDRS, query);
 }
 
 // Shared state for reports and SSE clients (Placeholders if not found elsewhere)
 export const reports = {};
 export const clients = [];
-
-const SIGNATURE_MAX_AGE_MS = 30_000;
 
 /**
  * Validates HMAC-SHA256 signature from Python snapper.
@@ -45,15 +24,7 @@ const SIGNATURE_MAX_AGE_MS = 30_000;
  * @returns {boolean}
  */
 export const validateSignature = (signature, timestamp) => {
-    if (!signature || !timestamp || !SNAPPER_API_SECRET) return false;
-    const ts = Number(timestamp);
-    if (isNaN(ts) || Date.now() - ts > SIGNATURE_MAX_AGE_MS) return false;
-    const expected = createHmac('sha256', SNAPPER_API_SECRET).update(timestamp).digest('hex');
-    try {
-        return timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'));
-    } catch {
-        return false;
-    }
+    return sharedValidateSignature(signature, timestamp, SNAPPER_API_SECRET);
 };
 
 /**
@@ -104,17 +75,7 @@ export async function getCoingeckoToDuneMapping(dbClient) {
  * Building coingeckoToCAIP2Mapping dynamically from COLLECTION_CHAINS
  */
 export async function getCoingeckoToCAIP2Mapping(dbClient) {
-    const chainsResult = await dbClient.readMany(COLLECTION_CHAINS, {}, {
-        projection: { "annotation.coingecko": 1, "caip2": 1, "_id": 0 }
-    });
-
-    const mapping = {};
-    chainsResult.forEach(chain => {
-        if (chain.annotation?.coingecko && chain.caip2) {
-            mapping[chain.annotation.coingecko] = chain.caip2;
-        }
-    });
-    return mapping;
+    return dbClient.getCoingeckoToCAIP2Mapping(COLLECTION_CHAINS);
 }
 
 /**
@@ -155,23 +116,7 @@ export async function getCaip2ToCoingeckoMapping(dbClient) {
  * Enriches label data with entity images from labelEntities collection
  */
 export async function enrichLabelsWithEntityImages(labels, dbClient) {
-    if (!Array.isArray(labels) || labels.length === 0) return labels;
-
-    const entities = await dbClient.readMany(COLLECTION_ENTITES, {}, { projection: { _id: 0, name: 1, image: 1 } });
-    const entityMap = {};
-    entities.forEach(entity => {
-        if (entity.name && entity.image) {
-            entityMap[entity.name] = dbClient.base64ToDataURI(entity.image);
-        }
-    });
-
-    labels.forEach(label => {
-        if (label.entity && entityMap[label.entity]) {
-            label.entityImage = entityMap[label.entity];
-        }
-    });
-
-    return labels;
+    return dbClient.enrichLabelsWithEntityImages(labels, COLLECTION_ENTITES);
 }
 
 /**
@@ -181,46 +126,7 @@ export async function enrichLabelsWithEntityImages(labels, dbClient) {
  * @returns {{ chainRegexMap: Record<string, RegExp[]>, regexFingerprintMap: Record<string, string> }}
  */
 export function compileChainRegexes(chains) {
-    const chainRegexMap = {};
-    const regexFingerprintMap = {};
-
-    chains.forEach(chainDoc => {
-        if (chainDoc.caip2 && chainDoc.addrRegexPatterns && chainDoc.addrRegexPatterns.length > 0) {
-            const baseFlags = chainDoc.addrCaseSensitive === false ? 'i' : '';
-            chainRegexMap[chainDoc.caip2] = chainDoc.addrRegexPatterns.map(patternStr => {
-                let finalPattern = patternStr;
-                let finalFlags = baseFlags;
-
-                if (patternStr.startsWith('/') && patternStr.lastIndexOf('/') > 0) {
-                    const lastSlashIndex = patternStr.lastIndexOf('/');
-                    finalPattern = patternStr.substring(1, lastSlashIndex);
-                    const patternFlags = patternStr.substring(lastSlashIndex + 1);
-
-                    const mergedFlags = new Set([...finalFlags, ...patternFlags]);
-                    mergedFlags.delete('g');
-                    mergedFlags.delete('y');
-                    finalFlags = Array.from(mergedFlags).join('');
-                } else {
-                    const mergedFlags = new Set([...finalFlags]);
-                    mergedFlags.delete('g');
-                    mergedFlags.delete('y');
-                    finalFlags = Array.from(mergedFlags).join('');
-                }
-
-                try {
-                    return new RegExp(finalPattern, finalFlags);
-                } catch (e) {
-                    logger.error(`Invalid regex pattern for ${chainDoc.caip2}: ${patternStr}`);
-                    return null;
-                }
-            }).filter(r => r !== null);
-
-            // Build fingerprint for same-regex constraint
-            regexFingerprintMap[chainDoc.caip2] = JSON.stringify([...chainDoc.addrRegexPatterns].sort());
-        }
-    });
-
-    return { chainRegexMap, regexFingerprintMap };
+    return sharedCompileChainRegexes(chains);
 }
 
 export const updateClients = () => {

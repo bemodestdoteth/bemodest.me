@@ -26,3 +26,52 @@ export function transformToExtractionPattern(pattern: string): string {
     // Using double backslashes for string-based regex representation
     return `/(^|\\s|:|-|\\[)(${inner})($|\\s|\\])/gi`;
 }
+
+/**
+ * Compiles address regex patterns from chains into native RegExp objects.
+ * Also generates regex fingerprints for compatibility checking.
+ * @param {Array<any>} chains - Array of chain documents
+ * @returns {{ chainRegexMap: Record<string, RegExp[]>, regexFingerprintMap: Record<string, string> }}
+ */
+export function compileChainRegexes(chains: any[]) {
+    const chainRegexMap: Record<string, RegExp[]> = {};
+    const regexFingerprintMap: Record<string, string> = {};
+
+    chains.forEach(chainDoc => {
+        if (chainDoc.caip2 && chainDoc.addrRegexPatterns && chainDoc.addrRegexPatterns.length > 0) {
+            const baseFlags = chainDoc.addrCaseSensitive === false ? 'i' : '';
+            chainRegexMap[chainDoc.caip2] = chainDoc.addrRegexPatterns.map((patternStr: string) => {
+                let finalPattern = patternStr;
+                let finalFlags = baseFlags;
+
+                if (patternStr.startsWith('/') && patternStr.lastIndexOf('/') > 0) {
+                    const lastSlashIndex = patternStr.lastIndexOf('/');
+                    finalPattern = patternStr.substring(1, lastSlashIndex);
+                    const patternFlags = patternStr.substring(lastSlashIndex + 1);
+
+                    const mergedFlags = new Set([...finalFlags, ...patternFlags]);
+                    mergedFlags.delete('g');
+                    mergedFlags.delete('y');
+                    finalFlags = Array.from(mergedFlags).join('');
+                } else {
+                    const mergedFlags = new Set([...finalFlags]);
+                    mergedFlags.delete('g');
+                    mergedFlags.delete('y');
+                    finalFlags = Array.from(mergedFlags).join('');
+                }
+
+                try {
+                    return new RegExp(finalPattern, finalFlags);
+                } catch (e) {
+                    console.error(`Invalid regex pattern for ${chainDoc.caip2}: ${patternStr}`);
+                    return null;
+                }
+            }).filter((r: any) => r !== null);
+
+            // Build fingerprint for same-regex constraint
+            regexFingerprintMap[chainDoc.caip2] = JSON.stringify([...chainDoc.addrRegexPatterns].sort());
+        }
+    });
+
+    return { chainRegexMap, regexFingerprintMap };
+}

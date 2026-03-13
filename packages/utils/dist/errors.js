@@ -3,7 +3,7 @@
  * Custom error classes following RULES O-8007, A-4007
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InternalServerError = exports.NotFoundError = exports.UnauthorizedError = exports.ValidationError = exports.AppError = void 0;
+exports.InternalServerError = exports.NotFoundError = exports.ForbiddenError = exports.UnauthorizedError = exports.ValidationError = exports.AppError = void 0;
 exports.formatErrorResponse = formatErrorResponse;
 class AppError extends Error {
     code;
@@ -44,6 +44,13 @@ class UnauthorizedError extends AppError {
     }
 }
 exports.UnauthorizedError = UnauthorizedError;
+class ForbiddenError extends AppError {
+    constructor(message = 'Forbidden', requestId) {
+        super(message, 'FORBIDDEN', 403, requestId);
+        this.name = 'ForbiddenError';
+    }
+}
+exports.ForbiddenError = ForbiddenError;
 class NotFoundError extends AppError {
     constructor(message = 'Resource not found', requestId) {
         super(message, 'NOT_FOUND', 404, requestId);

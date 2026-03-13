@@ -21,6 +21,9 @@ export declare class ValidationError extends AppError {
 export declare class UnauthorizedError extends AppError {
     constructor(message?: string, requestId?: string);
 }
+export declare class ForbiddenError extends AppError {
+    constructor(message?: string, requestId?: string);
+}
 export declare class NotFoundError extends AppError {
     constructor(message?: string, requestId?: string);
 }

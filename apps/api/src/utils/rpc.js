@@ -1,15 +1,7 @@
 import logger from '../config/logger.js';
 import { MongoDBClient } from '@bemodest/database';
 import { COLLECTION_CHAINS } from '../config/env.js';
-
-/** @param {string|string[]|unknown} value */
-function interpolateSecrets(value) {
-    if (typeof value === 'string') {
-        return value.replace(/\$\{(\w+)\}/g, (_, key) => process.env[key] ?? `\${${key}}`);
-    }
-    if (Array.isArray(value)) return value.map(interpolateSecrets);
-    return value;
-}
+import { interpolateSecrets } from '@bemodest/utils';
 
 const rpcMap = new Map();       // key: CAIP-2 ID → { urls: string[], idx: number }
 const chainIdToCAIP2 = new Map(); // numeric chainId → CAIP-2 ID

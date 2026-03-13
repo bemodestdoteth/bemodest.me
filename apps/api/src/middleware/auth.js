@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken';
 import { validateApiConfig } from '@bemodest/config';
 import { AuthSessionSchema } from '@bemodest/types';
 
+import { UnauthorizedError, formatErrorResponse } from '@bemodest/utils';
+
 /**
  * Express middleware for JWT authentication following RULES S-3007, A-4007
  * @param {import('express').Request} req - Express request
@@ -16,13 +18,7 @@ export function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({
-      success: false,
-      error: {
-        code: 'UNAUTHORIZED',
-        message: 'No token provided',
-      },
-    });
+    return res.status(401).json(formatErrorResponse(new UnauthorizedError('No token provided')));
   }
 
   const token = authHeader.substring(7);
@@ -35,13 +31,7 @@ export function authMiddleware(req, res, next) {
     req.user = validated;
     next();
   } catch (error) {
-    return res.status(401).json({
-      success: false,
-      error: {
-        code: 'UNAUTHORIZED',
-        message: 'Invalid token',
-      },
-    });
+    return res.status(401).json(formatErrorResponse(new UnauthorizedError('Invalid token')));
   }
 }
 
