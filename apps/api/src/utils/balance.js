@@ -14,27 +14,13 @@ import {
     COLLECTION_COINGECKO_RANK,
 } from '../config/env.js';
 import { getCaip2ToGeckoTerminalMapping, getCaip2ToCoingeckoMapping } from './helpers.js';
+import { getChainTypeFromCAIP2, getEipChainId } from '@bemodest/utils';
 
 const ERC20_ABI = [
     'function balanceOf(address) view returns (uint256)',
     'function decimals() view returns (uint8)',
 ];
 
-function getChainTypeFromCAIP2(caip2Id) {
-    const ns = caip2Id.split(':')[0];
-    if (ns === 'eip155') return 'evm';
-    if (ns === 'solana') return 'solana';
-    if (ns === 'sui') return 'sui';
-    if (ns === 'cosmos') return 'cosmos';
-    if (ns === 'bip122') return 'bitcoin';
-    return 'unknown';
-}
-
-function getEipChainId(caip2Id) {
-    const [ns, chainId] = caip2Id.split(':');
-    if (ns === 'eip155') return parseInt(chainId, 10);
-    return null;
-}
 
 async function evmBalanceUsd(addr, caip2Id, contractAddr, price, attempt = 1) {
     const rpcUrl = getRpcUrl(caip2Id);

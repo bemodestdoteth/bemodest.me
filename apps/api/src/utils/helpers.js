@@ -58,17 +58,7 @@ export const hashString = (str) => {
  * Building coingeckoToDuneMapping dynamically from COLLECTION_CHAINS
  */
 export async function getCoingeckoToDuneMapping(dbClient) {
-    const chainsResult = await dbClient.readMany(COLLECTION_CHAINS, {}, {
-        projection: { "annotation.coingecko": 1, "annotation.dune": 1, "_id": 0 }
-    });
-
-    const mapping = {};
-    chainsResult.forEach(chain => {
-        if (chain.annotation?.coingecko && chain.annotation?.dune) {
-            mapping[chain.annotation.coingecko] = chain.annotation.dune;
-        }
-    });
-    return mapping;
+    return dbClient.getCoingeckoToDuneMapping(COLLECTION_CHAINS);
 }
 
 /**
@@ -82,34 +72,14 @@ export async function getCoingeckoToCAIP2Mapping(dbClient) {
  * Building caip2ToGeckoTerminalMapping dynamically from COLLECTION_CHAINS
  */
 export async function getCaip2ToGeckoTerminalMapping(dbClient) {
-    const chainsResult = await dbClient.readMany(COLLECTION_CHAINS, {}, {
-        projection: { "annotation.geckoterminal": 1, "caip2": 1, "_id": 0 }
-    });
-
-    const mapping = {};
-    chainsResult.forEach(chain => {
-        if (chain.annotation?.geckoterminal && chain.caip2) {
-            mapping[chain.caip2] = chain.annotation.geckoterminal;
-        }
-    });
-    return mapping;
+    return dbClient.getCaip2ToGeckoTerminalMapping(COLLECTION_CHAINS);
 }
 
 /**
  * Building caip2ToCoingeckoMapping dynamically from COLLECTION_CHAINS
  */
 export async function getCaip2ToCoingeckoMapping(dbClient) {
-    const chainsResult = await dbClient.readMany(COLLECTION_CHAINS, {}, {
-        projection: { "annotation.coingecko": 1, "caip2": 1, "_id": 0 }
-    });
-
-    const mapping = {};
-    chainsResult.forEach(chain => {
-        if (chain.annotation?.coingecko && chain.caip2) {
-            mapping[chain.caip2] = chain.annotation.coingecko;
-        }
-    });
-    return mapping;
+    return dbClient.getCaip2ToCoingeckoMapping(COLLECTION_CHAINS);
 }
 
 /**

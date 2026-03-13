@@ -430,4 +430,64 @@ export class MongoDBClient {
 
     return labels;
   }
+
+  /**
+   * Building coingeckoToDuneMapping dynamically from chains collection
+   * @async
+   * @param {string} chainsCollection - Name of chains collection
+   * @returns {Promise<Record<string, string>>}
+   */
+  async getCoingeckoToDuneMapping(chainsCollection) {
+    const chainsResult = await this.readMany(chainsCollection, {}, {
+      projection: { "annotation.coingecko": 1, "annotation.dune": 1, "_id": 0 }
+    });
+
+    const mapping = {};
+    chainsResult.forEach(chain => {
+      if (chain.annotation?.coingecko && chain.annotation?.dune) {
+        mapping[chain.annotation.coingecko] = chain.annotation.dune;
+      }
+    });
+    return mapping;
+  }
+
+  /**
+   * Building caip2ToCoingeckoMapping dynamically from chains collection
+   * @async
+   * @param {string} chainsCollection - Name of chains collection
+   * @returns {Promise<Record<string, string>>}
+   */
+  async getCaip2ToCoingeckoMapping(chainsCollection) {
+    const chainsResult = await this.readMany(chainsCollection, {}, {
+      projection: { "annotation.coingecko": 1, "caip2": 1, "_id": 0 }
+    });
+
+    const mapping = {};
+    chainsResult.forEach(chain => {
+      if (chain.annotation?.coingecko && chain.caip2) {
+        mapping[chain.caip2] = chain.annotation.coingecko;
+      }
+    });
+    return mapping;
+  }
+
+  /**
+   * Building caip2ToGeckoTerminalMapping dynamically from chains collection
+   * @async
+   * @param {string} chainsCollection - Name of chains collection
+   * @returns {Promise<Record<string, string>>}
+   */
+  async getCaip2ToGeckoTerminalMapping(chainsCollection) {
+    const chainsResult = await this.readMany(chainsCollection, {}, {
+      projection: { "annotation.geckoterminal": 1, "caip2": 1, "_id": 0 }
+    });
+
+    const mapping = {};
+    chainsResult.forEach(chain => {
+      if (chain.annotation?.geckoterminal && chain.caip2) {
+        mapping[chain.caip2] = chain.annotation.geckoterminal;
+      }
+    });
+    return mapping;
+  }
 }
