@@ -10,7 +10,8 @@
     "@bemodest/utils": "workspace:*",
     "@fontsource/geist-mono": "^5.2.7",
     "@fontsource/geist-sans": "^5.2.5",
-    "socket.io-client": "^4.8.3"
+    "socket.io-client": "^4.8.3",
+    "zod": "^3.25.76"
   },
   "scripts": {
     "build": "vite --config vite.config.js build",

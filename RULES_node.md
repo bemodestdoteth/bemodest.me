@@ -42,6 +42,7 @@ A-4004: Shared types MUST live in packages/types workspace
 A-4005: Extension background scripts MUST use message passing (never direct DOM manipulation)
 A-4006: API responses MUST follow structure: {success: boolean, data?: T, error?: {code: string, message: string}} [ref: moldstud.com/articles/p-best-practices-for-building-robust-apis-with-nodejs-ultimate-guide]
 A-4007: Error responses MUST include appropriate HTTP status codes: 400 (bad request), 401 (unauthorized), 404 (not found), 500 (server error) [ref: moldstud.com/articles/p-best-practices-for-building-robust-apis-with-nodejs-ultimate-guide]
+A-4008: All JavaScript MUST be in external files; inline <script> tags are prohibited in HTML files
 
 ## Category 5: Testing & Validation (V-Series)
 V-5001: Test coverage MUST be ≥80% (jest --coverage --coverageThreshold='{"global":{"lines":80,"functions":80,"branches":80}}') [ref: jestjs.io/docs/configuration, moldstud.com/articles/p-steps-to-improve-code-coverage-from-0-to-80-using-jest]
@@ -116,3 +117,4 @@ M-12002: Zod schemas MUST be co-located with their usage (API route schemas in s
 M-12003: Mongoose schema changes MUST include migration scripts in migrations/ directory
 M-12004: Type definitions from Mongoose schemas MUST be exported via infer: type Entity = InferSchemaType<typeof entitySchema>
 M-12005: Shared types MUST be defined once in packages/types and imported via workspace protocol
+M-12006: Database models and clients MUST be imported from the @bemodest/database package (never defined locally in apps)

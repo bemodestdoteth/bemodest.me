@@ -142,6 +142,40 @@ body {
     color: var(--accent-primary);
 }
 
+
 .ext-etheraddresslookup-nav-link:hover {
     background: var(--glass-bg);
+}
+
+/* Loading Overlay */
+.loader-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--glass-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    border-radius: 8px;
+}
+
+.loader-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid hsla(260, 85%, 65%, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--accent-primary);
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 8px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }

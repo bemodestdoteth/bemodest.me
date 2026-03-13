@@ -6,6 +6,13 @@ let statsCache = {
     entityTotal: 0
 };
 let availableEntities = [];
+let availableChains = [];
+
+// Session monitoring state
+let sessionExpiresAt = null;
+let sessionMonitorInterval = null;
+const SESSION_CHECK_INTERVAL_MS = 30000;
+const SESSION_WARNING_THRESHOLD_MS = 300000;
 
 // Auth handling
 function handleLogin(e) {
@@ -27,15 +34,18 @@ function handleLogin(e) {
         })
         .then(data => {
             if (data.success && data.data.token) {
-                // Store token for socket.io connection
                 sessionStorage.setItem('jwt_token', data.data.token);
 
-                // Initialize socket.io connection with JWT token
+                if (data.data.expiresAt) {
+                    sessionExpiresAt = data.data.expiresAt;
+                }
+
                 initializeSocketConnection(data.data.token);
 
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
                 initializeApp();
+                startSessionMonitor();
             } else {
                 throw new Error(data.error || 'Login failed');
             }
@@ -47,13 +57,13 @@ function handleLogin(e) {
 }
 
 function handleLogout() {
-    // Disconnect socket.io
+    stopSessionMonitor();
+
     if (socket) {
         socket.disconnect();
         socket = null;
     }
 
-    // Clear stored token
     sessionStorage.removeItem('jwt_token');
 
     fetch('/logout', { method: 'POST' })
@@ -87,6 +97,7 @@ function initializeSocketConnection(token) {
         socket.emit('entityTotalGet');
         socket.emit('walletsGet');
         socket.emit('entityGet', { params: {} });
+        socket.emit('chainGet', { params: {} });
     });
 
     socket.on('connect_error', (error) => {
@@ -160,6 +171,10 @@ function initializeSocketConnection(token) {
     // Listen for chain updates
     socket.on('chainUpdate', (data) => {
         console.log('[WebApp] Received chain update:', data);
+        if (data.success && Array.isArray(data.data)) {
+            availableChains = data.data;
+            updateBulkAddChainDropdowns();
+        }
     });
 
     // Listen for errors
@@ -181,10 +196,10 @@ function updateConnectionStatus(connected, message = '') {
 
     if (connected) {
         statusEl.className = 'connection-status connected';
-        textEl.textContent = 'Connected';
+        textEl.textContent = 'Api';
     } else {
         statusEl.className = 'connection-status disconnected';
-        textEl.textContent = message || 'Disconnected';
+        textEl.textContent = message || 'Api';
     }
 }
 
@@ -205,24 +220,35 @@ function updateStatsDisplay() {
 }
 
 
-// Add this function at the start of main.js
 function checkSession() {
     fetch('/api/session')
         .then(res => res.json())
         .then(data => {
             if (data.authenticated) {
-                // Get token from session storage or fetch new one
                 const token = sessionStorage.getItem('jwt_token');
                 if (token) {
                     initializeSocketConnection(token);
                 }
 
+                if (data.expiresAt) {
+                    sessionExpiresAt = data.expiresAt;
+                }
+
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
                 initializeApp();
+                startSessionMonitor();
+
+                if (data.isExpiringSoon) {
+                    showSessionWarningModal();
+                }
             } else {
-                document.getElementById('loginForm').style.display = 'block';
-                document.getElementById('content').style.display = 'none';
+                if (data.reason === 'expired') {
+                    handleSessionExpired(true);
+                } else {
+                    document.getElementById('loginForm').style.display = 'block';
+                    document.getElementById('content').style.display = 'none';
+                }
             }
         })
         .catch(err => {
@@ -262,18 +288,32 @@ function updateWalletTable(labelledAddresses) {
     const tableData = [];
     const chains = new Set();
 
+    // Create a map for display names
+    const chainDisplayMap = {};
+    availableChains.forEach(c => {
+        chainDisplayMap[c.caip2] = c.annotation?.code || c.code || c.caip2;
+    });
+
     Object.entries(labelledAddresses).forEach(([address, wallet]) => {
+        const displayChains = wallet.chains
+            ? wallet.chains.map(c => chainDisplayMap[c] || c).join(', ')
+            : '';
+
         tableData.push([
             '', // Placeholder for checkbox column
             address,
-            wallet.chain,
+            displayChains,
             wallet.entity,
             wallet.entityImage || '',
             wallet.comment,
             wallet.label,
             wallet.tracking
         ]);
-        chains.add(wallet.chain);
+        if (Array.isArray(wallet.chains)) {
+            wallet.chains.forEach(c => chains.add(c));
+        } else if (wallet.chains) {
+            chains.add(wallet.chains);
+        }
     });
 
     // Clear and reload table
@@ -285,9 +325,10 @@ function updateWalletTable(labelledAddresses) {
     const existingChains = Array.from($('#chainFilter option').map((i, el) => el.value));
     chains.forEach(chain => {
         if (!existingChains.includes(chain)) {
+            const displayText = chainDisplayMap[chain] || chain;
             $('#chainFilter').append($('<option>', {
                 value: chain,
-                text: chain
+                text: displayText
             }));
         }
     });
@@ -482,9 +523,12 @@ document.addEventListener('DOMContentLoaded', checkSession);
  * @returns {void}
  */
 
+// Global flag for bulk add initialization
+let bulkAddInitialized = false;
+
 function initializeBulkAdd() {
     const btn = document.getElementById('bulkAddBtn');
-    if (!btn) return;
+    if (!btn || bulkAddInitialized) return;
 
     const container = document.getElementById('bulkAddContainer');
 
@@ -499,6 +543,9 @@ function initializeBulkAdd() {
             addBulkRow();
         }
     });
+
+    // Make duplicateRow global so it can be called from onclick
+    window.duplicateRow = duplicateRow;
 
     // Handle "Cancel" button click
     document.getElementById('cancelBulkBtn').addEventListener('click', () => {
@@ -524,58 +571,140 @@ function initializeBulkAdd() {
             handleBulkInsertResult(data);
         });
     }
+
+    bulkAddInitialized = true;
 }
 
 /**
  * @name addBulkRow
  * @desc Add a new row to the bulk add form
+ * @param {Object} [data=null] - Optional data to prepopulate the row
  * @returns {void}
  */
-function addBulkRow() {
+function addBulkRow(data = null) {
     const rowsContainer = document.getElementById('bulkAddRows');
     const rowId = 'row-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
 
-    // Get chains from existing filter or default
-    const chainOptions = Array.from(document.getElementById('chainFilter').options)
-        .filter(opt => opt.value !== '') // Exclude "All"
-        .map(opt => `<option value="${opt.value}">${opt.text}</option>`)
-        .join('');
+    // Get chains from availableChains or existing filter as fallback
+    let chainOptions = '';
+    if (availableChains.length > 0) {
+        chainOptions = availableChains
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map(c => {
+                const code = c.annotation?.code || c.code || c.caip2;
+                let displayText = `${c.name} (${code})`;
+                if (c.status === 'deprecated') {
+                    displayText += ' ⚠️ (DEPRECATED)';
+                }
+                return `<option value="${c.caip2}" ${data && data.chain === c.caip2 ? 'selected' : ''}>${displayText}</option>`;
+            })
+            .join('');
+    } else {
+        chainOptions = Array.from(document.getElementById('chainFilter').options)
+            .filter(opt => opt.value !== '') // Exclude "All"
+            .map(opt => `<option value="${opt.value}" ${data && data.chain === opt.value ? 'selected' : ''}>${opt.text}</option>`)
+            .join('');
+    }
 
     // Generate entity options
-    const entityOptions = availableEntities.map(e => `<option value="${e}">${e}</option>`).join('');
+    const entityOptions = availableEntities.map(e => `<option value="${e}" ${data && data.entity === e ? 'selected' : ''}>${e}</option>`).join('');
 
     const rowHtml = `
         <div id="${rowId}" class="bulk-row" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: start;">
             <div style="flex: 2;">
-                <input type="text" name="addr" placeholder="Wallet Address" style="width: 100%; padding: 5px;" required>
+                <input type="text" name="addr" placeholder="Wallet Address" value="${data ? data.addr : ''}" style="width: 100%; padding: 5px;" required>
                 <div class="error-msg" style="color: red; font-size: 12px; display: none;"></div>
             </div>
             <div style="flex: 1;">
                 <select name="chain" style="width: 100%; padding: 5px;" required>
-                    <option value="" disabled selected>Chain</option>
+                    <option value="" disabled ${!data ? 'selected' : ''}>Chain</option>
                     ${chainOptions}
                 </select>
             </div>
             <div style="flex: 1;">
                  <select name="entity" style="width: 100%; padding: 5px;">
-                    <option value="" selected>Entity (Optional)</option>
+                    <option value="" ${!data || !data.entity ? 'selected' : ''}>Entity (Optional)</option>
                     ${entityOptions}
                  </select>
             </div>
             <div style="flex: 1;">
-                 <input type="text" name="label" placeholder="Label" style="width: 100%; padding: 5px;">
+                 <input type="text" name="label" placeholder="Label" value="${data ? data.label : ''}" style="width: 100%; padding: 5px;">
             </div>
              <div style="flex: 1;">
-                 <input type="text" name="comment" placeholder="Comment" style="width: 100%; padding: 5px;">
+                 <input type="text" name="comment" placeholder="Comment" value="${data ? data.comment : ''}" style="width: 100%; padding: 5px;">
             </div>
-            <div style="width: 30px; display: flex; align-items: center; justify-content: center;">
-                 <button type="button" onclick="document.getElementById('${rowId}').remove()" style="background: none; border: none; color: #999; cursor: pointer; font-weight: bold;">&times;</button>
+            <div style="width: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                 <label style="font-size: 10px; margin-bottom: 2px;">Tracking</label>
+                 <input type="checkbox" name="tracking" style="cursor: pointer;" ${data && data.tracking ? 'checked' : ''}>
+            </div>
+            <div style="display: flex; gap: 5px; align-items: center; justify-content: center;">
+                 <button type="button" onclick="duplicateRow('${rowId}')" style="background-color: #2196F3; color: white; border: none; padding: 2px 5px; border-radius: 3px; cursor: pointer; font-size: 11px;">Dup</button>
+                 <button type="button" onclick="document.getElementById('${rowId}').remove()" style="background: none; border: none; color: #999; cursor: pointer; font-weight: bold; margin-left: 5px;">&times;</button>
             </div>
         </div>
     `;
 
     // Append html
     rowsContainer.insertAdjacentHTML('beforeend', rowHtml);
+}
+
+/**
+ * @name duplicateRow
+ * @desc Duplicate a bulk add row
+ * @param {string} rowId - The ID of the row to duplicate
+ * @returns {void}
+ */
+function duplicateRow(rowId) {
+    const row = document.getElementById(rowId);
+    if (!row) return;
+
+    const addr = row.querySelector('input[name="addr"]').value;
+    const chain = row.querySelector('select[name="chain"]').value;
+    const entity = row.querySelector('[name="entity"]').value;
+    const label = row.querySelector('input[name="label"]').value;
+    const comment = row.querySelector('input[name="comment"]').value;
+    const tracking = row.querySelector('input[name="tracking"]').checked;
+
+    addBulkRow({
+        addr,
+        chain,
+        entity,
+        label,
+        comment,
+        tracking
+    });
+}
+
+/**
+ * @name updateBulkAddChainDropdowns
+ * @desc Update all chain dropdowns in bulk add rows
+ * @returns {void}
+ */
+function updateBulkAddChainDropdowns() {
+    const rows = document.querySelectorAll('.bulk-row');
+    rows.forEach(row => {
+        const select = row.querySelector('select[name="chain"]');
+        const currentValue = select.value;
+
+        let optionsHtml = '<option value="" disabled>Chain</option>';
+        if (availableChains.length > 0) {
+            const sortedChains = [...availableChains].sort((a, b) => a.name.localeCompare(b.name));
+            sortedChains.forEach(c => {
+                const code = c.annotation?.code || c.code || c.caip2;
+                const displayText = `${c.name} (${code})`;
+                optionsHtml += `<option value="${c.caip2}" ${currentValue === c.caip2 ? 'selected' : ''}>${displayText}</option>`;
+            });
+        } else {
+            // Fallback
+            const existingOpts = Array.from(document.getElementById('chainFilter').options).filter(o => o.value !== '');
+            existingOpts.forEach(opt => {
+                optionsHtml += `<option value="${opt.value}" ${currentValue === opt.value ? 'selected' : ''}>${opt.text}</option>`;
+            });
+        }
+
+        select.innerHTML = optionsHtml;
+        if (currentValue) select.value = currentValue;
+    });
 }
 
 /**
@@ -601,6 +730,7 @@ function submitBulkAdd() {
         const entity = row.querySelector('[name="entity"]').value.trim(); // Changed to support input or select
         const label = row.querySelector('input[name="label"]').value.trim();
         const comment = row.querySelector('input[name="comment"]').value.trim();
+        const tracking = row.querySelector('input[name="tracking"]').checked;
 
         if (!addr) {
             const errEl = row.querySelector('.error-msg');
@@ -626,11 +756,11 @@ function submitBulkAdd() {
 
         labels.push({
             addr,
-            chain,
+            chains: [chain],
             entity,
             label, // field name in db is 'label' according to walletList: item.label
             comment,
-            tracking: true // Default to tracking? Or add checkbox? Existing UI table has 'Tracking'. Assuming true or default.
+            tracking: tracking
         });
     });
 
@@ -664,7 +794,6 @@ function handleBulkInsertResult(data) {
         return;
     }
 
-    // Process individual results
     const rows = document.querySelectorAll('.bulk-row');
     let successCount = 0;
 
@@ -673,15 +802,13 @@ function handleBulkInsertResult(data) {
             if (res.index < rows.length) {
                 const row = rows[res.index];
                 if (res.success) {
-                    row.remove(); // Remove successful rows? Or mark them?
-                    // Removing seems cleaner to show remaining "todo"
+                    row.remove();
                     successCount++;
                 } else {
                     const errEl = row.querySelector('.error-msg');
                     if (errEl) {
                         errEl.textContent = res.error || 'Unknown error';
                         errEl.style.display = 'block';
-                        // Highlight row
                         row.style.backgroundColor = '#fff0f0';
                     }
                 }
@@ -693,8 +820,6 @@ function handleBulkInsertResult(data) {
         statusDiv.textContent = `Successfully added ${successCount} addresses.`;
         statusDiv.style.color = 'green';
 
-        // If all successful, maybe clear/hide form after short delay?
-        // For now keep open if there are remaining (failed) rows, or just show status.
         if (document.querySelectorAll('.bulk-row').length === 0) {
             setTimeout(() => {
                 document.getElementById('bulkAddContainer').style.display = 'none';
@@ -705,4 +830,153 @@ function handleBulkInsertResult(data) {
         statusDiv.textContent = 'No addresses added.';
         statusDiv.style.color = 'red';
     }
+}
+
+function startSessionMonitor() {
+    if (sessionMonitorInterval) {
+        clearInterval(sessionMonitorInterval);
+    }
+
+    updateSessionStatusDisplay();
+
+    sessionMonitorInterval = setInterval(() => {
+        checkSessionStatus();
+    }, SESSION_CHECK_INTERVAL_MS);
+}
+
+function stopSessionMonitor() {
+    if (sessionMonitorInterval) {
+        clearInterval(sessionMonitorInterval);
+        sessionMonitorInterval = null;
+    }
+    sessionExpiresAt = null;
+}
+
+function checkSessionStatus() {
+    fetch('/api/session')
+        .then(res => res.json())
+        .then(data => {
+            if (!data.authenticated) {
+                handleSessionExpired(data.reason === 'expired');
+                return;
+            }
+
+            sessionExpiresAt = data.expiresAt;
+            updateSessionStatusDisplay();
+
+            if (data.isExpiringSoon) {
+                showSessionWarningModal();
+            }
+        })
+        .catch(err => {
+            console.error('Session check failed:', err);
+        });
+}
+
+function updateSessionStatusDisplay() {
+    const statusEl = document.getElementById('sessionStatus');
+    if (!statusEl || !sessionExpiresAt) return;
+
+    const remainingMs = sessionExpiresAt - Date.now();
+    const statusText = statusEl.querySelector('.session-time');
+
+    if (remainingMs <= 0) {
+        handleSessionExpired(true);
+        return;
+    }
+
+    statusText.textContent = formatTimeRemaining(remainingMs);
+
+    if (remainingMs < SESSION_WARNING_THRESHOLD_MS) {
+        statusEl.classList.add('warning');
+        statusEl.classList.remove('active');
+    } else {
+        statusEl.classList.add('active');
+        statusEl.classList.remove('warning');
+    }
+}
+
+function formatTimeRemaining(ms) {
+    if (ms <= 0) return 'Expired';
+
+    const totalSeconds = Math.floor(ms / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+    if (days > 0) {
+        return `${days}d ${hours}h`;
+    } else if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+    } else {
+        return `${minutes}m`;
+    }
+}
+
+function showSessionWarningModal() {
+    const modal = document.getElementById('sessionExpiryModal');
+    if (!modal || modal.style.display === 'block') return;
+
+    modal.style.display = 'block';
+
+    const countdownEl = modal.querySelector('.expiry-countdown');
+    if (countdownEl && sessionExpiresAt) {
+        const updateCountdown = () => {
+            const remaining = sessionExpiresAt - Date.now();
+            if (remaining <= 0) {
+                handleSessionExpired(true);
+                return;
+            }
+            countdownEl.textContent = formatTimeRemaining(remaining);
+        };
+
+        updateCountdown();
+        const countdownInterval = setInterval(() => {
+            if (modal.style.display !== 'block') {
+                clearInterval(countdownInterval);
+                return;
+            }
+            updateCountdown();
+        }, 1000);
+    }
+}
+
+function hideSessionWarningModal() {
+    const modal = document.getElementById('sessionExpiryModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function handleSessionExpired(wasExpired) {
+    stopSessionMonitor();
+
+    if (socket) {
+        socket.disconnect();
+        socket = null;
+    }
+
+    sessionStorage.removeItem('jwt_token');
+
+    const modal = document.getElementById('sessionExpiredModal');
+    if (modal) {
+        const messageEl = modal.querySelector('.expiry-message');
+        if (messageEl) {
+            messageEl.textContent = wasExpired
+                ? 'Your session has expired. Please log in again to continue.'
+                : 'Your session is no longer valid. Please log in again.';
+        }
+        modal.style.display = 'block';
+    }
+}
+
+function redirectToLogin() {
+    hideSessionWarningModal();
+    const expiredModal = document.getElementById('sessionExpiredModal');
+    if (expiredModal) {
+        expiredModal.style.display = 'none';
+    }
+
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('content').style.display = 'none';
 }

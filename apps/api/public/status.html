@@ -1,16 +1,209 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Server Status</title>
+
+<head>
+    <title>System Status</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <!-- Use same fonts as main page -->
     <link rel="preload" href="/fonts/beaufort_medium.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="/fonts/d2coding.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="stylesheet" href="/css/status.css">
-  </head>
-<body>
-  <h1>Server Status</h1>
-  <div id="status-container"></div>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <style>
+        .status-container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .status-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .status-section h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        .status-success, .status-online {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-failure, .status-offline {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .last-updated {
+            font-size: 0.9em;
+            color: #666;
+            text-align: right;
+            margin-top: 10px;
+        }
+    </style>
+</head>
 
-  <script src="/js/status.js"></script>
+<body>
+    <div>
+        <header>
+            <h1>System Status</h1>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div id="sessionStatus" class="session-status active" style="display:none;">
+                    <span class="session-icon">⏱</span>
+                    <span class="session-time">--</span>
+                </div>
+                <div id="connectionStatus" class="connection-status disconnected" style="display:none;">
+                    <span class="status-indicator"></span>
+                    <span class="status-text">Disconnected</span>
+                </div>
+                <button onclick="window.location.href='/'">Back to Dashboard</button>
+            </div>
+        </header>
+
+        <div class="status-container">
+            <div class="status-section">
+                <h2>Data Scrapers</h2>
+                <div class="table-responsive">
+                    <table id="scraperTable">
+                        <thead>
+                            <tr>
+                                <th>Machine ID</th>
+                                <th>IP Address</th>
+                                <th>App Name</th>
+                                <th>Target</th>
+                                <th>Status</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scraperBody">
+                            <tr><td colspan="6" style="text-align:center;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="status-section">
+                <h2>Applications</h2>
+                <div class="table-responsive">
+                    <table id="appTable">
+                        <thead>
+                            <tr>
+                                <th>Machine ID</th>
+                                <th>IP Address</th>
+                                <th>App Name</th>
+                                <th>Status</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appBody">
+                            <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="last-updated" id="lastFetchTime"></div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            fetchStatus();
+            // Refresh every 30 seconds
+            setInterval(fetchStatus, 30000);
+        });
+
+        async function fetchStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const result = await response.json();
+                
+                if (result.success) {
+                    renderScrapers(result.data.scrapers);
+                    renderApps(result.data.apps);
+                    $('#lastFetchTime').text(`Last fetched: ${new Date().toLocaleString()}`);
+                }
+            } catch (error) {
+                console.error('Error fetching status:', error);
+            }
+        }
+
+        function renderScrapers(data) {
+            const tbody = $('#scraperBody');
+            tbody.empty();
+            
+            if (!data || data.length === 0) {
+                tbody.append('<tr><td colspan="6" style="text-align:center;">No data available</td></tr>');
+                return;
+            }
+
+            data.forEach(item => {
+                const statusClass = item.success ? 'status-success' : 'status-failure';
+                const statusText = item.success ? 'Success' : 'Failed';
+                const time = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'N/A';
+                
+                tbody.append(`
+                    <tr>
+                        <td>${item.machine_id || '-'}</td>
+                        <td>${item.machine_ip || '-'}</td>
+                        <td>${item.app_name || '-'}</td>
+                        <td>${item.target || '-'}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${time}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        function renderApps(data) {
+            const tbody = $('#appBody');
+            tbody.empty();
+
+            if (!data || data.length === 0) {
+                tbody.append('<tr><td colspan="5" style="text-align:center;">No data available</td></tr>');
+                return;
+            }
+
+            data.forEach(item => {
+                const isOnline = item.status === 'online';
+                const statusClass = isOnline ? 'status-online' : 'status-offline';
+                const time = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'N/A';
+
+                tbody.append(`
+                    <tr>
+                        <td>${item.machine_id || '-'}</td>
+                        <td>${item.machine_ip || '-'}</td>
+                        <td>${item.app_name || '-'}</td>
+                        <td><span class="status-badge ${statusClass}">${item.status || '-'}</span></td>
+                        <td>${time}</td>
+                    </tr>
+                `);
+            });
+        }
+    </script>
 </body>
 </html>

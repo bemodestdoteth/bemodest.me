@@ -1,11 +1,13 @@
 import path from 'path';
 import fs from 'node:fs/promises';
-import { MongoDBClient } from '../mongoDBClient.js';
+import { MongoDBClient } from '@bemodest/database';
+import { ObjectId } from 'mongodb';
 import logger from '../config/logger.js';
 import {
     COLLECTION_ADDRS,
     COLLECTION_CHAINS,
-    COLLECTION_ENTITES
+    COLLECTION_ENTITES,
+    IMAGE_SIZE_LIMIT_BYTES
 } from '../config/env.js';
 import {
     ChainGetSchema,
@@ -17,11 +19,12 @@ import {
     LabelInsertSchema,
     LabelDeleteSchema,
     LabelInsertBulkSchema,
+    LabelUpdateSchema,
     ChainInsertSchema,
     ChainUpdateSchema,
     ChainDeleteSchema
-} from '../schemas.js';
-import { enrichLabelsWithEntityImages, getChainsWithCounts } from '../utils/helpers.js';
+} from '@bemodest/database';
+import { enrichLabelsWithEntityImages, getChainsWithCounts, compileChainRegexes } from '../utils/helpers.js';
 import { getIO } from './state.js';
 
 export async function handleChainGet(socket, payload) {
@@ -64,18 +67,28 @@ export async function handleChainInsert(socket, payload) {
 
         const chain = validated.body;
 
-        // Find max numeric _id for incremental ID
-        const count = await dbClient.readMany(COLLECTION_CHAINS, {}, { projection: { _id: 1 } });
-        let newId = 0;
-        if (count.length > 0) {
-            const maxId = count.reduce((max, doc) => {
-                const id = parseInt(doc._id);
-                return !isNaN(id) && id > max ? id : max;
-            }, -1);
-            newId = maxId + 1;
+        if (chain.caip2) {
+            const caipParts = chain.caip2.split(':');
+            if (caipParts[0] === 'eip155' && caipParts[1]) {
+                try {
+                    const response = await fetch('https://chainid.network/chains.json');
+                    if (!response.ok) throw new Error('Failed to fetch EVM registry');
+                    const chainsList = await response.json();
+                    const chainIdNum = parseInt(caipParts[1], 10);
+                    const isValidEVM = chainsList.some(c => c.chainId === chainIdNum);
+                    if (!isValidEVM) {
+                        await dbClient.close();
+                        socket.emit('failure', {
+                            success: false,
+                            error: { code: 'VALIDATION_ERROR', message: `EVM Chain ID ${chainIdNum} is not registered on chainid.network.` }
+                        });
+                        return;
+                    }
+                } catch (fetchErr) {
+                    logger.warn(`Could not verify EVM chain against registry: ${fetchErr.message}`);
+                }
+            }
         }
-
-        chain._id = newId;
 
         await dbClient.createOne(COLLECTION_CHAINS, chain);
 
@@ -124,8 +137,8 @@ export async function handleChainUpdate(socket, payload) {
 
         const { _id, ...updateData } = validated.body;
 
-        // Parse _id as number if possible (as stored in handleChainInsert)
-        const targetId = isNaN(Number(_id)) ? _id : Number(_id);
+        // Use ObjectId if valid, else fallback
+        const targetId = ObjectId.isValid(_id) ? new ObjectId(_id) : (isNaN(Number(_id)) ? _id : Number(_id));
 
         await dbClient.updateOne(COLLECTION_CHAINS, { _id: targetId }, { $set: updateData });
 
@@ -166,14 +179,27 @@ export async function handleChainDelete(socket, payload) {
         await dbClient.connect();
 
         // Check if chain has labels before deletion
-        const chainToDelete = await dbClient.readMany(COLLECTION_CHAINS, { name: validated.body.name }, { projection: { chain: 1, code: 1 } });
+        const chainToDelete = await dbClient.readMany(COLLECTION_CHAINS, { name: validated.body.name }, { projection: { caip2: 1 } });
         if (chainToDelete.length === 0) {
             await dbClient.close();
             throw new Error('Chain not found');
         }
 
-        const chainCode = chainToDelete[0].chain || chainToDelete[0].code;
-        const labelCount = await dbClient.count(COLLECTION_ADDRS, { chain: chainCode });
+        const caip2Id = chainToDelete[0].caip2;
+
+        if (caip2Id && caip2Id.startsWith('cosmos:')) {
+            await dbClient.close();
+            socket.emit('failure', {
+                success: false,
+                error: {
+                    code: 'DELETION_BLOCKED',
+                    message: "Cosmos chains cannot be deleted. Please update the chain to set status: 'deprecated' and provide a supersededBy CAIP-2 ID."
+                }
+            });
+            return;
+        }
+
+        const labelCount = await dbClient.count(COLLECTION_ADDRS, { chains: caip2Id });
 
         if (labelCount > 0) {
             await dbClient.close();
@@ -260,7 +286,7 @@ export async function handleEntityInsert(socket, payload) {
         await dbClient.connect();
 
         const entries = Object.entries(validated.body);
-        const IMAGE_SIZE_LIMIT = 1048576;
+        const IMAGE_SIZE_LIMIT = IMAGE_SIZE_LIMIT_BYTES;
 
         for (const [name, data] of entries) {
             const entity = {
@@ -395,7 +421,7 @@ export async function handleEntityUpdate(socket, payload) {
             tracking
         };
 
-        const IMAGE_SIZE_LIMIT = 1048576;
+        const IMAGE_SIZE_LIMIT = IMAGE_SIZE_LIMIT_BYTES;
         if (image) {
             if (image.length > IMAGE_SIZE_LIMIT * 1.37) {
                 throw new Error(`Image size for ${name} exceeds 1MB limit`);
@@ -502,6 +528,51 @@ export async function handleLabelInsert(socket, payload) {
 
         const dbClient = new MongoDBClient();
         await dbClient.connect();
+
+        // Gather all unique chains involved (primary chains + alias chains)
+        const allChains = new Set([...validated.body.chains]);
+        if (validated.body.aliases) {
+            validated.body.aliases.forEach(a => allChains.add(a.chain));
+        }
+
+        const chainDocs = await dbClient.readMany(COLLECTION_CHAINS, {
+            caip2: { $in: Array.from(allChains) }
+        });
+
+        // Validate primary chains exist
+        const primaryChainsExist = validated.body.chains.every(c => chainDocs.some(cd => cd.caip2 === c));
+        if (!primaryChainsExist) {
+            await dbClient.close();
+            socket.emit('failure', { success: false, error: { code: 'INVALID_CHAIN', message: 'One or more primary chain codes are invalid.' } });
+            return;
+        }
+
+        const { chainRegexMap, regexFingerprintMap } = compileChainRegexes(chainDocs);
+
+        // Alias validation: check if alias chain exists and validate alias name against regex
+        if (validated.body.aliases) {
+            for (const alias of validated.body.aliases) {
+                if (!chainRegexMap[alias.chain]) {
+                    await dbClient.close();
+                    socket.emit('failure', { success: false, error: { code: 'INVALID_ALIAS_CHAIN', message: `Chain '${alias.chain}' for alias '${alias.name}' not found or has no regex.` } });
+                    return;
+                }
+                const isValidAlias = chainRegexMap[alias.chain].some(regex => regex.test(alias.name));
+                if (!isValidAlias) {
+                    await dbClient.close();
+                    socket.emit('failure', { success: false, error: { code: 'INVALID_ALIAS_FORMAT', message: `Alias '${alias.name}' does not match the required address format for ${alias.chain}.` } });
+                    return;
+                }
+            }
+        }
+
+        const primaryFingerprints = validated.body.chains.map(c => regexFingerprintMap[c]);
+        if (!primaryFingerprints.every(fp => fp === primaryFingerprints[0])) {
+            await dbClient.close();
+            socket.emit('failure', { success: false, error: { code: 'INCOMPATIBLE_CHAINS', message: 'All selected chains must share the same address format (regex). You cannot combine EVM chains with Solana, for example.' } });
+            return;
+        }
+
         await dbClient.createOne(COLLECTION_ADDRS, validated.body);
         const result = await dbClient.readMany(COLLECTION_ADDRS, {}, { projection: { _id: 0 } });
         await enrichLabelsWithEntityImages(result, dbClient);
@@ -526,6 +597,167 @@ export async function handleLabelInsert(socket, payload) {
             error: {
                 code: err.name === 'ZodError' ? 'VALIDATION_ERROR' : 'INSERT_ERROR',
                 message: err.message || 'Failed to insert new label'
+            }
+        });
+    }
+}
+
+/**
+ * Handle labelUpdate event - updates existing label
+ * @param {object} socket - Socket.IO socket instance
+ * @param {object} payload - Update request payload
+ * @returns {Promise<void>}
+ */
+export async function handleLabelUpdate(socket, payload) {
+    try {
+        logger.info(`[Socket.IO] handleLabelUpdate entry - payload: ${JSON.stringify(payload)}`);
+        
+        let validated;
+        try {
+            validated = LabelUpdateSchema.parse(payload);
+            logger.info(`[Socket.IO] Payload validated successfully for ${validated.body.originalAddr}`);
+        } catch (zodErr) {
+            logger.error(`[Socket.IO] Validation failed for labelUpdate: ${JSON.stringify(zodErr.errors)}`);
+            socket.emit('failure', {
+                success: false,
+                error: { code: 'VALIDATION_ERROR', message: zodErr.errors.map(e => e.message).join(', ') }
+            });
+            return;
+        }
+
+        const dbClient = new MongoDBClient();
+        await dbClient.connect();
+        logger.info(`[Socket.IO] DB connected for update to ${validated.body.originalAddr}`);
+
+        const { originalAddr, ...updateData } = validated.body;
+
+        // Verify label exists
+        const existingLabel = await dbClient.readMany(COLLECTION_ADDRS, { addr: originalAddr }, { projection: { _id: 1 } });
+        if (existingLabel.length === 0) {
+            logger.warn(`[Socket.IO] Label not found for update: ${originalAddr}`);
+            await dbClient.close();
+            socket.emit('failure', {
+                success: false,
+                error: { code: 'NOT_FOUND', message: `Label for address ${originalAddr} not found.` }
+            });
+            return;
+        }
+
+        // If renaming address, check if new address exists
+        if (originalAddr !== updateData.addr) {
+            const conflict = await dbClient.readMany(COLLECTION_ADDRS, { addr: updateData.addr }, { projection: { _id: 1 } });
+            if (conflict.length > 0) {
+                logger.warn(`[Socket.IO] Label update conflict: New address ${updateData.addr} already exists`);
+                await dbClient.close();
+                socket.emit('failure', {
+                    success: false,
+                    error: { code: 'CONFLICT', message: `Label for address "${updateData.addr}" already exists` }
+                });
+                return;
+            }
+        }
+
+        // Gather all unique chains involved (primary chains + alias chains)
+        const allChains = new Set([...updateData.chains]);
+        if (updateData.aliases) {
+            updateData.aliases.forEach(a => allChains.add(a.chain));
+        }
+
+        const chainDocs = await dbClient.readMany(COLLECTION_CHAINS, {
+            caip2: { $in: Array.from(allChains) }
+        });
+
+        // Validate primary chains exist
+        const primaryChainsExist = updateData.chains.every(c => chainDocs.some(cd => cd.caip2 === c));
+        if (!primaryChainsExist) {
+            await dbClient.close();
+            socket.emit('failure', { success: false, error: { code: 'INVALID_CHAIN', message: 'One or more primary chain codes are invalid.' } });
+            return;
+        }
+
+        const { chainRegexMap, regexFingerprintMap } = compileChainRegexes(chainDocs);
+
+        // Alias validation: check if alias chain exists and validate alias name against regex
+        if (updateData.aliases) {
+            for (const alias of updateData.aliases) {
+                if (!chainRegexMap[alias.chain]) {
+                    await dbClient.close();
+                    socket.emit('failure', { success: false, error: { code: 'INVALID_ALIAS_CHAIN', message: `Chain '${alias.chain}' for alias '${alias.name}' not found or has no regex.` } });
+                    return;
+                }
+                const isValidAlias = chainRegexMap[alias.chain].some(regex => regex.test(alias.name));
+                if (!isValidAlias) {
+                    await dbClient.close();
+                    socket.emit('failure', { success: false, error: { code: 'INVALID_ALIAS_FORMAT', message: `Alias '${alias.name}' does not match the required address format for ${alias.chain}.` } });
+                    return;
+                }
+            }
+        }
+
+        // Validate that the provided address is valid for EVERY selected chain
+        const invalidChains = updateData.chains.filter(c => {
+            const patterns = chainRegexMap[c];
+            if (!patterns) return true;
+            return !patterns.some(re => {
+                // Reset regex state for global/sticky regexes
+                re.lastIndex = 0;
+                return re.test(updateData.addr);
+            });
+        });
+        
+        if (invalidChains.length > 0) {
+            logger.warn(`[Socket.IO] Incompatible chains for update: ${updateData.chains.join(', ')} - Address ${updateData.addr} is invalid for: ${invalidChains.join(', ')}`);
+            await dbClient.close();
+            socket.emit('failure', { 
+                success: false, 
+                error: { 
+                    code: 'INCOMPATIBLE_CHAINS', 
+                    message: `The address "${updateData.addr}" is not valid for the following selected chains: ${invalidChains.join(', ')}. Please ensure all selected chains share the same address format.` 
+                } 
+            });
+            return;
+        }
+        
+        logger.info(`[Socket.IO] Chains compatible (address validated for all ${updateData.chains.length} chains)`);
+
+        const updateResult = await dbClient.updateOne(COLLECTION_ADDRS, { addr: originalAddr }, { $set: updateData });
+
+        if (updateResult.matchedCount === 0) {
+            logger.error(`[Socket.IO] labelUpdate failed: No document matched for addr ${originalAddr}`);
+            await dbClient.close();
+            socket.emit('failure', {
+                success: false,
+                error: { code: 'UPDATE_FAILED', message: 'Failed to update label: Document not found during update operation.' }
+            });
+            return;
+        }
+
+        logger.info(`[Socket.IO] successfully updated label for ${originalAddr} (modified: ${updateResult.modifiedCount})`);
+
+        const result = await dbClient.readMany(COLLECTION_ADDRS, {}, { projection: { _id: 0 } });
+        await enrichLabelsWithEntityImages(result, dbClient);
+        await dbClient.close();
+
+        const io = getIO();
+        io.emit('labelUpdate', {
+            success: true,
+            data: result,
+            timestamp: Date.now()
+        });
+
+        socket.emit('success', {
+            success: true,
+            data: `Successfully updated label: ${updateData.addr}`,
+            timestamp: Date.now()
+        });
+
+    } catch (err) {
+        logger.error('[Socket.IO] labelUpdate Error:', err);
+        socket.emit('failure', {
+            success: false,
+            error: {
+                code: err.name === 'ZodError' ? 'VALIDATION_ERROR' : 'UPDATE_ERROR',
+                message: err.message || 'Failed to update label'
             }
         });
     }
@@ -616,12 +848,13 @@ export async function handleWalletsGet(socket) {
         const labelledAddresses = {};
         result.forEach(item => {
             labelledAddresses[item.addr] = {
-                chain: item.chain,
+                chains: item.chains ?? [],
                 entity: item.entity,
                 entityImage: item.entityImage,
                 comment: item.comment,
                 label: item.label,
-                tracking: item.tracking
+                tracking: item.tracking,
+                aliases: item.aliases ?? []
             };
         });
 
@@ -666,41 +899,10 @@ export async function handleLabelInsertBulk(socket, payload) {
         await dbClient.connect();
 
         const chains = await dbClient.readMany(COLLECTION_CHAINS, {}, {
-            projection: { chain: 1, addrRegexPatterns: 1, addrCaseSensitive: 1, _id: 0 }
+            projection: { caip2: 1, addrRegexPatterns: 1, addrCaseSensitive: 1, _id: 0 }
         });
-        const chainRegexMap = {};
-        chains.forEach(chainDoc => {
-            if (chainDoc.chain && chainDoc.addrRegexPatterns && chainDoc.addrRegexPatterns.length > 0) {
-                const baseFlags = chainDoc.addrCaseSensitive === false ? 'i' : '';
-                chainRegexMap[chainDoc.chain] = chainDoc.addrRegexPatterns.map(patternStr => {
-                    let finalPattern = patternStr;
-                    let finalFlags = baseFlags;
 
-                    if (patternStr.startsWith('/') && patternStr.lastIndexOf('/') > 0) {
-                        const lastSlashIndex = patternStr.lastIndexOf('/');
-                        finalPattern = patternStr.substring(1, lastSlashIndex);
-                        const patternFlags = patternStr.substring(lastSlashIndex + 1);
-
-                        const mergedFlags = new Set([...finalFlags, ...patternFlags]);
-                        mergedFlags.delete('g');
-                        mergedFlags.delete('y');
-                        finalFlags = Array.from(mergedFlags).join('');
-                    } else {
-                        const mergedFlags = new Set([...finalFlags]);
-                        mergedFlags.delete('g');
-                        mergedFlags.delete('y');
-                        finalFlags = Array.from(mergedFlags).join('');
-                    }
-
-                    try {
-                        return new RegExp(finalPattern, finalFlags);
-                    } catch (e) {
-                        logger.error(`Invalid regex pattern for ${chainDoc.chain}: ${patternStr}`);
-                        return null;
-                    }
-                }).filter(r => r !== null);
-            }
-        });
+        const { chainRegexMap, regexFingerprintMap } = compileChainRegexes(chains);
 
         const labels = validated.body;
         const results = [];
@@ -710,24 +912,65 @@ export async function handleLabelInsertBulk(socket, payload) {
         for (let i = 0; i < labels.length; i++) {
             const label = labels[i];
             try {
-                const regexArray = chainRegexMap[label.chain];
-                if (!regexArray || regexArray.length === 0) {
+                // Validate all chain codes in label.chains exist
+                const missingChain = label.chains.find(code => !chainRegexMap[code]);
+                if (missingChain) {
                     results.push({
                         index: i,
                         success: false,
                         addr: label.addr,
-                        error: `Chain ${label.chain} not found or has no address patterns`
+                        error: `Chain '${missingChain}' not found or has no address patterns`
                     });
                     continue;
                 }
 
-                const isValidAddress = regexArray.some(regex => regex.test(label.addr));
+                // Validate all chains share the same addrRegexPatterns
+                const fingerprints = label.chains.map(code => regexFingerprintMap[code]);
+                if (!fingerprints.every(fp => fp === fingerprints[0])) {
+                    results.push({
+                        index: i,
+                        success: false,
+                        addr: label.addr,
+                        error: 'All chains in a label must share the same address format (regex)'
+                    });
+                    continue;
+                }
+
+                // Validate address against first chain's regex (all share same patterns)
+                const primaryRegexArray = chainRegexMap[label.chains[0]];
+                const isValidAddress = primaryRegexArray.some(regex => regex.test(label.addr));
                 if (!isValidAddress) {
                     results.push({
                         index: i,
                         success: false,
                         addr: label.addr,
-                        error: `Invalid address format for chain ${label.chain}`
+                        error: `Invalid address format for chain(s) ${label.chains.join(', ')}`
+                    });
+                    continue;
+                }
+
+                // Validate aliases (if any)
+                let aliasError = null;
+                if (label.aliases) {
+                    for (const alias of label.aliases) {
+                        if (!chainRegexMap[alias.chain]) {
+                            aliasError = `Chain '${alias.chain}' for alias '${alias.name}' not found or has no regex`;
+                            break;
+                        }
+                        const isValidAlias = chainRegexMap[alias.chain].some(regex => regex.test(alias.name));
+                        if (!isValidAlias) {
+                            aliasError = `Alias '${alias.name}' does not match the required address format for ${alias.chain}`;
+                            break;
+                        }
+                    }
+                }
+
+                if (aliasError) {
+                    results.push({
+                        index: i,
+                        success: false,
+                        addr: label.addr,
+                        error: aliasError
                     });
                     continue;
                 }

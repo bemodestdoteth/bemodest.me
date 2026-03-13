@@ -78,6 +78,14 @@ export class ChainManager {
     getChainByName(name: string): Chains | undefined {
         return this.chainService.getChainByName(name);
     }
+
+    /**
+     * Checks if ChainManager has been initialized
+     * @returns {boolean} True if initialized, false otherwise
+     */
+    isInitialized(): boolean {
+        return this.initialized;
+    }
 }
 
 declare global {

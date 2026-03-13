@@ -774,6 +774,7 @@ export class Entities {
 
                 const response = await this.updateDataToServer(body);
                 if (response) {
+                    await chrome.storage.local.remove('extensionFormDraft');
                     this.resetForm();
                     this.updateStatus('Sending update request...', 'pending');
                 }
@@ -803,6 +804,7 @@ export class Entities {
 
                 const response = await this.addDataToServer(body);
                 if (response) {
+                    await chrome.storage.local.remove('extensionFormDraft');
                     nameInput.value = '';
                     fileInput.value = '';
                     hiddenInput.value = '';

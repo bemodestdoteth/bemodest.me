@@ -1,20 +1,31 @@
 import { ChainManager } from '../services/chains/chain-manager';
+import { BEGINNING_AND_END_CHARS_IN_ADDR_TO_SHOW } from '../shared/constants';
 
 const EXT_PREFIX = 'ext-etheraddresslookup';
 const DOM_LABELLED_ADDRESSES_KEY = "labelledAddresses";
 const DOM_ENTITY_ADDRESSES_KEY = "entities";
 
 export class EtherAddressLookup {
+    private objWeb3: any;
+    private scope: any;
+    private strRpcDetails: string;
+    private mutationTimeout: any;
+    private blPerformAddressLookups: boolean;
+    private intSettingsCount: number;
+    private intSettingsTotalCount: number;
+
     // ===================================================
     // 1. Initialisation
     // ===================================================
-    constructor(objWeb3, scope = chrome.storage.local) {
+    constructor(objWeb3: any, scope: any = chrome.storage.local) {
         this.objWeb3 = objWeb3;
         this.scope = scope;
-
         this.strRpcDetails = "";
+        this.mutationTimeout = null;
+        this.blPerformAddressLookups = true;
+        this.intSettingsCount = 0;
+        this.intSettingsTotalCount = 2;
 
-        this.setDefaultExtensionSettings();
         this.init();
     }
 
@@ -24,9 +35,9 @@ export class EtherAddressLookup {
      * @param {String | Array} key
      * @return {Promise}
      */
-    get(key) {
+    get(key: string | string[]): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.scope.get(key, (items) => {
+            this.scope.get(key, (items: any) => {
                 if (chrome.runtime.lastError) {
                     return reject(chrome.runtime.lastError);
                 }
@@ -35,8 +46,8 @@ export class EtherAddressLookup {
         });
     }
 
-    async retrieve() {
-        const labels = await this.get(DOM_LABELLED_ADDRESSES_KEY);
+    async retrieve(): Promise<any[]> {
+        const labels = await this.get(DOM_LABELLED_ADDRESSES_KEY) as Record<string, any>;
         if (labels[DOM_LABELLED_ADDRESSES_KEY] === undefined) {
             return [];
         } else {
@@ -57,13 +68,39 @@ export class EtherAddressLookup {
      * @name init
      * @desc Gets extension settings and applies DOM manipulation
      */
-    init() {
+    init(): void {
         //Update the DOM once all settings have been received...
-        setTimeout(function () {
+        setTimeout(() => {
             // Needs to happen after user settings have been collected
             // and in the context of init();
             this.manipulateDOM();
-        }.bind(this), 10);
+            this.setupMutationObserver();
+        }, 10);
+    }
+
+    setupMutationObserver() {
+        const observer = new MutationObserver((mutations) => {
+            let shouldRun = false;
+            for (const mutation of mutations) {
+                if (mutation.addedNodes.length > 0) {
+                    shouldRun = true;
+                    break;
+                }
+            }
+            if (shouldRun) {
+                if (this.mutationTimeout) {
+                    clearTimeout(this.mutationTimeout);
+                }
+                this.mutationTimeout = setTimeout(() => {
+                    this.convertAddressToLink();
+                }, 1000); // 1s debounce to prevent performance issues
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
     }
 
     manipulateDOM() {
@@ -120,7 +157,9 @@ export class EtherAddressLookup {
             for (let i = 0; i < iframe.length; i++) {
                 //Get the scanned nodes
                 for (let j = 0; j < arrScannedTags.length; j++) {
-                    const objNodes = iframe[i].contentWindow.document.getElementsByTagName(arrScannedTags[j]);
+                    const contentDoc = iframe[i].contentWindow?.document;
+                    if (!contentDoc) continue;
+                    const objNodes = contentDoc.getElementsByTagName(arrScannedTags[j]);
                     //Loop through the scanned content
                     for (let x = 0; x < objNodes.length; x++) {
                         // if( this.hasIgnoreAttributes(objNodes[x]) ){ continue; }
@@ -133,10 +172,9 @@ export class EtherAddressLookup {
         // Get the scanned nodes
         for (let i = 0; i < arrScannedTags.length; i++) {
             const objNodes = document.getElementsByTagName(arrScannedTags[i]);
-            // console.log(arrScannedTags[i], "||", objNodes.length);
             //Loop through the scanned content
             for (let x = 0; x < objNodes.length; x++) {
-                // if( this.hasIgnoreAttributes(objNodes[x]) ){ continue; }
+                if ((objNodes[x] as HTMLElement).getAttribute('data-ext-processed') === 'true') { continue; }
                 this.convertAddresses(objNodes[x], retrievedAddresses);
             }
         }
@@ -149,13 +187,13 @@ export class EtherAddressLookup {
      * @desc slot node contains regex replaced content; see generateReplacementContent()
      * @param {Node} objNode
      */
-    async convertAddresses(objNode, retrievedAddresses) {
+    async convertAddresses(objNode: any, retrievedAddresses: any[]): Promise<void> {
         // Some nodes have non-textNode children
         const nodeTypeExceptions = [
             "https://tronscan.org/",
-        ]
-        let nodeType;
-        if (window.location.href.includes(nodeTypeExceptions)) {
+        ];
+        let nodeType: number;
+        if (window.location.href.includes(nodeTypeExceptions[0])) {
             nodeType = 1;
         } else {
             nodeType = 3;
@@ -173,45 +211,81 @@ export class EtherAddressLookup {
                 const label = await this.isLabelMatched(childContent, retrievedAddresses);
                 // Only start replacing stuff if the we get a RegEx match.
                 if (label !== undefined) {
-                    // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot
                     const replacement = document.createElement('div');
                     replacement.setAttribute('class', 'ext-etheraddresslookup-temporary');
+                    replacement.setAttribute('style', 'display: inline-block;');
                     replacement.innerHTML = this.generateReplacementContent(label);
                     objNode.replaceChild(replacement, child);
+                    objNode.setAttribute('data-ext-processed', 'true');
                 }
             }
         }
     }
 
-    async isLabelMatched(childContent, retrievedAddresses) {
-        let childContentFormatted = childContent.replace(/\*/, "").toLowerCase();
+    async isLabelMatched(childContent: string, retrievedAddresses: any[]): Promise<any> {
+        const text = childContent.trim().toLowerCase();
+        // Handle various abbreviations: 0x123...abcd, 0x123…abcd, etc.
+        const segments = text.split(/\.\.\.|…/);
 
-        let sliceAtBeginning = 6;
-        let sliceAtEnd = -6;
+        for (const entry of retrievedAddresses) {
+            const addr = entry.address.toLowerCase();
 
-        for (let i = 0; i < retrievedAddresses.length; i++) {
-            if ((retrievedAddresses[i].address.slice(0, sliceAtBeginning).toLowerCase() === childContentFormatted.slice(0, sliceAtBeginning)) && (retrievedAddresses[i].address.slice(sliceAtEnd).toLowerCase() === childContentFormatted.slice(sliceAtEnd))) {
-                const chainCode = retrievedAddresses[i].chain;
-                const chainManager = ChainManager.getInstance();
-                const chain = chainManager.getChainByCode(chainCode);
-
-                if (!chain) {
-                    const availableChains = chainManager.getAllChains().map(c => c.chain).join(', ');
-                    console.warn(`Chain not found: ${chainCode}. Available chains: ${availableChains}`);
-                    continue;
+            // 1. Direct hex address match
+            let matched = false;
+            if (segments.length === 1) {
+                if (addr === text) matched = true;
+            } else if (segments.length >= 2) {
+                const start = segments[0];
+                const end = segments[segments.length - 1];
+                if (start.length >= 2 && addr.startsWith(start) && addr.endsWith(end)) {
+                    matched = true;
                 }
-
-                return {
-                    address: retrievedAddresses[i].address,
-                    chain: chain,
-                    comment: retrievedAddresses[i].comment,
-                    entity: retrievedAddresses[i].entity,
-                    entityImage: retrievedAddresses[i].entityImage,
-                    label: retrievedAddresses[i].label,
-                    tracking: retrievedAddresses[i].tracking,
-                };
             }
+
+            // 2. Alias match (only for non-abbreviated text)
+            if (!matched && segments.length === 1) {
+                const hasAlias = entry.aliases?.some((a: any) => a.name.toLowerCase() === text);
+                if (hasAlias) matched = true;
+            }
+
+            if (matched) return await this.buildLabel(entry);
         }
+        return undefined;
+    }
+
+    private async buildLabel(entry: any): Promise<any> {
+        const chainManager = ChainManager.getInstance();
+
+        // Ensure ChainManager is initialized before accessing chains
+        if (!chainManager.isInitialized()) {
+            await chainManager.initialize();
+        }
+
+        // Support both legacy `chain` (string) and new `chains` (string[])
+        const chainCodes: string[] = Array.isArray(entry.chains)
+            ? entry.chains
+            : (entry.chain ? [entry.chain] : []);
+
+        const chains = chainCodes
+            .map((code: string) => chainManager.getChainByCode(code))
+            .filter(Boolean);
+
+        if (chains.length === 0) {
+            const availableChains = chainManager.getAllChains().map((c: any) => c.chain).join(', ');
+            console.warn(`No valid chains found for: ${chainCodes.join(', ')}. Available: ${availableChains}`);
+            return undefined;
+        }
+
+        return {
+            address: entry.address,
+            chains,
+            primaryChain: chains[0],
+            comment: entry.comment,
+            entity: entry.entity,
+            entityImage: entry.entityImage,
+            label: entry.label,
+            tracking: entry.tracking,
+        };
     }
 
     /**
@@ -220,14 +294,41 @@ export class EtherAddressLookup {
      * @param {string} content
      * @returns {string}
      */
-    generateReplacementContent(label) {
-        const imgTag = label.entityImage === "" ? "" : `<img class="ext-etheraddresslookup-label-img" src="${label.entityImage}" style="width:1.2em;height:auto;">`;
+    generateReplacementContent(label: any): string {
+        const imgTag = label.entityImage === '' ? '' :
+            `<img class="ext-etheraddresslookup-label-img" src="${label.entityImage}" style="width:1.2em;height:auto;">`;
+
+        // Build gradient from up to 4 chain colors
+        const gradientColors = label.chains.slice(0, 4).map((c: any) => c.bgColor);
+        const gradient = gradientColors.length === 1
+            ? gradientColors[0]
+            : `linear-gradient(var(--chain-angle,135deg), ${gradientColors.join(', ')})`;
+
+        // One explorer link per chain
+        const explorerLinks = label.chains.map((c: any) =>
+            `<a href="${c.blockExplorerPrefix}${label.address}"
+                target="_blank"
+                style="display:block;color:${c.fontColor};font-size:10px;padding:1px 0;
+                       text-decoration:none;white-space:nowrap;">
+                ↳ View on ${c.name}
+             </a>`
+        ).join('');
+
+
         return imgTag +
-            `<a title="See this address on the blockchain explorer" ` +
-            `href="${label.chain.blockExplorerPrefix}${label.address}${label.chain.blockExplorerPostfix}" ` +
-            `class="ext-etheraddresslookup-link" ` +
-            `style="padding: 2px; background: ${label.chain.bgColor}; color: ${label.chain.fontColor}!important; border: 1px solid; border-radius: 0.25rem;"` +
-            `target="_blank">${label.label}</a>`;
+            `<span class="ext-etheraddresslookup-link ext-multichain-label"
+                   title="${label.label}"
+                   style="padding:2px;background:${gradient};color:${label.primaryChain.fontColor}!important;
+                          border:1px solid;border-radius:0.25rem;position:relative;
+                          --chain-angle:135deg;cursor:pointer;display:inline-block;">
+                ${label.label}
+                <span class="ext-chain-tooltip"
+                      style="display:none;position:absolute;top:100%;left:0;background:#fff;
+                             border:1px solid #ccc;border-radius:4px;padding:4px 8px;z-index:9999;
+                             white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.12);">
+                    ${explorerLinks}
+                </span>
+            </span>`;
     }
 
     /**
@@ -236,7 +337,7 @@ export class EtherAddressLookup {
      * @param {Element} node
      * @returns {boolean}
      */
-    hasIgnoreAttributes(node) {
+    hasIgnoreAttributes(node: Element): boolean {
         var ignoreAttributes = {
             "class": ["ng-binding"]
         };
@@ -251,8 +352,10 @@ export class EtherAddressLookup {
 
                     // This node's value for the attribute we are checking
                     var nodeAttributeValue = node.getAttribute(attributeName);
+                    if (!nodeAttributeValue) continue;
+
                     // The values we want to ignore for this attribute
-                    var badAttributeValueList = ignoreAttributes[attributeName];
+                    var badAttributeValueList = (ignoreAttributes as any)[attributeName];
 
                     // Loop through the attribute values we want to ignore
                     for (var i = 0; i < badAttributeValueList.length; i++) {

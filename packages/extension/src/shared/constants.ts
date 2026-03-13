@@ -1,5 +1,5 @@
 // Display constants
-export const BEGINNING_AND_END_CHARS_IN_ADDR_TO_SHOW = 5;
+export const BEGINNING_AND_END_CHARS_IN_ADDR_TO_SHOW = 4;
 
 // Form selectors
 export const FORM_ADDRESS_SELECTOR = '#label-address';
@@ -18,9 +18,8 @@ export const LABELLED_ADDRESSES_KEY = "labelledAddresses";
 export const ENTITY_ADDRESSES_KEY = "entities";
 
 // API endpoints (per S-3001 should be from env, but extensions use manifest host_permissions)
-export const API_BASE_URL = 'http://dev.bemodest.me:25833';
-export const API_LABELS_ENDPOINT = `${API_BASE_URL}/api/labels`;
-export const API_LABELS_DELETE_ENDPOINT = (address: string) => `${API_BASE_URL}/api/labels/${address}`;
+export const DEV_API_URL = 'http://dev.bemodest.me:25833';
+export const PROD_API_URL = 'https://api.bemodest.me';
 
 // MongoDB collections
 export const COLLECTION_ADDRS = 'labelAddrs';
@@ -40,3 +39,10 @@ export const WS_EVENT_CHAIN_UPDATE = 'chainUpdate';
 export const WS_EVENT_SUCCESS = 'success';
 export const WS_EVENT_FAILURE = 'failure';
 export const WS_EVENT_GET_ERROR = 'get_error';
+export const WS_EVENT_STATUS_CHANGE = 'statusChange';
+
+// Connection Statuses
+export const WS_STATUS_CONNECTING = 'connecting';
+export const WS_STATUS_CONNECTED = 'connected';
+export const WS_STATUS_DISCONNECTED = 'disconnected';
+export const WS_STATUS_ERROR = 'error';

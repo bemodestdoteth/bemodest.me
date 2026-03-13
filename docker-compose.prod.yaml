@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  api:
+    image: bemodest-api:latest
+    pull_policy: never
+    container_name: bemodest-api
+    restart: always
+    ports:
+      - 32358:32358
+    env_file:
+      - apps/api/.env
+
+  sidecar:
+    image: bemodest-sidecar:latest
+    pull_policy: never
+    container_name: bemodest-sidecar
+    restart: always
+    ports:
+      - 32359:25834
+    env_file:
+      - apps/api/.env

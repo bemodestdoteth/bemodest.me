@@ -15,6 +15,13 @@
             style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
             Address Lookup</h4>
 
+        <div style="display: flex; justify-content: center; margin-bottom: 15px;">
+            <div id="ws-status-badge" class="status-badge disconnected">
+                <span class="status-dot"></span>
+                <span class="status-text">Disconnected</span>
+            </div>
+        </div>
+
         <div>
             <ul class="ext-etheraddresslookup-nav ext-etheraddresslookup-nav-tabs" id="ext-etheraddresslookup-tab"
                 role="tablist" style="margin-bottom: 1rem">
@@ -41,6 +48,18 @@
                 <!-- OPTIONS PANEL -->
                 <div class="ext-etheraddresslookup-tab-pane fade active show" id="ext-etheraddresslookup-options">
                     <div style="padding: 10px;">
+                        <h5>Connection Settings</h5>
+                        <form id="ext-connection-settings" style="margin-bottom: 20px;">
+                            <label style="margin-right: 15px;">
+                                <input type="radio" name="environment" value="dev"> Development
+                            </label>
+                            <label>
+                                <input type="radio" name="environment" value="prod"> Production
+                            </label>
+                            <div id="ext-connection-status" style="font-size: 11px; margin-top: 5px; min-height: 15px;">
+                            </div>
+                        </form>
+
                         <h5>Authentication</h5>
                         <p style="font-size: 12px; color: #666;">Connect to the API server to sync labels and entities.
                         </p>
@@ -102,6 +121,16 @@
                                 <input class="form-check-input" type="checkbox" name="label-track" id="label-track" />
                                 <label class="form-check-label" for="label-track">Track This Wallet</label>
                             </div>
+
+                            <!-- Alias sub-panel -->
+                            <div id="alias-panel" style="margin-bottom:8px; border: 1px dashed #ddd; padding: 8px; border-radius: 4px; background: #fafafa;">
+                                <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px;">Aliases (optional)</label>
+                                <div id="alias-rows">
+                                    <!-- Rows injected by JS: each row = { name input, chain select, remove button } -->
+                                </div>
+                                <button type="button" id="btn-add-alias" class="btn btn-sm btn-info" style="font-size:10px;margin-top:4px;">+ Add alias</button>
+                            </div>
+
                             <div class="form-control" name="label-chain" id="label-chain"></div>
                             <button class="btn btn-success btn-small" type="submit">Save</button>
                         </form>
@@ -115,7 +144,14 @@
                     </form>
                     <div>
                         <p><b>Current Labels: <span id="label-count">0</span></b></p>
-                        <div id="ext-etheraddresslookup-current-labels" style="max-height: 300px; overflow-y: auto;">
+                        <div style="position: relative; min-height: 100px;">
+                            <div id="labels-loading-overlay" class="loader-overlay">
+                                <div class="loader-spinner"></div>
+                                <span style="font-size: 11px; color: var(--foreground);">Loading labels...</span>
+                            </div>
+                            <div id="ext-etheraddresslookup-current-labels"
+                                style="max-height: 300px; overflow-y: auto;">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -186,16 +222,128 @@
                 <!-- CHAINS PANEL -->
                 <div class="ext-etheraddresslookup-tab-pane fade" id="ext-etheraddresslookup-chains">
                     <div id="ext-etheraddresslookup-new-chains">
-                        <p><b>New Chain:</b></p>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <p style="margin: 0;"><b><span id="chain-form-title">New Chain</span>:</b></p>
+                        </div>
                         <form id="form-add-chains">
                             <input class="form-control" type="text" id="chain-name"
                                 placeholder="Chain Name (e.g. Ethereum)" required />
-                            <input class="form-control" type="text" id="chain-code" placeholder="Code (e.g. ETH)"
-                                required pattern="[A-Z]+" title="Uppercase letters only" />
+
+                            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                                <select class="form-control" id="chain-namespace" style="flex: 1;">
+                                    <option value="eip155">eip155 (EVM)</option>
+                                    <option value="cosmos">cosmos</option>
+                                    <option value="solana">solana</option>
+                                    <option value="polkadot">polkadot</option>
+                                    <option value="bip122">bip122 (BTC)</option>
+                                    <option value="others">others</option>
+                                </select>
+                                <input class="form-control" type="text" id="chain-reference"
+                                    placeholder="Reference (e.g. 1)" style="flex: 2;" required />
+                            </div>
+                            <small id="reference-helper"
+                                style="display: block; font-size: 10px; color: #666; margin-top: -8px; margin-bottom: 10px;">Numeric
+                                Chain ID for EVM</small>
+
+                            <div style="margin-bottom: 10px;">
+                                <label for="chain-symbol"
+                                    style="font-size: 11px; display: block; margin-bottom: 2px;">Native Gas
+                                    Symbol</label>
+                                <input class="form-control" type="text" id="chain-symbol"
+                                    placeholder="Symbol (e.g. ETH)" title="Gas symbol for the chain" />
+                            </div>
+
+                            <!-- Dynamic Annotations Section -->
+                            <div
+                                style="margin: 10px 0; border: 1px solid #eee; padding: 10px; border-radius: 4px; background: #fafafa;">
+                                <label
+                                    style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 5px;">Dynamic
+                                    Annotations</label>
+
+                                <div id="annotations-list"
+                                    style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px;">
+                                    <!-- Populated by JS -->
+                                </div>
+
+                                <div style="display: flex; gap: 5px;">
+                                    <input class="form-control form-control-sm" type="text" id="annotation-key"
+                                        placeholder="Key (e.g. dune)" style="flex: 1; font-size: 11px;" />
+                                    <input class="form-control form-control-sm" type="text" id="annotation-value"
+                                        placeholder="Value" style="flex: 1; font-size: 11px;" />
+                                    <button type="button" id="btn-add-annotation" class="btn btn-sm btn-info"
+                                        style="padding: 0 10px;">+</button>
+                                </div>
+                                <small style="display: block; font-size: 9px; color: #888; margin-top: 4px;">Common
+                                    keys: coingecko, dune, kraken, chainlink</small>
+                            </div>
+
+                            <!-- Advanced Settings Section -->
+                            <details style="margin: 10px 0; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                                <summary style="font-size: 12px; font-weight: bold; cursor: pointer; outline: none;">
+                                    Advanced Settings</summary>
+                                <div style="margin-top: 10px;">
+                                    <div class="form-check" style="margin-bottom: 5px;">
+                                        <input class="form-check-input" type="checkbox" id="chain-is-testnet" />
+                                        <label class="form-check-label" for="chain-is-testnet">Is Testnet</label>
+                                    </div>
+
+                                    <div style="margin-bottom: 10px;">
+                                        <input class="form-control" type="number" step="0.01" id="chain-gas-price"
+                                            placeholder="Default Gas Price (Gwei)" />
+                                    </div>
+
+                                    <div style="margin-bottom: 10px;">
+                                        <input class="form-control" type="number" step="1" id="chain-block-time"
+                                            placeholder="Block Time in Seconds (Default: 30)" />
+                                    </div>
+
+                                    <div
+                                        style="margin: 10px 0; border: 1px dashed #eee; padding: 10px; border-radius: 4px;">
+                                        <label
+                                            style="font-size: 11px; font-weight: bold; display: block; margin-bottom: 5px;">HTTP
+                                            RPC Endpoints</label>
+                                        <div id="rpc-list"
+                                            style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px;">
+                                        </div>
+                                        <div style="display: flex; gap: 5px;">
+                                            <input class="form-control form-control-sm" type="text" id="rpc-value"
+                                                placeholder="HTTPS RPC URL" style="flex: 1; font-size: 11px;" />
+                                            <button type="button" id="btn-add-rpc" class="btn btn-sm btn-info"
+                                                style="padding: 0 10px;">+</button>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        style="margin: 10px 0; border: 1px dashed #eee; padding: 10px; border-radius: 4px;">
+                                        <label
+                                            style="font-size: 11px; font-weight: bold; display: block; margin-bottom: 5px;">WebSocket
+                                            RPC Endpoints</label>
+                                        <div id="ws-rpc-list"
+                                            style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px;">
+                                        </div>
+                                        <div style="display: flex; gap: 5px;">
+                                            <input class="form-control form-control-sm" type="text" id="ws-rpc-value"
+                                                placeholder="WSS RPC URL" style="flex: 1; font-size: 11px;" />
+                                            <button type="button" id="btn-add-ws-rpc" class="btn btn-sm btn-info"
+                                                style="padding: 0 10px;">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
                             <input class="form-control" type="text" id="chain-explorer-prefix"
                                 placeholder="Explorer Prefix (e.g. https://etherscan.io/address/)" required />
-                            <input class="form-control" type="text" id="chain-explorer-postfix"
-                                placeholder="Explorer Postfix (Optional)" />
+
+                            <div style="margin: 10px 0;">
+                                <select class="form-control" id="chain-status" style="margin-bottom: 5px;">
+                                    <option value="active">Active</option>
+                                    <option value="deprecated">Deprecated</option>
+                                </select>
+                                <div id="superseded-by-container" style="display: none;">
+                                    <input class="form-control" type="text" id="chain-superseded-by"
+                                        placeholder="Superseded By (CAIP-2 ID, required if deprecated)" />
+                                </div>
+                            </div>
 
                             <div style="margin: 10px 0; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
                                 <label style="font-size: 12px; font-weight: bold;">Appearance</label>
@@ -256,6 +404,21 @@
                                 <input class="form-check-input" type="checkbox" id="chain-case-sensitive" />
                                 <label class="form-check-label" for="chain-case-sensitive">Case Sensitive
                                     Addresses</label>
+                            </div>
+
+                            <div style="margin: 10px 0; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                                <label style="font-size: 12px; font-weight: bold;">Memo Settings</label>
+                                <div class="form-check" style="margin-top: 5px; margin-bottom: 10px;">
+                                    <input class="form-check-input" type="checkbox" id="chain-memo-required" />
+                                    <label class="form-check-label" for="chain-memo-required">Memo Required</label>
+                                </div>
+                                <div id="chain-memo-regex-container" style="display: none;">
+                                    <textarea class="form-control" id="chain-memo-regex" rows="3"
+                                        placeholder="Memo Regex Patterns (one per line)"
+                                        style="font-family: monospace; font-size: 11px; resize: vertical;"></textarea>
+                                    <button type="button" id="btn-convert-memo-regex" class="btn btn-sm btn-info"
+                                        style="margin-top: 5px; width: 100%;">Convert to Extraction Mode</button>
+                                </div>
                             </div>
 
                             <button class="btn btn-success btn-small" type="submit">Save Chain</button>

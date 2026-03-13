@@ -1,0 +1,73 @@
+{
+    "type": "object",
+    "properties": {
+        "_id": {
+            "type": "string"
+        },
+        "enabled": {
+            "type": "boolean"
+        },
+        "label": {
+            "type": "string"
+        },
+        "condition": {
+            "type": "string",
+            "enum": [
+                "spread_pct",
+                "price_above",
+                "price_below",
+                "change_pct_5m",
+                "volume_spike"
+            ]
+        },
+        "value": {
+            "type": "number"
+        },
+        "recovery_value": {
+            "type": "number"
+        },
+        "ticker": {
+            "type": "string"
+        },
+        "quote": {
+            "type": "string"
+        },
+        "exchanges": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "cooldown_secs": {
+            "type": "integer"
+        },
+        "webhook_url": {
+            "type": "string"
+        },
+        "webhook_dead": {
+            "type": "boolean"
+        },
+        "created_at": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "updated_at": {
+            "type": "string",
+            "format": "date-time"
+        }
+    },
+    "required": [
+        "_id",
+        "enabled",
+        "label",
+        "condition",
+        "value",
+        "recovery_value",
+        "ticker",
+        "quote",
+        "exchanges",
+        "cooldown_secs",
+        "webhook_url",
+        "webhook_dead"
+    ]
+}

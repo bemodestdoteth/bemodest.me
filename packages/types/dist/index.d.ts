@@ -1,3 +1,4 @@
+export * from './generated.js';
 import { z } from 'zod';
 /**
  * Label Zod schema for runtime validation
@@ -15,8 +16,8 @@ export declare const LabelSchema: z.ZodObject<{
     tracking: z.ZodDefault<z.ZodBoolean>;
     comment: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    addr: string;
     label: string;
+    addr: string;
     chain: string;
     tracking: boolean;
     code?: string | undefined;
@@ -24,8 +25,8 @@ export declare const LabelSchema: z.ZodObject<{
     entityImage?: string | undefined;
     comment?: string | undefined;
 }, {
-    addr: string;
     label: string;
+    addr: string;
     chain: string;
     code?: string | undefined;
     entity?: string | undefined;

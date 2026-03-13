@@ -1,0 +1,632 @@
+/* Constellation Light Theme - Matches Main App Styles */
+
+:root {
+    /* Main App Palette Adaptation */
+    --bg-void: #ffffff;
+    /* White background */
+    --bg-panel: #f8f9fa;
+    /* Light gray panel */
+    --bg-card: #ffffff;
+    /* White cards */
+    --text-bright: #333333;
+    /* Dark text */
+    --text-dim: #666666;
+    /* Medium gray text */
+
+    /* Semantic Colors (Material Design / App Standards) */
+    --neon-cyan: #2196F3;
+    /* Blue */
+    --neon-green: #4CAF50;
+    /* Green */
+    --neon-red: #F44336;
+    /* Red */
+    --neon-amber: #FF9800;
+    /* Orange */
+
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --hover-bg: rgba(33, 150, 243, 0.05);
+}
+
+/* Base Container */
+.tracking-view {
+    font-family: 'BeauFort', 'Segoe UI', sans-serif;
+    /* Use App Font */
+    background: var(--bg-void);
+    color: var(--text-bright);
+    min-height: calc(100vh - 80px);
+    /* Adjust for header */
+    position: relative;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-top: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    height: 800px;
+    /* Fixed height for the widget */
+    position: relative;
+}
+
+/* Left Rail - Trending List */
+.trending-rail {
+    background: var(--bg-panel);
+    border-right: 1px solid #e0e0e0;
+    padding: 0;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.rail-header {
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    background: #fff;
+}
+
+.rail-header h2 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--neon-cyan);
+    margin-bottom: 4px;
+}
+
+.rail-header p {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+.coin-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.coin-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.coin-item:hover {
+    background: var(--hover-bg);
+}
+
+.coin-item.pinned {
+    background: rgba(255, 152, 0, 0.05);
+    /* Subtle gold tint */
+    border-left-color: var(--neon-amber);
+    position: relative;
+}
+
+.coin-item.active {
+    background: #e3f2fd;
+    border-left-color: var(--neon-cyan);
+}
+
+.coin-item.pinned::after {
+    content: "★";
+    position: absolute;
+    right: 15px;
+    font-size: 0.85rem;
+    color: var(--neon-amber);
+    opacity: 0.7;
+}
+
+.coin-rank {
+    font-family: 'D2Coding', monospace;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    width: 20px;
+}
+
+.coin-info {
+    flex: 1;
+}
+
+.coin-symbol {
+    font-family: 'D2Coding', monospace;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #333;
+}
+
+.coin-name {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+}
+
+.coin-change {
+    font-family: 'D2Coding', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.coin-change.positive {
+    color: var(--neon-green);
+}
+
+.coin-change.negative {
+    color: var(--neon-red);
+}
+
+/* Main Constellation Area */
+.constellation-area {
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    background: #fff;
+    overflow-y: auto;
+    /* Enable vertical scrolling */
+    height: 100%;
+    /* Fill the grid cell height */
+}
+
+.area-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f5f5f5;
+}
+
+.selected-coin {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.selected-coin h1 {
+    font-family: 'D2Coding', monospace;
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0;
+    color: #333;
+}
+
+.selected-coin .badge {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: 'D2Coding', monospace;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.selected-coin .badge.positive {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+.selected-coin .badge.negative {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.view-toggle button {
+    padding: 8px 16px;
+    background: transparent;
+    border: none;
+    color: #666;
+    font-family: 'BeauFort', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+
+.view-toggle button.active {
+    background: #fff;
+    color: var(--neon-cyan);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Constellation Canvas */
+.constellation-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 400px;
+    background: radial-gradient(circle at center, #fafafa, #ffffff);
+    border: 1px solid #eee;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.constellation {
+    position: relative;
+    width: 600px;
+    height: 500px;
+}
+
+/* Center coin node */
+.center-node {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 110px;
+    height: 110px;
+    background: #fff;
+    border: 3px solid var(--neon-cyan);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 10;
+    box-shadow: 0 10px 20px rgba(33, 150, 243, 0.2);
+}
+
+.center-node .symbol {
+    font-family: 'D2Coding', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.center-node .label {
+    font-size: 0.7rem;
+    color: #888;
+    margin-top: 4px;
+    font-weight: 600;
+}
+
+/* Exchange nodes */
+.exchange-node {
+    position: absolute;
+    width: 95px;
+    height: 95px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 5;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.exchange-node::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+}
+
+.exchange-node:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.exchange-node:hover::before {
+    border-color: var(--node-color);
+}
+
+/* Specific styling for futures */
+.exchange-node.futures {
+    background: #fff8e1;
+    /* Warm amber tint */
+}
+
+/* Decentralized exchanges */
+.exchange-node.dex {
+    background: #e8f5e9;
+    /* Cyan-green tint */
+}
+
+/* Korean exchanges */
+.exchange-node.korean {
+    background: #fce4ec;
+    /* Soft pink tint */
+}
+
+.exchange-node .name {
+    font-family: 'D2Coding', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #333;
+}
+
+.exchange-node .price {
+    font-family: 'D2Coding', monospace;
+    font-size: 0.7rem;
+    color: #666;
+    margin-top: 4px;
+}
+
+.exchange-node .diff {
+    font-size: 0.85rem;
+    margin-top: 2px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.exchange-node .diff.positive {
+    background: #e8f5e9;
+    color: var(--neon-green);
+}
+
+.exchange-node .diff.negative {
+    background: #ffebee;
+    color: var(--neon-red);
+}
+
+.exchange-node .diff.neutral {
+    background: #f5f5f5;
+    color: #888;
+}
+
+/* Connection lines (SVG) */
+.connections {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+}
+
+.connection-line {
+    stroke-linecap: round;
+    transition: all 0.3s;
+    mix-blend-mode: multiply;
+    /* Better blending on light bg */
+}
+
+/* Stats panel */
+.stats-panel {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 0;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    border-left: 4px solid transparent;
+}
+
+.stat-card:nth-child(1) {
+    border-left-color: var(--neon-cyan);
+}
+
+.stat-card:nth-child(2) {
+    border-left-color: var(--neon-green);
+}
+
+.stat-card:nth-child(3) {
+    border-left-color: var(--neon-amber);
+}
+
+.stat-card:nth-child(4) {
+    border-left-color: #9e9e9e;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-family: 'D2Coding', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.stat-value.cyan {
+    color: var(--neon-cyan);
+}
+
+.stat-value.green {
+    color: var(--neon-green);
+}
+
+.stat-value.amber {
+    color: var(--neon-amber);
+}
+
+.stat-sub {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 4px;
+}
+
+/* Deep dive button */
+.deep-dive-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--neon-cyan);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-family: 'BeauFort', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0;
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgba(33, 150, 243, 0.3);
+}
+
+.deep-dive-btn:hover {
+    background: #1976D2;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
+}
+
+/* Volume timeline */
+.volume-timeline {
+    margin-top: 24px;
+    padding: 20px;
+    background: #fcfcfc;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.timeline-header h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.timeline-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 60px;
+}
+
+.timeline-bar {
+    flex: 1;
+    background: linear-gradient(to top, var(--neon-cyan), #e3f2fd);
+    border-radius: 2px 2px 0 0;
+    min-height: 4px;
+    transition: all 0.3s;
+    opacity: 0.8;
+}
+
+.timeline-bar:hover {
+    background: var(--neon-cyan);
+    opacity: 1;
+}
+
+/* --- Responsive Adjustments (Mobile UI) --- */
+@media (max-width: 1024px) {
+    .layout {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 100px);
+    }
+
+    .trending-rail {
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+        height: 40vh;
+        min-height: 300px;
+        flex: none;
+    }
+
+    .constellation-area {
+        height: auto;
+        flex: 1;
+        overflow: hidden;
+        /* constrain for inner scrolling */
+    }
+
+    .stats-panel {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .constellation {
+        transform: scale(0.9);
+        transform-origin: center;
+        margin: auto;
+        flex-shrink: 0;
+    }
+
+    .constellation-container {
+        min-height: 450px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 0 10px;
+    }
+}
+
+@media (max-width: 600px) {
+    .layout {
+        min-height: 100vh;
+    }
+
+    .trending-rail {
+        height: 45vh;
+    }
+
+    .stats-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .constellation {
+        transform: scale(0.85);
+        transform-origin: left center;
+        margin: 0;
+    }
+
+    .constellation-container {
+        min-height: 400px;
+        justify-content: flex-start;
+        padding: 0 20px;
+    }
+
+    .area-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .selected-coin h1 {
+        font-size: 1.8rem;
+    }
+
+    .deep-dive-controls {
+        margin-left: 0 !important;
+        margin-top: 10px;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}

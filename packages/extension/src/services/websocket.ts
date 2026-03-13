@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { API_BASE_URL } from '../shared/constants';
+import { DEV_API_URL, PROD_API_URL } from '../shared/constants';
 
 /**
  * @class WebSocketService
@@ -18,28 +18,54 @@ export class WebSocketService {
      * @returns {Promise<Socket>}
      * @throws {Error} If connection fails
      */
-    async connect(token: string): Promise<Socket> {
+    /**
+     * @name connect
+     * @desc Establishes Socket.IO connection to the server
+     * @param {string} token - JWT token for authentication
+     * @param {number} timeoutMs - Connection timeout in milliseconds
+     * @returns {Promise<Socket>}
+     * @throws {Error} If connection fails or times out
+     */
+    async connect(token: string, timeoutMs: number = 10000): Promise<Socket> {
         if (this.socket?.connected) {
             console.log('[WebSocket] Already connected');
             return this.socket;
         }
 
+        // Determine URL based on settings
+        const { websocket_env } = await chrome.storage.sync.get('websocket_env');
+        const url = websocket_env === 'prod' ? PROD_API_URL : DEV_API_URL;
+        console.log(`[WebSocket] Connecting to ${websocket_env || 'dev'} environment: ${url}`);
+
         return new Promise((resolve, reject) => {
+            let connectionTimeout: NodeJS.Timeout;
+
             try {
-                this.socket = io(API_BASE_URL, {
+                this.socket = io(url, {
                     auth: { token },
                     reconnectionDelayMax: 10000,
                     transports: ['websocket', 'polling']
                 });
 
+                // Setup timeout
+                connectionTimeout = setTimeout(() => {
+                    if (this.socket && !this.socket.connected) {
+                        console.error(`[WebSocket] Connection timed out after ${timeoutMs}ms`);
+                        this.socket.disconnect();
+                        reject(new Error(`Connection timed out after ${timeoutMs}ms`));
+                    }
+                }, timeoutMs);
+
                 this.socket.on('connect', () => {
                     console.log('[WebSocket] Connected successfully');
+                    clearTimeout(connectionTimeout);
                     this.reconnectAttempts = 0;
                     resolve(this.socket!);
                 });
 
                 this.socket.on('connect_error', (error: Error) => {
                     console.error('[WebSocket] Connection error:', error.message);
+                    clearTimeout(connectionTimeout);
                     this.handleReconnect(token);
                     reject(error);
                 });
@@ -57,6 +83,7 @@ export class WebSocketService {
 
             } catch (error) {
                 console.error('[WebSocket] Failed to create socket:', error);
+                if (connectionTimeout!) clearTimeout(connectionTimeout);
                 reject(error);
             }
         });
@@ -76,9 +103,9 @@ export class WebSocketService {
 
         this.reconnectAttempts++;
         const delay = this.RECONNECT_DELAY_MS * Math.pow(2, this.reconnectAttempts - 1);
-        
+
         console.log(`[WebSocket] Attempting reconnection ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
-        
+
         setTimeout(() => {
             this.connect(token).catch(console.error);
         }, delay);
@@ -105,6 +132,7 @@ export class WebSocketService {
             console.error('[WebSocket] Cannot emit - not connected');
             return;
         }
+        console.log(`[WebSocketService] Emitting event: ${event}`, payload);
         this.socket.emit(event, payload);
     }
 

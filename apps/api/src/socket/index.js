@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
 import logger from '../config/logger.js';
-import { CHROME_EXTENSION_ID, PORT } from '../config/env.js';
+import { CHROME_EXTENSION_ID, PORT, CORS_ORIGIN_ALLOWED } from '../config/env.js';
 import { socketAuthMiddleware } from '../middleware/auth.js';
 import { setIO, getIO } from './state.js';
 import {
@@ -14,6 +14,7 @@ import {
     handleEntityDelete,
     handleLabelGet,
     handleLabelInsert,
+    handleLabelUpdate,
     handleLabelDelete,
     handleWalletTrackingGet,
     handleWalletTotalGet,
@@ -27,7 +28,7 @@ export const initSocketIO = (server) => {
         cors: {
             origin: [
                 `chrome-extension://${CHROME_EXTENSION_ID}`,
-                'http://localhost:25833',
+                ...CORS_ORIGIN_ALLOWED,
                 `http://localhost:${PORT}`
             ],
             methods: ["GET", "POST"],
@@ -42,6 +43,12 @@ export const initSocketIO = (server) => {
     io.on('connection', (socket) => {
         logger.info(`[Socket.IO] Client connected: ${socket.id}. Total clients: ${io.engine.clientsCount}`);
 
+        socket.onAny((event, ...args) => {
+            if (!['walletTrackingGet', 'walletTotalGet', 'entityTotalGet', 'walletsGet', 'entityGet', 'chainGet'].includes(event)) {
+                logger.info(`[Socket.IO Debug] Received event: ${event}, Payload: ${JSON.stringify(args)}`);
+            }
+        });
+
         socket.on('chainGet', (payload) => handleChainGet(socket, payload));
         socket.on('chainInsert', (payload) => handleChainInsert(socket, payload));
         socket.on('chainUpdate', (payload) => handleChainUpdate(socket, payload));
@@ -52,6 +59,7 @@ export const initSocketIO = (server) => {
         socket.on('entityDelete', (payload) => handleEntityDelete(socket, payload));
         socket.on('labelGet', (payload) => handleLabelGet(socket, payload));
         socket.on('labelInsert', (payload) => handleLabelInsert(socket, payload));
+        socket.on('labelUpdate', (payload) => handleLabelUpdate(socket, payload));
         socket.on('labelInsertBulk', (payload) => handleLabelInsertBulk(socket, payload));
         socket.on('labelDelete', (payload) => handleLabelDelete(socket, payload));
         socket.on('walletTrackingGet', () => handleWalletTrackingGet(socket));

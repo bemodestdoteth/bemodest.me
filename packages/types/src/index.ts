@@ -1,3 +1,4 @@
+export * from './generated.js';
 import { z } from 'zod';
 
 /**

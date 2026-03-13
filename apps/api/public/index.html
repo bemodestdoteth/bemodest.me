@@ -32,6 +32,10 @@
         <header>
             <h1>Wallet Tracker</h1>
             <div style="display: flex; gap: 10px; align-items: center;">
+                <div id="sessionStatus" class="session-status active">
+                    <span class="session-icon">⏱</span>
+                    <span class="session-time">--</span>
+                </div>
                 <div id="connectionStatus" class="connection-status disconnected">
                     <span class="status-indicator"></span>
                     <span class="status-text">Disconnected</span>
@@ -48,6 +52,30 @@
                 <h3>Extension Authentication</h3>
                 <p>Your extension is now authorized! Open the extension popup and click "Get Token from Web" button.</p>
                 <p style="font-size: 12px; color: #666;">Token expires in 30 days.</p>
+            </div>
+        </div>
+
+        <!-- Session Expiry Warning Modal -->
+        <div id="sessionExpiryModal" class="modal" style="display: none;">
+            <div class="modal-content session-warning-modal">
+                <h3>⚠️ Session Expiring Soon</h3>
+                <p>Your session will expire in <span class="expiry-countdown">--</span></p>
+                <p style="font-size: 14px; color: #666;">Please save your work. You will be logged out when the session
+                    expires.</p>
+                <div class="modal-actions">
+                    <button onclick="hideSessionWarningModal()" class="btn-secondary">Dismiss</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Session Expired Modal -->
+        <div id="sessionExpiredModal" class="modal" style="display: none;">
+            <div class="modal-content session-expired-modal">
+                <h3>🔒 Session Expired</h3>
+                <p class="expiry-message">Your session has expired. Please log in again to continue.</p>
+                <div class="modal-actions">
+                    <button onclick="redirectToLogin()" class="btn-primary">Log In</button>
+                </div>
             </div>
         </div>
 
@@ -98,7 +126,7 @@
                 <div style="margin-top: 10px; display: flex; gap: 10px;">
                     <button id="addBulkRowBtn"
                         style="background-color: #4CAF50; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+
-                        Add Row</button>
+                        Add Empty Row</button>
                     <div style="flex-grow: 1;"></div>
                     <button id="cancelBulkBtn"
                         style="background-color: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Cancel</button>
@@ -114,6 +142,7 @@
                         <th>Wallet Address</th>
                         <th>Chain</th>
                         <th>Entity</th>
+                        <th>Image</th>
                         <th>Comment</th>
                         <th>Label</th>
                         <th>Tracking</th>

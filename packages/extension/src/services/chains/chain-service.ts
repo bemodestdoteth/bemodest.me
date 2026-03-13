@@ -89,15 +89,16 @@ export class ChainService {
 
         data.forEach((chainData: ChainData) => {
             const chain = new Chains(chainData);
-            this.chains.set(chainData.chain.toUpperCase(), chain);
+            // Map strictly by CAIP-2 as the single source of truth
+            this.chains.set(chainData.caip2, chain);
         });
 
         console.log(`[ChainService] Loaded ${this.chains.size} chains: ${Array.from(this.chains.keys()).join(', ')}`);
     }
 
     /**
-     * Gets chain by code
-     * @param {string} code - Chain code (e.g., 'ETH', 'BTC')
+     * Gets chain by code or CAIP-2
+     * @param {string} code - Chain code (e.g., 'ETH', 'BTC') or CAIP-2 ('eip155:1')
      * @returns {Chains | undefined} Chain instance or undefined
      * @example
      * ```typescript
@@ -105,7 +106,20 @@ export class ChainService {
      * ```
      */
     getChainByCode(code: string): Chains | undefined {
-        return this.chains.get(code.toUpperCase());
+        // Direct CAIP-2 match (fastest)
+        const directMatch = this.chains.get(code) || this.chains.get(code.toLowerCase());
+        if (directMatch) return directMatch;
+
+        // Fallback for legacy codes (like 'ETH', 'BTC')
+        const upperCode = code.toUpperCase();
+        for (const chain of this.chains.values()) {
+            if (chain.annotation?.code?.toUpperCase() === upperCode ||
+                chain.chain?.toUpperCase() === upperCode ||
+                chain.caip2?.toUpperCase() === upperCode) {
+                return chain;
+            }
+        }
+        return undefined;
     }
 
     /**

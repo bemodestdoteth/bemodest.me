@@ -10,7 +10,11 @@ import {
     WS_EVENT_CHAIN_GET,
     WS_EVENT_CHAIN_UPDATE,
     WS_EVENT_SUCCESS,
-    WS_EVENT_FAILURE
+    WS_EVENT_FAILURE,
+    WS_STATUS_CONNECTING,
+    WS_STATUS_CONNECTED,
+    WS_STATUS_DISCONNECTED,
+    WS_STATUS_ERROR
 } from '../shared/constants';
 
 declare const objEtherAddressLookup: any;
@@ -51,8 +55,22 @@ async function initializeWebSocket(): Promise<void> {
             return;
         }
 
+        // Broadcast connecting status
+        chrome.runtime.sendMessage({
+            type: 'ws-event',
+            event: 'statusChange',
+            data: { connected: false, status: WS_STATUS_CONNECTING }
+        }).catch(() => { });
+
         await websocketService.connect(token);
         console.log('[Background] WebSocket connection established');
+
+        // Broadcast connection status
+        chrome.runtime.sendMessage({
+            type: 'ws-event',
+            event: 'statusChange',
+            data: { connected: true, status: WS_STATUS_CONNECTED }
+        }).catch(() => { });
 
         // Set up WebSocket event listeners
         setupWebSocketListeners();
@@ -64,8 +82,17 @@ async function initializeWebSocket(): Promise<void> {
             websocketService.emit(WS_EVENT_LABEL_GET, { params: {}, headers: {} });
             websocketService.emit(WS_EVENT_ENTITY_GET, { params: {}, headers: {} });
         }, 1000);
-    } catch (error) {
+    } catch (error: any) {
         console.error('[Background] Failed to initialize WebSocket:', error);
+        chrome.runtime.sendMessage({
+            type: 'ws-event',
+            event: 'statusChange',
+            data: {
+                connected: false,
+                status: WS_STATUS_ERROR,
+                error: error.message || 'Connection failed'
+            }
+        }).catch(() => { });
     }
 }
 
@@ -86,12 +113,25 @@ function setupWebSocketListeners(): void {
     });
 
     websocketService.on(WS_EVENT_LABEL_UPDATE, (response: any) => {
-        console.log('[Background] Received labelUpdate, broadcasting to popup');
+        console.log('[Background] Received labelUpdate, broadcasting to popup and content scripts');
         chrome.runtime.sendMessage({
             type: 'ws-event',
             event: WS_EVENT_LABEL_UPDATE,
             data: response
         }).catch(() => { });
+
+        // Broadcast to all tabs (content scripts) to trigger address re-conversion
+        chrome.tabs.query({}, (tabs) => {
+            tabs.forEach(tab => {
+                if (tab.id) {
+                    chrome.tabs.sendMessage(tab.id, {
+                        type: 'ws-event',
+                        event: WS_EVENT_LABEL_UPDATE,
+                        data: response
+                    }).catch(() => { });
+                }
+            });
+        });
     });
 
     websocketService.on(WS_EVENT_ENTITY_UPDATE, (response: any) => {
@@ -127,6 +167,17 @@ try {
 
     // Initialize WebSocket connection on extension boot
     initializeWebSocket();
+
+    // Listen for environment changes
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+        if (areaName === 'sync' && changes.websocket_env) {
+            console.log('[Background] WebSocket environment changed, reconnecting...');
+            if (websocketService.isConnected()) {
+                websocketService.disconnect();
+            }
+            initializeWebSocket();
+        }
+    });
 
     chrome.runtime.onMessage.addListener(
         function (request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
@@ -179,6 +230,7 @@ try {
                     sendResponse({ success: false, error: 'WebSocket not connected' });
                     return true;
                 }
+                console.log(`[Background] Processing ws-emit for event: ${request.event}`, request.payload);
                 websocketService.emit(request.event, request.payload);
                 sendResponse({ success: true });
                 return true;
@@ -197,8 +249,10 @@ try {
 
             // Handle WebSocket connection status request
             if (request.action === 'ws-status') {
+                const connected = websocketService.isConnected();
                 sendResponse({
-                    isConnected: websocketService.isConnected()
+                    connected: connected,
+                    status: connected ? WS_STATUS_CONNECTED : WS_STATUS_DISCONNECTED
                 });
                 return true;
             }

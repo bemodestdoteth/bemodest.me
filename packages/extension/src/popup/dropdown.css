@@ -1,5 +1,6 @@
 
-/* Dropdown Container */
+/* ── Multi-select chain picker ─────────────────────────────────────── */
+
 #label-chain {
     position: relative;
     padding: 0;
@@ -7,54 +8,77 @@
     background: transparent;
 }
 
-/* Header (Selected Value) */
-#label-dropdown-value {
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid #ddd;
-}
-
-#label-dropdown-value::after {
-    content: '▼';
-    font-size: 10px;
-    margin-left: 8px;
-}
-
-/* Options Container */
-.ext-etheraddresslookup-dropdown-options {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    max-height: 200px;
+/* Scrollable checkbox list */
+.chain-checkbox-list {
+    max-height: 160px;
     overflow-y: auto;
-    background: #fff;
     border: 1px solid #ddd;
     border-radius: 4px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    margin-top: 4px;
+    padding: 4px 0;
+    background: #fff;
+    font-size: 13px;
 }
 
-/* Open State */
-#label-chain.open .ext-etheraddresslookup-dropdown-options {
-    display: block;
-}
-
-/* Individual Options */
-.custom-option {
-    padding: 8px 12px;
-    font-size: 14px;
+.chain-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background 0.1s;
 }
 
-.custom-option:hover {
-    filter: brightness(0.9);
+.chain-checkbox-item:hover {
+    background: #f5f5f5;
+}
+
+.chain-checkbox-item input[type="checkbox"] {
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+/* Selected chips row */
+.chain-selected-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    min-height: 22px;
+    padding: 2px 0;
+    margin-bottom: 4px;
+}
+
+.chain-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: default;
+    user-select: none;
+}
+
+.chain-drag-handle {
+    cursor: grab;
+    opacity: 0.7;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.chain-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Inline error */
+.chain-error-msg {
+    color: #d32f2f;
+    font-size: 11px;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+/* ── Content-script tooltip hover (injected into page) ──────────────── */
+
+.ext-multichain-label:hover .ext-chain-tooltip {
+    display: block !important;
 }

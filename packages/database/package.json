@@ -1,0 +1,12 @@
+{
+    "name": "@bemodest/database",
+    "version": "1.0.0",
+    "main": "index.js",
+    "type": "module",
+    "dependencies": {
+        "mongodb": "^6.12.0",
+        "winston": "^3.17.0",
+        "zod": "^3.22.4",
+        "dotenv": "^16.0.3"
+    }
+}

@@ -26,12 +26,98 @@
     </div>
 
     <div id="content" style="display: none">
-        <header>
-            <h1>Wallet Tracker</h1>
+        <link rel="stylesheet" href="/css/constellation.css">
+
+        <header style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; gap: 10px; align-items: center;">
-                <div id="connectionStatus" class="connection-status disconnected">
-                    <span class="status-indicator"></span>
-                    <span class="status-text">Disconnected</span>
+                <h1><a href="/" style="text-decoration: none; color: inherit;">Wallet Tracker</a></h1>
+                <div id="sessionStatus" class="session-status active" style="margin-left: 10px;">
+                    <span class="session-icon">⏱</span>
+                    <span class="session-time">--</span>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div class="sidecar-connection-container">
+                    <div id="sidecarConnectionStatus" class="connection-status disconnected">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">Sidecar</span>
+                    </div>
+                    <div class="exchanges-dropdown" style="z-index: 1000;">
+                        <div id="binanceConnectionStatus" class="connection-status disconnected">
+                            <span class="status-indicator"></span>
+                            <img src="/images/binance.jpg" alt="Binance" class="status-icon">
+                            <span class="status-text">Spot</span>
+                        </div>
+                        <div id="binance_fConnectionStatus" class="connection-status disconnected">
+                            <span class="status-indicator"></span>
+                            <img src="/images/binance.jpg" alt="Binance Futures" class="status-icon">
+                            <span class="status-text">Futures</span>
+                        </div>
+                        <div id="upbitConnectionStatus" class="connection-status disconnected">
+                            <span class="status-indicator"></span>
+                            <img src="/images/upbit.png" alt="Upbit" class="status-icon">
+                            <span class="status-text">Spot</span>
+                        </div>
+                        <div id="bithumbConnectionStatus" class="connection-status disconnected">
+                            <span class="status-indicator"></span>
+                            <img src="/images/bithumb.png" alt="Bithumb" class="status-icon">
+                            <span class="status-text">Spot</span>
+                        </div>
+                        <div id="bybitConnectionStatus" class="connection-status disconnected">
+                            <span class="status-indicator"></span>
+                            <img src="/images/bybit.png" alt="Bybit" class="status-icon">
+                            <span class="status-text">Spot</span>
+                        </div>
+                        <div id="bybit_fConnectionStatus" class="connection-status disconnected">
+                            <span class="status-indicator"></span>
+                            <img src="/images/bybit.png" alt="Bybit Futures" class="status-icon">
+                            <span class="status-text">Futures</span>
+                        </div>
+                        <div id="gateioConnectionStatus" class="connection-status disconnected">
+                            <span class="status-indicator"></span>
+                            <img src="/images/gate_io.jpg" alt="Gate.io" class="status-icon"
+                                style="border-radius: 50%;">
+                            <span class="status-text">Spot</span>
+                        </div>
+                        <div id="bitgetConnectionStatus" class="connection-status disconnected">
+                            <span class="status-indicator"></span>
+                            <img src="/images/bitget.jpg" alt="Bitget" class="status-icon" style="border-radius: 50%;">
+                            <span class="status-text">Spot</span>
+                        </div>
+                        <div id="bitget_fConnectionStatus" class="connection-status disconnected">
+                            <span class="status-indicator"></span>
+                            <img src="/images/bitget.jpg" alt="Bitget Futures" class="status-icon"
+                                style="border-radius: 50%;">
+                            <span class="status-text">Futures</span>
+                        </div>
+                        <div id="coinbaseConnectionStatus" class="connection-status disconnected">
+                            <span class="status-indicator"></span>
+                            <img src="/images/coinbase.png" alt="Coinbase" class="status-icon"
+                                style="border-radius: 50%;">
+                            <span class="status-text">Spot</span>
+                        </div>
+                        <div id="krakenConnectionStatus" class="connection-status disconnected">
+                            <span class="status-indicator"></span>
+                            <img src="/images/kraken.jpg" alt="Kraken" class="status-icon" style="border-radius: 50%;">
+                            <span class="status-text">Spot</span>
+                        </div>
+                        <div id="kucoinConnectionStatus" class="connection-status disconnected">
+                            <span class="status-indicator"></span>
+                            <img src="/images/kucoin.png" alt="KuCoin" class="status-icon" style="border-radius: 50%;">
+                            <span class="status-text">Spot</span>
+                        </div>
+                        <div id="okxConnectionStatus" class="connection-status disconnected">
+                            <span class="status-indicator"></span>
+                            <img src="/images/okx.png" alt="OKX" class="status-icon" style="border-radius: 50%;">
+                            <span class="status-text">Spot</span>
+                        </div>
+                        <div id="okx_fConnectionStatus" class="connection-status disconnected">
+                            <span class="status-indicator"></span>
+                            <img src="/images/okx.png" alt="OKX Futures" class="status-icon"
+                                style="border-radius: 50%;">
+                            <span class="status-text">Futures</span>
+                        </div>
+                    </div>
                 </div>
                 <button id="extensionBtn" style="background-color: #4CAF50;">Extension Token</button>
                 <button id="logoutBtn">Logout</button>
@@ -48,23 +134,320 @@
             </div>
         </div>
 
-        <div class="grid-list-container">
-            <a href="/" class="grid-list-item">
-                <span>Dashboard</span>
-            </a>
-            <!-- Placeholder for future pages -->
+        <!-- Session Expiry Warning Modal -->
+        <div id="sessionExpiryModal" class="modal" style="display: none;">
+            <div class="modal-content session-warning-modal">
+                <h3>⚠️ Session Expiring Soon</h3>
+                <p>Your session will expire in <span class="expiry-countdown">--</span></p>
+                <p style="font-size: 14px; color: #666;">Please save your work. You will be logged out when the session
+                    expires.</p>
+                <div class="modal-actions">
+                    <button onclick="hideSessionWarningModal()" class="btn-secondary">Dismiss</button>
+                </div>
+            </div>
         </div>
 
-        <!-- Void content for now -->
-        <div class="table-container">
-            <h2>Tracking</h2>
-            <p>Work in progress.</p>
+        <!-- Session Expired Modal -->
+        <div id="sessionExpiredModal" class="modal" style="display: none;">
+            <div class="modal-content session-expired-modal">
+                <h3>🔒 Session Expired</h3>
+                <p class="expiry-message">Your session has expired. Please log in again to continue.</p>
+                <div class="modal-actions">
+                    <button onclick="redirectToLogin()" class="btn-primary">Log In</button>
+                </div>
+            </div>
         </div>
+
+        <div class="tracking-view">
+            <div class="layout">
+                <!-- Left Rail -->
+                <aside class="trending-rail">
+                    <!-- Pinlist Config Panel -->
+                    <div class="pinlist-panel-container"
+                        style="border-bottom: 1px solid #e0e0e0; padding: 10px 15px; background: #fff;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <h3
+                                style="font-size: 0.85rem; color: var(--neon-cyan); margin: 0; text-transform: uppercase;">
+                                Pinlist</h3>
+                            <button id="togglePinlistBtn"
+                                style="padding: 2px 6px; font-size: 10px; border-radius: 3px; border: 1px solid #ccc; background: #f9f9f9; color: #555; cursor: pointer;">Configure</button>
+                        </div>
+                        <div id="pinlistContent"
+                            style="display: none; background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px solid #eee;">
+                            <div style="margin-bottom: 10px;">
+                                <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                                    <input type="text" id="pinlistInput" placeholder="Add symbol..."
+                                        style="flex: 1; padding: 6px 8px; border-radius: 3px; border: 1px solid #ccc; background: #fff; color: #333; font-family: 'D2Coding', monospace; font-size: 0.8rem;">
+                                    <button id="pinlistAddBtn" class="btn-primary"
+                                        style="padding: 6px 12px; font-size: 0.8rem;">Add</button>
+                                </div>
+                                <div id="pinlistTags"
+                                    style="display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; background: #fff; border-radius: 3px; border: 1px solid #eee;">
+                                    <span
+                                        style="color: var(--text-dim); font-size: 0.8rem; font-style: italic;">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rail-header"
+                        style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h2>Market Watch</h2>
+                            <p style="margin-top: 4px;">Live Ticker Stream</p>
+                        </div>
+                        <div>
+                            <select id="marketSortSelect"
+                                style="padding: 4px; font-size: 0.75rem; border: 1px solid var(--glass-border); border-radius: 4px; background: rgba(0,0,0,0.2); color: var(--text-bright);">
+                                <option value="name_asc">Name (A-Z)</option>
+                                <option value="name_desc">Name (Z-A)</option>
+                                <option value="change_desc">% Change (High to Low)</option>
+                                <option value="change_asc">% Change (Low to High)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="search-container"
+                        style="padding: 10px 15px; border-bottom: 1px solid var(--border-color);">
+                        <input type="text" id="coinSearchInput" placeholder="Search symbol..." autocomplete="off"
+                            style="width: 100%; padding: 8px 12px; border-radius: 4px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.2); color: #fff; font-family: 'D2Coding', monospace;">
+                    </div>
+                    <ul class="coin-list" id="coinList">
+                        <!-- Generated by JS -->
+                    </ul>
+                </aside>
+
+                <!-- Main Area -->
+                <main class="constellation-area">
+                    <header class="area-header">
+                        <div class="selected-coin">
+                            <h1 id="selectedSymbol">BTC</h1>
+                            <span class="badge positive" id="selectedChange">0.0%</span>
+                            <div class="deep-dive-controls"
+                                style="margin-left: 15px; display: flex; align-items: center; gap: 10px;">
+                                <a href="#" class="deep-dive-btn" id="deepDiveBtn">
+                                    → Deep Dive Analysis
+                                </a>
+                                <div id="dwServerStatus" class="dw-status-indicator"
+                                    style="display: none; align-items: center; gap: 5px; font-size: 0.8rem; color: var(--text-dim);">
+                                    <span class="status-dot"
+                                        style="width: 8px; height: 8px; border-radius: 50%; background-color: #666; display: inline-block;"></span>
+                                    <span class="status-text">D/W Status: <span
+                                            id="dwServerStatusText">Waiting...</span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="view-toggle">
+                            <button class="active">Graph</button>
+                            <button>Grid</button>
+                        </div>
+                    </header>
+
+                    <div class="constellation-container">
+                        <div class="constellation" id="constellation">
+                            <svg class="connections" id="connections" width="100%" height="100%">
+                                <!-- Lines generated by JS -->
+                            </svg>
+                            <!-- Nodes generated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="stats-panel">
+                        <div class="stat-card">
+                            <div class="stat-label">Max Price Spread (non-futures) <span
+                                    style="font-size: 0.85em; color: var(--text-dim);">(> $30k vol)</span></div>
+                            <div class="stat-value cyan" id="statSpread">0.0%</div>
+                            <div class="stat-sub" id="statSpreadValue">-- - --</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Max Price Spread (futures) <span
+                                    style="font-size: 0.85em; color: var(--text-dim);">(> $30k vol)</span></div>
+                            <div class="stat-value green" id="statArb">0.0%</div>
+                            <div class="stat-sub" id="statArbValue">-- - --</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Price Leader</div>
+                            <div class="stat-value amber" id="statLeader">--</div>
+                            <div class="stat-sub" id="statLeaderVolume">Lowest Latency</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Connected Sources</div>
+                            <div class="stat-value" id="statExchanges">0</div>
+                            <div class="stat-sub">Active streams</div>
+                        </div>
+                    </div>
+
+                    <div class="volume-timeline">
+                        <div class="timeline-header">
+                            <h3>Real-time Volume Pulse</h3>
+                            <span style="font-size: 0.7rem; color: var(--text-dim);">Live</span>
+                        </div>
+                        <div class="timeline-bars" id="timelineBars">
+                            <!-- Generated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Debug Panel -->
+                    <div class="debug-panel-container"
+                        style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3>Debug: Raw Ticker Data</h3>
+                            <button id="toggleDebugBtn" style="padding: 4px 8px; font-size: 12px;">Toggle View</button>
+                        </div>
+                        <div id="debugContent"
+                            style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                            <!-- Binance Debug Card -->
+                            <div class="debug-card"
+                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+                                <h4 style="color: var(--text-dim); margin-bottom: 5px;">Binance</h4>
+                                <pre id="debug_binance"
+                                    style="font-family: 'D2Coding', monospace; font-size: 11px; color: var(--neon-green); overflow-x: auto;">Waiting...</pre>
+                            </div>
+                            <!-- Binance Futures Debug Card -->
+                            <div class="debug-card"
+                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+                                <h4 style="color: var(--text-dim); margin-bottom: 5px;">Binance Futures</h4>
+                                <pre id="debug_binance_f"
+                                    style="font-family: 'D2Coding', monospace; font-size: 11px; color: var(--neon-purple); overflow-x: auto;">Waiting...</pre>
+                            </div>
+                            <!-- Upbit Debug Card -->
+                            <div class="debug-card"
+                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+                                <h4 style="color: var(--text-dim); margin-bottom: 5px;">Upbit</h4>
+                                <pre id="debug_upbit"
+                                    style="font-family: 'D2Coding', monospace; font-size: 11px; color: var(--neon-blue); overflow-x: auto;">Waiting...</pre>
+                            </div>
+                            <!-- Bithumb Debug Card -->
+                            <div class="debug-card"
+                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+                                <h4 style="color: var(--text-dim); margin-bottom: 5px;">Bithumb</h4>
+                                <pre id="debug_bithumb"
+                                    style="font-family: 'D2Coding', monospace; font-size: 11px; color: var(--neon-pink); overflow-x: auto;">Waiting...</pre>
+                            </div>
+                            <!-- Bybit Debug Card -->
+                            <div class="debug-card"
+                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+                                <h4 style="color: var(--text-dim); margin-bottom: 5px;">Bybit</h4>
+                                <pre id="debug_bybit"
+                                    style="font-family: 'D2Coding', monospace; font-size: 11px; color: #ffe600; overflow-x: auto;">Waiting...</pre>
+                            </div>
+                            <div class="debug-card"
+                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+                                <h4 style="color: var(--text-dim); margin-bottom: 5px;">Bybit Futures</h4>
+                                <pre id="debug_bybit_f"
+                                    style="font-family: 'D2Coding', monospace; font-size: 11px; color: #ffeb3b; overflow-x: auto;">Waiting...</pre>
+                            </div>
+                            <!-- Gate.io Debug Card -->
+                            <div class="debug-card"
+                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+                                <h4 style="color: var(--text-dim); margin-bottom: 5px;">Gate.io</h4>
+                                <pre id="debug_gateio"
+                                    style="font-family: 'D2Coding', monospace; font-size: 11px; color: #00d1b2; overflow-x: auto;">Waiting...</pre>
+                            </div>
+                            <!-- Bitget Debug Card -->
+                            <div class="debug-card"
+                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+                                <h4 style="color: var(--text-dim); margin-bottom: 5px;">Bitget</h4>
+                                <pre id="debug_bitget"
+                                    style="font-family: 'D2Coding', monospace; font-size: 11px; color: #00e5ff; overflow-x: auto;">Waiting...</pre>
+                            </div>
+                            <!-- Bitget Futures Debug Card -->
+                            <div class="debug-card"
+                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+                                <h4 style="color: var(--text-dim); margin-bottom: 5px;">Bitget Futures</h4>
+                                <pre id="debug_bitget_f"
+                                    style="font-family: 'D2Coding', monospace; font-size: 11px; color: #00bfa5; overflow-x: auto;">Waiting...</pre>
+                            </div>
+                            <!-- Coinbase Debug Card -->
+                            <div class="debug-card"
+                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+                                <h4 style="color: var(--text-dim); margin-bottom: 5px;">Coinbase</h4>
+                                <pre id="debug_coinbase"
+                                    style="font-family: 'D2Coding', monospace; font-size: 11px; color: #0052ff; overflow-x: auto;">Waiting...</pre>
+                            </div>
+                            <!-- Kraken Debug Card -->
+                            <div class="debug-card"
+                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+                                <h4 style="color: var(--text-dim); margin-bottom: 5px;">Kraken</h4>
+                                <pre id="debug_kraken"
+                                    style="font-family: 'D2Coding', monospace; font-size: 11px; color: #5200ff; overflow-x: auto;">Waiting...</pre>
+                            </div>
+                            <!-- KuCoin Debug Card -->
+                            <div class="debug-card"
+                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+                                <h4 style="color: var(--text-dim); margin-bottom: 5px;">KuCoin</h4>
+                                <pre id="debug_kucoin"
+                                    style="font-family: 'D2Coding', monospace; font-size: 11px; color: #00c8aa; overflow-x: auto;">Waiting...</pre>
+                            </div>
+                            <!-- OKX Debug Card -->
+                            <div class="debug-card"
+                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+                                <h4 style="color: var(--text-dim); margin-bottom: 5px;">OKX</h4>
+                                <pre id="debug_okx"
+                                    style="font-family: 'D2Coding', monospace; font-size: 11px; color: #0078ff; overflow-x: auto;">Waiting...</pre>
+                            </div>
+                            <!-- OKX Futures Debug Card -->
+                            <div class="debug-card"
+                                style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px;">
+                                <h4 style="color: var(--text-dim); margin-bottom: 5px;">OKX Futures</h4>
+                                <pre id="debug_okx_f"
+                                    style="font-family: 'D2Coding', monospace; font-size: 11px; color: #5296ff; overflow-x: auto;">Waiting...</pre>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Excludelist Config Panel -->
+                    <div class="excludelist-panel-container"
+                        style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3>Excludelist Configuration</h3>
+                            <button id="toggleExcludelistBtn" style="padding: 4px 8px; font-size: 12px;">Toggle
+                                View</button>
+                        </div>
+                        <div id="excludelistContent"
+                            style="display: none; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <div style="margin-bottom: 15px;">
+                                <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 10px;">
+                                    Tickers matching these symbols will be ignored by the Sidecar. Add or remove symbols
+                                    using comma-separated values (e.g., EUR, GBP, TRY).
+                                </p>
+                                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                                    <input type="text" id="excludelistInput" placeholder="Add symbols to exclude..."
+                                        style="flex: 1; padding: 8px 12px; border-radius: 4px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.4); color: #fff; font-family: 'D2Coding', monospace;">
+                                    <button id="excludelistAddBtn" class="btn-primary"
+                                        style="padding: 8px 16px;">Add</button>
+                                </div>
+
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <h4 style="color: #fff; font-size: 1rem;">Current Excludelist</h4>
+                                    <button id="excludelistRefreshBtn"
+                                        style="padding: 4px 8px; font-size: 12px; background: transparent; border: 1px solid var(--border-color); color: var(--text-dim); cursor: pointer; border-radius: 4px;">↻
+                                        Refresh</button>
+                                </div>
+                                <div id="excludelistTags"
+                                    style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 40px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 4px; border: 1px solid rgba(255,255,255,0.05);">
+                                    <span
+                                        style="color: var(--text-dim); font-size: 0.9rem; font-style: italic;">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </main>
+            </div>
+        </div>
+
+
     </div>
 
     <!-- Socket.IO Client -->
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/js/tracking.js"></script>
     <script src="/js/main.js"></script>
 </body>
 

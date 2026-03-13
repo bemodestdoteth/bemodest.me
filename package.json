@@ -10,7 +10,12 @@
     "watch:extension": "pnpm --filter extension watch"
   },
   "devDependencies": {
-    "turbo": "^2.3.3",
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "turbo": "^2.3.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "ioredis": "^5.9.2",
+    "mongodb": "^6.20.0"
   }
 }

@@ -4,10 +4,24 @@ services:
   api:
     build:
       context: .
+      args:
+        UID: ${UID}
+        GID: ${GID}
       dockerfile: apps/api/Dockerfile
-      env_file:
-        - apps/api/.env
     container_name: bemodest-api
     restart: always
     ports:
-      - "${PORT}:${PORT}"
+      - 32358:32358
+    env_file:
+      - apps/api/.env
+
+  sidecar:
+    build:
+      context: .
+      dockerfile: apps/sidecar/Dockerfile
+    container_name: bemodest-sidecar
+    restart: always
+    ports:
+      - 32359:32359
+    env_file:
+      - apps/api/.env

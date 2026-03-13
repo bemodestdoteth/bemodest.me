@@ -1,0 +1,13 @@
+{
+    "name": "@bemodest/schema-definitions",
+    "version": "1.0.0",
+    "description": "JSON Schemas for polyglot type generation",
+    "scripts": {
+        "generate:ts": "quicktype -s schema schemas/AlertRule.json schemas/SidecarConfigPayload.json -o ../types/src/generated.ts --just-types",
+        "generate:rs": "quicktype -s schema schemas/AlertRule.json schemas/SidecarConfigPayload.json -o ../../apps/sidecar/src/types/generated.rs --visibility public --derive-debug --derive-clone",
+        "build": "pnpm run generate:ts && pnpm run generate:rs"
+    },
+    "devDependencies": {
+        "quicktype": "^23.0.170"
+    }
+}
