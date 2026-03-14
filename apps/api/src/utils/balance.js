@@ -1,147 +1,14 @@
-import { JsonRpcProvider, Contract } from 'ethers';
-import { Connection, PublicKey } from '@solana/web3.js';
-import { getAssociatedTokenAddress } from '@solana/spl-token';
-import { SuiClient } from '@mysten/sui.js/client';
-import { StargateClient } from '@cosmjs/stargate';
 import { MongoDBClient } from '@bemodest/database';
 import logger from '../config/logger.js';
 import { getRpcUrl, reportRpcFailure } from './rpc.js';
 import { getRedisClient } from './redis.js';
 import {
     COLLECTION_ADDRS,
-    COLLECTION_CHAINS,
     COLLECTION_CONTRACT_MAPPINGS,
     COLLECTION_COINGECKO_RANK,
 } from '../config/env.js';
-import { getCaip2ToGeckoTerminalMapping, getCaip2ToCoingeckoMapping } from './helpers.js';
-import { getChainTypeFromCAIP2, getEipChainId } from '@bemodest/utils';
-
-const ERC20_ABI = [
-    'function balanceOf(address) view returns (uint256)',
-    'function decimals() view returns (uint8)',
-];
-
-
-async function evmBalanceUsd(addr, caip2Id, contractAddr, price, attempt = 1) {
-    const rpcUrl = getRpcUrl(caip2Id);
-    if (!rpcUrl) return 0;
-    try {
-        const chainId = getEipChainId(caip2Id);
-        const provider = new JsonRpcProvider(rpcUrl, chainId, { staticNetwork: true });
-        const contract = new Contract(contractAddr, ERC20_ABI, provider);
-        const [raw, decimals] = await Promise.all([
-            contract.balanceOf(addr),
-            contract.decimals(),
-        ]);
-        const amount = Number(raw) / 10 ** Number(decimals);
-        return amount * price;
-    } catch (err) {
-        reportRpcFailure(rpcUrl);
-        logger.warn(`[Balance] EVM ${caip2Id} ${addr} (attempt ${attempt}): ${err.message}`);
-        if (attempt < 3) {
-            await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
-            return await evmBalanceUsd(addr, caip2Id, contractAddr, price, attempt + 1);
-        }
-        return 0;
-    }
-}
-
-async function evmNativeBalanceUsd(addr, caip2Id, price, attempt = 1) {
-    const rpcUrl = getRpcUrl(caip2Id);
-    if (!rpcUrl) return 0;
-    try {
-        const chainId = getEipChainId(caip2Id);
-        const provider = new JsonRpcProvider(rpcUrl, chainId, { staticNetwork: true });
-        const raw = await provider.getBalance(addr);
-        const amount = Number(raw) / 1e18;
-        return amount * price;
-    } catch (err) {
-        reportRpcFailure(rpcUrl);
-        logger.warn(`[Balance] EVM native ${caip2Id} ${addr} (attempt ${attempt}): ${err.message}`);
-        if (attempt < 3) {
-            await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
-            return await evmNativeBalanceUsd(addr, caip2Id, price, attempt + 1);
-        }
-        return 0;
-    }
-}
-
-async function solanaBalanceUsd(addr, contractAddr, price, attempt = 1) {
-    const rpcUrl = getRpcUrl('solana') || 'https://api.mainnet-beta.solana.com';
-    try {
-        const conn = new Connection(rpcUrl, 'confirmed');
-        const ownerPubkey = new PublicKey(addr);
-        if (!contractAddr) {
-            // Native SOL
-            const lamports = await conn.getBalance(ownerPubkey);
-            return (lamports / 1e9) * price;
-        }
-        const mintPubkey = new PublicKey(contractAddr);
-        const ata = await getAssociatedTokenAddress(mintPubkey, ownerPubkey);
-        const { value } = await conn.getTokenAccountBalance(ata);
-        return (value.uiAmount ?? 0) * price;
-    } catch (err) {
-        reportRpcFailure(rpcUrl);
-        logger.warn(`[Balance] Solana ${addr} (attempt ${attempt}): ${err.message}`);
-        if (attempt < 3) {
-            await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
-            return await solanaBalanceUsd(addr, contractAddr, price, attempt + 1);
-        }
-        return 0;
-    }
-}
-
-async function suiBalanceUsd(addr, coinType, price, attempt = 1) {
-    const rpcUrl = getRpcUrl('sui') || 'https://fullnode.mainnet.sui.io';
-    try {
-        const client = new SuiClient({ url: rpcUrl });
-        const bal = await client.getBalance({ owner: addr, coinType: coinType || '0x2::sui::SUI' });
-        const amount = Number(bal.totalBalance) / 1e9;
-        return amount * price;
-    } catch (err) {
-        reportRpcFailure(rpcUrl);
-        logger.warn(`[Balance] Sui ${addr} (attempt ${attempt}): ${err.message}`);
-        if (attempt < 3) {
-            await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
-            return await suiBalanceUsd(addr, coinType, price, attempt + 1);
-        }
-        return 0;
-    }
-}
-
-async function cosmosBalanceUsd(addr, rpcEndpoint, denom, price, attempt = 1) {
-    try {
-        const client = await StargateClient.connect(rpcEndpoint);
-        const coin = await client.getBalance(addr, denom || 'uosmo');
-        await client.disconnect();
-        return (Number(coin.amount) / 1e6) * price;
-    } catch (err) {
-        reportRpcFailure(rpcEndpoint);
-        logger.warn(`[Balance] Cosmos ${addr} (attempt ${attempt}): ${err.message}`);
-        if (attempt < 3) {
-            await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
-            const nextRpc = getRpcUrl('osmosis') || 'https://rpc.osmosis.zone';
-            return await cosmosBalanceUsd(addr, nextRpc, denom, price, attempt + 1);
-        }
-        return 0;
-    }
-}
-
-async function getBalanceOnChain(caip2Id, addr, contractAddr, price) {
-    const chainType = getChainTypeFromCAIP2(caip2Id);
-    if (chainType === 'evm') {
-        if (contractAddr) return await evmBalanceUsd(addr, caip2Id, contractAddr, price);
-        return await evmNativeBalanceUsd(addr, caip2Id, price);
-    } else if (chainType === 'solana') {
-        return await solanaBalanceUsd(addr, contractAddr, price);
-    } else if (chainType === 'sui') {
-        return await suiBalanceUsd(addr, contractAddr, price);
-    } else if (chainType === 'cosmos') {
-        const rpcUrl = getRpcUrl(caip2Id) || 'https://rpc.osmosis.zone';
-        return await cosmosBalanceUsd(addr, rpcUrl, contractAddr, price);
-    }
-    return 0;
-}
+import { getCaip2ToGeckoTerminalMapping } from './helpers.js';
+import { getBalanceOnChain as sharedGetBalanceOnChain } from '@bemodest/utils';
 
 /**
  * Retrieves hot wallet balances for a given ticker and set of exchanges.
@@ -214,9 +81,16 @@ export async function getHotWalletBalances(ticker, exchanges) {
 
                     let usdBalance = 0;
                     try {
-                        usdBalance = await getBalanceOnChain(caip2, doc.addr, contractAddr, price);
+                        const rpcUrl = getRpcUrl(caip2);
+                        if (!rpcUrl) return null;
+
+                        usdBalance = await sharedGetBalanceOnChain(caip2, doc.addr, contractAddr, price, rpcUrl);
                     } catch (err) {
                         logger.error(`[Balance] Fetch error for ${exchange}:${caip2}: ${err.message}`);
+                        if (err.message.includes('RPC')) {
+                            const rpcUrl = getRpcUrl(caip2);
+                            if (rpcUrl) reportRpcFailure(rpcUrl);
+                        }
                     }
 
                     return { exchange, chain: caip2, usdBalance, dwStatus };
@@ -248,4 +122,3 @@ export async function getHotWalletBalances(ticker, exchanges) {
         await db.close();
     }
 }
-

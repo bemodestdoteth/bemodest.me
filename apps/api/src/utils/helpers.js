@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import { hashString as sharedHashString } from '@bemodest/utils';
 import { validateSignature as sharedValidateSignature, compileChainRegexes as sharedCompileChainRegexes } from '@bemodest/utils';
 import { COLLECTION_CHAINS, COLLECTION_ENTITES, COLLECTION_ADDRS, STATS_CUTOFF_MS, SNAPPER_API_SECRET } from '../config/env.js';
 import logger from '../config/logger.js';
@@ -49,9 +49,7 @@ export const sseConnect = (req, res) => {
 };
 
 export const hashString = (str) => {
-    const hash = crypto.createHash('sha256');
-    hash.update(str);
-    return hash.digest('hex');
+    return sharedHashString(str);
 };
 
 /**

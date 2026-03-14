@@ -4,6 +4,8 @@
     "main": "index.js",
     "type": "module",
     "dependencies": {
+        "@bemodest/config": "workspace:*",
+        "@bemodest/utils": "workspace:*",
         "mongodb": "^6.12.0",
         "winston": "^3.17.0",
         "zod": "^3.22.4",

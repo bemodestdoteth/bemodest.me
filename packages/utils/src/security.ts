@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHmac, timingSafeEqual, createHash } from 'node:crypto';
 
 const SIGNATURE_MAX_AGE_MS = 30_000;
 
@@ -19,4 +19,13 @@ export const validateSignature = (signature: string | undefined, timestamp: stri
     } catch {
         return false;
     }
+};
+
+/**
+ * Creates a SHA-256 hash of a string.
+ * @param {string} str - String to hash
+ * @returns {string} Hex-encoded hash
+ */
+export const hashString = (str: string): string => {
+    return createHash('sha256').update(str).digest('hex');
 };

@@ -20,3 +20,4 @@ __exportStar(require("./regex"), exports);
 __exportStar(require("./security.js"), exports);
 __exportStar(require("./chains.js"), exports);
 __exportStar(require("./config"), exports);
+__exportStar(require("./blockchain"), exports);
