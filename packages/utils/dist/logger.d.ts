@@ -9,3 +9,5 @@ import winston from 'winston';
  * logger.info('Server started', { port: 3000 });
  */
 export declare function createLogger(logDir: string, level?: string): winston.Logger;
+export declare const logger: winston.Logger;
+export default logger;

@@ -141,7 +141,7 @@ initSocketIO(server);
 getRedisClient();
 
 // Initialize Shared MongoDB (fire-and-forget, will connect on first use or here)
-import { getDBClient, closeDBClient } from './services/db.js';
+import { getDBClient, closeDBClient } from '@bemodest/database';
 getDBClient().catch(err => logger.error('[DB] Failed to connect initially:', err));
 
 // Initialize RPC Manager (fire-and-forget)

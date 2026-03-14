@@ -1,16 +1,10 @@
-import { createLogger } from '@bemodest/utils';
+import { logger } from '@bemodest/utils';
 import { encodeDbPassword } from '@bemodest/config';
 import { MongoClient } from 'mongodb';
 import fs from 'node:fs/promises';
 const MONGO_TLS = process.env.MONGO_TLS === 'true';
 const MONGO_AUTH_SOURCE = process.env.MONGO_AUTH_SOURCE || 'admin';
 const MONGODB_MAX_TIME_MS = Number(process.env.MONGODB_MAX_TIME_MS) || 30000;
-
-// Initialize shared logger following canonical pattern (RULES O-8001, O-8002)
-const logger = createLogger(
-  process.env.LOG_DIR || './logs',
-  process.env.LOG_LEVEL || 'info'
-);
 
 // End of imports
 

@@ -41,3 +41,9 @@ export function createLogger(logDir: string, level: string = 'info'): winston.Lo
 
   return logger;
 }
+export const logger = createLogger(
+  process.env.LOG_DIR || './logs',
+  process.env.LOG_LEVEL || 'info'
+);
+
+export default logger;

@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.logger = void 0;
 exports.createLogger = createLogger;
 const winston_1 = __importDefault(require("winston"));
 const node_path_1 = __importDefault(require("node:path"));
@@ -38,3 +39,5 @@ function createLogger(logDir, level = 'info') {
     });
     return logger;
 }
+exports.logger = createLogger(process.env.LOG_DIR || './logs', process.env.LOG_LEVEL || 'info');
+exports.default = exports.logger;
