@@ -53,7 +53,7 @@ import authRouter from './modules/auth/routes.js';
 import { sseConnect } from './utils/helpers.js';
 import { checkSocketIOStatus } from './socket/index.js';
 import { getStatus } from './routes/status.js';
-import { initRedis } from './utils/redis.js';
+import { getRedisClient } from '@bemodest/database';
 import { initDexPricePoller } from './utils/dexPricePoller.js';
 import { initRpcManager } from './utils/rpc.js';
 
@@ -138,7 +138,7 @@ const server = createServer(app);
 initSocketIO(server);
 
 // Initialize Redis
-initRedis();
+getRedisClient();
 
 // Initialize Shared MongoDB (fire-and-forget, will connect on first use or here)
 import { getDBClient, closeDBClient } from './services/db.js';

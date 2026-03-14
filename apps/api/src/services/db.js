@@ -1,28 +1,16 @@
-import { MongoDBClient } from '@bemodest/database';
-import logger from '../config/logger.js';
-
-let dbClient = null;
+import { getDBClient as sharedGetDBClient, closeDBClient as sharedCloseDBClient } from '@bemodest/database';
 
 /**
- * Get the singleton MongoDB client instance
- * @returns {Promise<MongoDBClient>}
+ * Get the singleton MongoDB client instance from the shared database package
+ * @returns {Promise<import('@bemodest/database').MongoDBClient>}
  */
 export async function getDBClient() {
-    if (!dbClient) {
-        dbClient = new MongoDBClient();
-        await dbClient.connect();
-        logger.info('[DB] Singleton MongoDB connection established');
-    }
-    return dbClient;
+    return sharedGetDBClient();
 }
 
 /**
- * Gracefully close the MongoDB connection
+ * Gracefully close the shared MongoDB connection
  */
 export async function closeDBClient() {
-    if (dbClient) {
-        await dbClient.close();
-        dbClient = null;
-        logger.info('[DB] Singleton MongoDB connection closed');
-    }
+    return sharedCloseDBClient();
 }

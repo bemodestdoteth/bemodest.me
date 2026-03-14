@@ -1,7 +1,6 @@
-import { MongoDBClient } from '@bemodest/database';
+import { getRedisClient, getDBClient } from '@bemodest/database';
 import logger from '../config/logger.js';
 import { getRpcUrl, reportRpcFailure } from './rpc.js';
-import { getRedisClient } from './redis.js';
 import {
     COLLECTION_ADDRS,
     COLLECTION_CONTRACT_MAPPINGS,
@@ -15,13 +14,11 @@ import { getBalanceOnChain as sharedGetBalanceOnChain } from '@bemodest/utils';
  * USES: sidecar LVC prices from Redis and standardises communication via CAIP-2.
  */
 export async function getHotWalletBalances(ticker, exchanges) {
-    const db = new MongoDBClient();
+    const db = await getDBClient();
     const redis = getRedisClient();
     const upperTicker = ticker.toUpperCase();
 
     try {
-        await db.connect();
-
         // 1. Get CAIP-2 → GeckoTerminal mapping
         const caip2ToGecko = await getCaip2ToGeckoTerminalMapping(db);
 
@@ -118,7 +115,5 @@ export async function getHotWalletBalances(ticker, exchanges) {
     } catch (err) {
         logger.error(`[Balance] getHotWalletBalances error: ${err.message}`);
         return { success: false, message: 'Internal server error' };
-    } finally {
-        await db.close();
     }
 }

@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { MongoDBClient } from '@bemodest/database';
+import { getRedisClient, getDBClient } from '@bemodest/database';
 import logger from '../config/logger.js';
 import {
     JWT_SECRET,
@@ -34,13 +34,11 @@ import {
     validateSignature,
     updateClients
 } from '../utils/helpers.js';
-import { getRedisClient } from '../utils/redis.js';
 import { getIO } from '../socket/state.js';
 import { getHotWalletBalances } from '../utils/balance.js';
 
 export const walletList = async (req, res) => {
     try {
-        const { getDBClient } = await import('../services/db.js');
         const dbClient = await getDBClient();
         const result = await dbClient.readMany(COLLECTION_ADDRS, {}, { projection: { _id: 0 } });
 
@@ -66,7 +64,6 @@ export const walletList = async (req, res) => {
 
 export const walletTotal = async (req, res) => {
     try {
-        const { getDBClient } = await import('../services/db.js');
         const dbClient = await getDBClient();
         const result = await dbClient.readMany(COLLECTION_ADDRS, {}, { projection: { _id: 1 } });
 
@@ -79,7 +76,6 @@ export const walletTotal = async (req, res) => {
 
 export const walletTracking = async (req, res) => {
     try {
-        const { getDBClient } = await import('../services/db.js');
         const dbClient = await getDBClient();
         const result = await dbClient.readMany(COLLECTION_ADDRS, { tracking: true }, { projection: { _id: 1 } });
 
@@ -92,7 +88,6 @@ export const walletTracking = async (req, res) => {
 
 export const entityTotal = async (req, res) => {
     try {
-        const { getDBClient } = await import('../services/db.js');
         const dbClient = await getDBClient();
         const result = await dbClient.readMany(COLLECTION_ENTITES, {}, { projection: { _id: 1 } });
 
@@ -105,8 +100,7 @@ export const entityTotal = async (req, res) => {
 
 export const entityGet = async (req, res) => {
     try {
-        const dbClient = new MongoDBClient();
-        await dbClient.connect();
+        const dbClient = await getDBClient();
         const result = await dbClient.readMany(COLLECTION_ENTITES, req.query || {}, { projection: { _id: 0 } });
 
         result.forEach(item => {
@@ -115,7 +109,6 @@ export const entityGet = async (req, res) => {
             }
         });
 
-        await dbClient.close();
         res.status(200).json({ success: true, data: result });
     } catch (err) {
         logger.error(err);
@@ -125,8 +118,7 @@ export const entityGet = async (req, res) => {
 
 export const coingeckoGet = async (req, res) => {
     try {
-        const dbClient = new MongoDBClient();
-        await dbClient.connect();
+        const dbClient = await getDBClient();
         const rankResult = await dbClient.readMany(COLLECTION_COINGECKO_RANK, req.body,
             {
                 "projection": { "id": 1, "symbol": 1, "current_price": 1, "market_cap_rank": 1, "price_change_percentage_24h": 1, "_id": 0 },
@@ -147,7 +139,6 @@ export const coingeckoGet = async (req, res) => {
 
         const finalResult = [];
         const coingeckoToCAIP2Mapping = await getCoingeckoToCAIP2Mapping(dbClient);
-        await dbClient.close();
 
         rankResult.forEach(obj1 => {
             const platforms = geckoMap.get(obj1.id);
@@ -181,8 +172,7 @@ export const coingeckoGet = async (req, res) => {
 
 export const coingeckoGetSolana = async (req, res) => {
     try {
-        const dbClient = new MongoDBClient();
-        await dbClient.connect();
+        const dbClient = await getDBClient();
         const rankResult = await dbClient.readMany(COLLECTION_COINGECKO_RANK, req.body,
             {
                 "projection": { "id": 1, "symbol": 1, "current_price": 1, "market_cap_rank": 1, "price_change_percentage_24h": 1, "_id": 0 },
@@ -203,7 +193,6 @@ export const coingeckoGetSolana = async (req, res) => {
 
         const finalResult = [];
         const coingeckoToCAIP2Mapping = await getCoingeckoToCAIP2Mapping(dbClient);
-        await dbClient.close();
         rankResult.forEach(obj1 => {
             const platforms = geckoMap.get(obj1.id);
 
@@ -235,8 +224,7 @@ export const coingeckoGetSolana = async (req, res) => {
 export const removeFront = async (req, res) => {
     try {
         const validated = LabelDeleteBulkSchema.parse(req.body);
-        const dbClient = new MongoDBClient();
-        await dbClient.connect();
+        const dbClient = await getDBClient();
 
         const addresses = Array.isArray(validated.address) ? validated.address : [validated.address];
 
@@ -244,7 +232,6 @@ export const removeFront = async (req, res) => {
 
         const result = await dbClient.readMany(COLLECTION_ADDRS, {}, { projection: { _id: 0 } });
         await enrichLabelsWithEntityImages(result, dbClient);
-        await dbClient.close();
 
         const io = getIO();
         if (io) {
@@ -355,8 +342,7 @@ export const updateExcludelist = async (req, res) => {
 
 export const getMarketMetadata = async (req, res) => {
     try {
-        const dbClient = new MongoDBClient();
-        await dbClient.connect();
+        const dbClient = await getDBClient();
 
         // Use 'coingeckoContractMappings' per user instruction
         const docs = await dbClient.readMany('coingeckoContractMappings', {}, {
@@ -367,7 +353,6 @@ export const getMarketMetadata = async (req, res) => {
             projection: { caip2: 1, 'annotation.code': 1, _id: 0 }
         });
 
-        await dbClient.close();
 
         const data = {};
         for (const doc of docs) {
@@ -581,12 +566,10 @@ export const postDeepDiveStop = async (req, res) => {
  */
 export const getAlertRules = async (req, res) => {
     try {
-        const dbClient = new MongoDBClient();
-        await dbClient.connect();
+        const dbClient = await getDBClient();
         const rules = await dbClient.readMany(COLLECTION_ALERT_RULES, {}, {
             sort: { created_at: -1 }
         });
-        await dbClient.close();
         res.status(200).json({ success: true, data: rules });
     } catch (err) {
         logger.error(`getAlertRules Error: ${err.message}`);
@@ -608,14 +591,12 @@ export const createAlertRule = async (req, res) => {
 
     try {
         const now = new Date();
-        const dbClient = new MongoDBClient();
-        await dbClient.connect();
+        const dbClient = await getDBClient();
         const result = await dbClient.insertOne(COLLECTION_ALERT_RULES, {
             ...body,
             created_at: now,
             updated_at: now,
         });
-        await dbClient.close();
 
         const redis = getRedisClient();
         await redis.xadd(REDIS_SIDECAR_CHANNEL, 'MAXLEN', '~', 1000, '*', 'payload', JSON.stringify({ type: 'alertrules_updated' }));
@@ -642,14 +623,12 @@ export const updateAlertRule = async (req, res) => {
 
     try {
         const { ObjectId } = await import('mongodb');
-        const dbClient = new MongoDBClient();
-        await dbClient.connect();
+        const dbClient = await getDBClient();
         await dbClient.updateOne(
             COLLECTION_ALERT_RULES,
             { _id: new ObjectId(id) },
             { $set: { ...body, updated_at: new Date() } }
         );
-        await dbClient.close();
 
         const redis = getRedisClient();
         await redis.xadd(REDIS_SIDECAR_CHANNEL, 'MAXLEN', '~', 1000, '*', 'payload', JSON.stringify({ type: 'alertrules_updated' }));
@@ -670,10 +649,8 @@ export const deleteAlertRule = async (req, res) => {
 
     try {
         const { ObjectId } = await import('mongodb');
-        const dbClient = new MongoDBClient();
-        await dbClient.connect();
+        const dbClient = await getDBClient();
         await dbClient.deleteOne(COLLECTION_ALERT_RULES, { _id: new ObjectId(id) });
-        await dbClient.close();
 
         // Clear sidecar-side Redis state for this rule
         const redis = getRedisClient();
@@ -698,14 +675,12 @@ export const resetWebhookDead = async (req, res) => {
 
     try {
         const { ObjectId } = await import('mongodb');
-        const dbClient = new MongoDBClient();
-        await dbClient.connect();
+        const dbClient = await getDBClient();
         await dbClient.updateOne(
             COLLECTION_ALERT_RULES,
             { _id: new ObjectId(id) },
             { $set: { webhook_dead: false, updated_at: new Date() } }
         );
-        await dbClient.close();
 
         const redis = getRedisClient();
         await redis.xadd(REDIS_SIDECAR_CHANNEL, 'MAXLEN', '~', 1000, '*', 'payload', JSON.stringify({ type: 'alertrules_updated' }));
@@ -727,14 +702,12 @@ export const markWebhookDead = async (req, res) => {
 
     try {
         const { ObjectId } = await import('mongodb');
-        const dbClient = new MongoDBClient();
-        await dbClient.connect();
+        const dbClient = await getDBClient();
         await dbClient.updateOne(
             COLLECTION_ALERT_RULES,
             { _id: new ObjectId(id) },
             { $set: { webhook_dead: true, updated_at: new Date() } }
         );
-        await dbClient.close();
 
         // Notify UI via Socket.IO
         const io = getIO();
@@ -746,4 +719,3 @@ export const markWebhookDead = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to mark webhook dead' });
     }
 };
-

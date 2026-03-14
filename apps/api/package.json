@@ -6,10 +6,10 @@
   "scripts": {
     "start": "node --env-file=.env src/server.js",
     "dev": "nodemon --exec 'node --env-file=.env.dev' src/server.js",
-    "generate:credentials": "node --env-file=.env.dev scripts/generate-credentials.js",
-    "test:auth": "node --env-file=.env.dev scripts/test-auth.js",
-    "test:websocket": "node --env-file=.env.dev scripts/test-websocket.js",
-    "verify:password": "node --env-file=.env.dev scripts/verify-password.js"
+    "generate:credentials": "node --env-file=.env.dev src/scripts/generate-credentials.js",
+    "test:auth": "node --env-file=.env.dev src/scripts/test-auth.js",
+    "test:websocket": "node --env-file=.env.dev src/scripts/test-websocket.js",
+    "verify:password": "node --env-file=.env.dev src/scripts/verify-password.js"
   },
   "author": "",
   "license": "ISC",

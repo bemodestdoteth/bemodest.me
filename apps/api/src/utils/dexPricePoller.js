@@ -1,8 +1,7 @@
 import fetch from 'node-fetch';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { MongoDBClient } from '@bemodest/database';
+import { getRedisClient, getDBClient } from '@bemodest/database';
 import logger from '../config/logger.js';
-import { getRedisClient } from './redis.js';
 import {
     COLLECTION_CONTRACT_MAPPINGS,
     DEX_POLL_WORKERS,
@@ -194,12 +193,10 @@ function* getTaskGenerator(networkToAddresses) {
  * }>}
  */
 async function loadContractMappings() {
-    const db = new MongoDBClient();
-    await db.connect();
+    const db = await getDBClient();
     const docs = await db.readMany(COLLECTION_CONTRACT_MAPPINGS, {}, {
         projection: { id: 1, symbol: 1, contracts: 1, _id: 0 },
     });
-    await db.close();
 
     /** @type {Map<string, string[]>} */
     const networkToAddresses = new Map();
@@ -244,14 +241,12 @@ export async function initDexPricePoller() {
         return;
     }
 
+    const db = await getDBClient();
     const redis = getRedisClient();
     const generator = getTaskGenerator(networkToAddresses);
 
     // Build reverse map: GT Network -> CAIP-2
-    const db = new MongoDBClient();
-    await db.connect();
     const caip2ToGT = await getCaip2ToGeckoTerminalMapping(db);
-    await db.close();
 
     const gtToCaip2 = {};
     for (const [caip2, gt] of Object.entries(caip2ToGT)) {

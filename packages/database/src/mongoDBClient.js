@@ -491,3 +491,31 @@ export class MongoDBClient {
     return mapping;
   }
 }
+
+// Singleton instances for common usage
+let sharedDB = null;
+
+/**
+ * Get the shared MongoDB singleton instance
+ * @returns {Promise<MongoDBClient>}
+ */
+export async function getDBClient() {
+  if (!sharedDB) {
+    sharedDB = new MongoDBClient();
+    await sharedDB.connect();
+    logger.info('[DB] Shared MongoDB connection established');
+  }
+  return sharedDB;
+}
+
+/**
+ * Gracefully close the shared MongoDB connection
+ * @returns {Promise<void>}
+ */
+export async function closeDBClient() {
+  if (sharedDB) {
+    await sharedDB.close();
+    sharedDB = null;
+    logger.info('[DB] Shared MongoDB connection closed');
+  }
+}
