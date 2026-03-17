@@ -1,5 +1,7 @@
 import { logger } from '@bemodest/utils';
-import { COOKIE_NAME, COOKIE_SAME_SITE, COOKIE_MAX_AGE_MS, SIDECAR_URL } from '../../config/env.js';
+import { validateApiConfig } from '@bemodest/config';
+const config = validateApiConfig();
+const { COOKIE_NAME, COOKIE_SAME_SITE, COOKIE_MAX_AGE_MS, SIDECAR_URL } = config;
 import * as authService from './service.js';
 
 export const login = async (req, res) => {

@@ -1,6 +1,8 @@
 import { Server } from 'socket.io';
 import { logger } from '@bemodest/utils';
-import { CHROME_EXTENSION_ID, PORT, CORS_ORIGIN_ALLOWED } from '../config/env.js';
+import { validateApiConfig } from '@bemodest/config';
+const config = validateApiConfig();
+const { CHROME_EXTENSION_ID, PORT, CORS_ORIGIN: CORS_ORIGIN_ALLOWED } = config;
 import { socketAuthMiddleware } from '../middleware/auth.js';
 import { setIO, getIO } from './state.js';
 import {
@@ -15,7 +17,6 @@ import {
     handleLabelGet,
     handleLabelInsert,
     handleLabelUpdate,
-    handleLabelDelete,
     handleWalletTrackingGet,
     handleWalletTotalGet,
     handleWalletsGet,
@@ -61,7 +62,6 @@ export const initSocketIO = (server) => {
         socket.on('labelInsert', (payload) => handleLabelInsert(socket, payload));
         socket.on('labelUpdate', (payload) => handleLabelUpdate(socket, payload));
         socket.on('labelInsertBulk', (payload) => handleLabelInsertBulk(socket, payload));
-        socket.on('labelDelete', (payload) => handleLabelDelete(socket, payload));
         socket.on('walletTrackingGet', () => handleWalletTrackingGet(socket));
         socket.on('walletTotalGet', () => handleWalletTotalGet(socket));
         socket.on('walletsGet', () => handleWalletsGet(socket));

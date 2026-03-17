@@ -1,9 +1,10 @@
-use crate::types::ticker::{
+use crate::types::{
     Exchange, NormalizedTicker,
     parse_decimal, now_micros, strip_scale_factor,
 };
 use serde_json::Value;
 use rust_decimal::Decimal;
+use rust_decimal::prelude::ToPrimitive;
 
 /// Normalise a Bitget spot ticker message.
 ///
@@ -61,12 +62,12 @@ pub fn normalize_bitget_ticker(raw: &Value) -> Option<NormalizedTicker> {
         exchange: Exchange::Bitget,
         base,
         quote: quote.to_string(),
-        o,
-        h,
-        l,
-        c,
-        v_base,
-        v_quote,
+        o: o.to_f64().unwrap_or(0.0),
+        h: h.to_f64().unwrap_or(0.0),
+        l: l.to_f64().unwrap_or(0.0),
+        c: c.to_f64().unwrap_or(0.0),
+        v_base: v_base.to_f64().unwrap_or(0.0),
+        v_quote: v_quote.to_f64().unwrap_or(0.0),
         timestamp_ms,
         market_state: None,
         ingest_time_us: now_micros(),
@@ -75,6 +76,7 @@ pub fn normalize_bitget_ticker(raw: &Value) -> Option<NormalizedTicker> {
         l_krw: None,
         c_krw: None,
         v_quote_krw: None,
+        liquidity: None,
     })
 }
 
@@ -112,15 +114,15 @@ pub fn normalize_bitget_f_ticker(raw: &Value) -> Option<NormalizedTicker> {
     let timestamp_ms = raw.get("ts")?.as_i64()?;
 
     Some(NormalizedTicker {
-        exchange: Exchange::BitgetFutures,
+        exchange: Exchange::BitgetF,
         base,
         quote: quote.to_string(),
-        o: o / factor,
-        h: h / factor,
-        l: l / factor,
-        c: c / factor,
-        v_base: v_base * factor,
-        v_quote,
+        o: (o / factor).to_f64().unwrap_or(0.0),
+        h: (h / factor).to_f64().unwrap_or(0.0),
+        l: (l / factor).to_f64().unwrap_or(0.0),
+        c: (c / factor).to_f64().unwrap_or(0.0),
+        v_base: (v_base * factor).to_f64().unwrap_or(0.0),
+        v_quote: v_quote.to_f64().unwrap_or(0.0),
         timestamp_ms,
         market_state: None,
         ingest_time_us: now_micros(),
@@ -129,5 +131,6 @@ pub fn normalize_bitget_f_ticker(raw: &Value) -> Option<NormalizedTicker> {
         l_krw: None,
         c_krw: None,
         v_quote_krw: None,
+        liquidity: None,
     })
 }

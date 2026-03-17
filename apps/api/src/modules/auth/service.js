@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET, ADMIN_USERNAME, ADMIN_PASSWORD_HASH, JWT_EXPIRES_IN_WEB, JWT_EXPIRES_IN_EXTENSION } from '../../config/env.js';
+import { validateApiConfig } from '@bemodest/config';
+const config = validateApiConfig();
+const { JWT_SECRET, ADMIN_USERNAME, ADMIN_PASSWORD_HASH, JWT_EXPIRES_IN_WEB, JWT_EXPIRES_IN_EXTENSION } = config;
 
 export const verifyAdmin = async (username, password) => {
     if (username !== ADMIN_USERNAME) return false;

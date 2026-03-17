@@ -9,7 +9,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use super::Exchange;
 use crate::normalizer::binance::normalize_binance_ticker_array;
-use crate::types::ticker::Exchange as ExchangeType;
+use crate::types::Exchange as ExchangeType;
 use crate::cache::lvc::LatestValueCache;
 use crate::cache::TokenAnnotationCache;
 use crate::exchanges::batcher::TickerBatcher;
@@ -102,7 +102,7 @@ impl BinanceFExchange {
                                         };
         
                                         // Normalize and upsert to LVC
-                                        let normalized = normalize_binance_ticker_array(&data_content, ExchangeType::BinanceFutures);
+                                        let normalized = normalize_binance_ticker_array(&data_content, ExchangeType::BinanceF);
                                         for mut ticker in normalized {
                                             if config.excludelist.read().unwrap().iter().any(|ex| ticker.base.starts_with(ex)) {
                                                 continue;

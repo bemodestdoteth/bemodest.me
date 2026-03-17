@@ -5,7 +5,7 @@ use std::time::Duration;
 use log::{info, warn, error};
 use futures_util::TryStreamExt;
 
-use crate::types::ticker::{parse_binance_symbol, parse_korean_symbol};
+use crate::types::{parse_binance_symbol, parse_korean_symbol};
 
 /// High-performance token mapping cache using Moka
 /// Maps exchange symbols (e.g., "BTCUSDT") to (base, quote) pairs (e.g., ("BTC", "USDT"))
@@ -79,7 +79,7 @@ impl TokenCache {
     }
 
     /// Get symbol mapping (cache-first, then MongoDB, then static parser)
-    pub async fn get(&self, symbol: &str, exchange_type: ExchangeType) -> Option<(String, String)> {
+    pub async fn get(&self, symbol: &str, exchange: crate::types::Exchange) -> Option<(String, String)> {
         // 1. Check cache first
         if let Some(mapping) = self.cache.get(symbol).await {
             return Some(mapping);
@@ -94,11 +94,12 @@ impl TokenCache {
         }
 
         // 3. Fall back to static parsing
-        let result = match exchange_type {
-            ExchangeType::Binance | ExchangeType::BinanceFutures | ExchangeType::Bybit | ExchangeType::BybitFutures | ExchangeType::Bitget | ExchangeType::BitgetFutures =>
+        use crate::types::Exchange as ticker;
+        let result = match exchange {
+            ticker::Binance | ticker::BinanceF | ticker::Bybit | ticker::BybitF | ticker::Bitget | ticker::BitgetF =>
                 parse_binance_symbol(symbol),
-            ExchangeType::Upbit | ExchangeType::Bithumb => parse_korean_symbol(symbol),
-            ExchangeType::Gateio => {
+            ticker::Upbit | ticker::Bithumb => parse_korean_symbol(symbol),
+            ticker::Gateio => {
                 let parts: Vec<&str> = symbol.split('_').collect();
                 if parts.len() == 2 {
                     Some((parts[0].to_string(), parts[1].to_string()))
@@ -106,7 +107,7 @@ impl TokenCache {
                     None
                 }
             },
-            ExchangeType::Coinbase | ExchangeType::Kucoin | ExchangeType::Okx | ExchangeType::OkxFutures => {
+            ticker::Coinbase | ticker::Kucoin | ticker::Okx | ticker::OkxF => {
                 // Coinbase/KuCoin/OKX product_id format: "BTC-USDT" → ("BTC", "USDT")
                 let parts: Vec<&str> = symbol.splitn(2, '-').collect();
                 if parts.len() == 2 {
@@ -115,7 +116,7 @@ impl TokenCache {
                     None
                 }
             },
-            ExchangeType::Kraken => {
+            ticker::Kraken => {
                 // Kraken WS v2 symbol format: "XBT/USD" → ("XBT", "USD")
                 let parts: Vec<&str> = symbol.splitn(2, '/').collect();
                 if parts.len() == 2 {
@@ -124,12 +125,13 @@ impl TokenCache {
                     None
                 }
             },
-            ExchangeType::Dex => None,
+            ticker::Dex => None,
         };
 
         // Cache the result if found
-        if let Some(ref mapping) = result {
-            self.cache.insert(symbol.to_string(), mapping.clone()).await;
+        if let Some(mapping) = result.as_ref() {
+            let val: (String, String) = mapping.clone();
+            self.cache.insert(symbol.to_string(), val).await;
         }
 
         result
@@ -159,47 +161,5 @@ impl TokenCache {
     /// Get current cache entry count
     pub fn entry_count(&self) -> u64 {
         self.cache.entry_count()
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum ExchangeType {
-    Binance,
-    BinanceFutures,
-    Upbit,
-    Bithumb,
-    Bybit,
-    BybitFutures,
-    Gateio,
-    Bitget,
-    BitgetFutures,
-    Coinbase,
-    Kraken,
-    Kucoin,
-    Okx,
-    OkxFutures,
-    Dex,
-}
-
-impl From<crate::types::ticker::Exchange> for ExchangeType {
-    fn from(e: crate::types::ticker::Exchange) -> Self {
-        use crate::types::ticker::Exchange as ticker;
-        match e {
-            ticker::Binance => ExchangeType::Binance,
-            ticker::BinanceFutures => ExchangeType::BinanceFutures,
-            ticker::Upbit => ExchangeType::Upbit,
-            ticker::Bithumb => ExchangeType::Bithumb,
-            ticker::Bybit => ExchangeType::Bybit,
-            ticker::BybitFutures => ExchangeType::BybitFutures,
-            ticker::Gateio => ExchangeType::Gateio,
-            ticker::Bitget => ExchangeType::Bitget,
-            ticker::BitgetFutures => ExchangeType::BitgetFutures,
-            ticker::Coinbase => ExchangeType::Coinbase,
-            ticker::Kraken => ExchangeType::Kraken,
-            ticker::Kucoin => ExchangeType::Kucoin,
-            ticker::Okx => ExchangeType::Okx,
-            ticker::OkxFutures => ExchangeType::OkxFutures,
-            ticker::Dex => ExchangeType::Dex,
-        }
     }
 }

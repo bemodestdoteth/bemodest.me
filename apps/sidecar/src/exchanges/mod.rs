@@ -15,6 +15,7 @@ pub mod kraken;
 pub mod kucoin;
 pub mod okx;
 pub mod okx_f;
+pub mod geckoterminal;
 
 #[async_trait]
 pub trait Exchange: Send + Sync {

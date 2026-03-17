@@ -1,5 +1,5 @@
 use papaya::HashMap;
-use crate::types::ticker::{NormalizedTicker, Exchange};
+use crate::types::{NormalizedTicker, Exchange};
 use log::trace;
 
 /// Lock-free Latest-Value Cache using Papaya
@@ -42,6 +42,7 @@ impl LatestValueCache {
         let guard = self.inner.guard();
         let mut results = Vec::new();
         for (key, val) in self.inner.iter(&guard) {
+            let key: &String = key;
             if key.ends_with(&suffix) {
                 results.push(val.clone());
             }
@@ -54,6 +55,7 @@ impl LatestValueCache {
         let guard = self.inner.guard();
         let mut results = Vec::new();
         for (_, val) in self.inner.iter(&guard) {
+            let val: &NormalizedTicker = val;
             if val.base == base {
                 results.push(val.clone());
             }
@@ -64,7 +66,7 @@ impl LatestValueCache {
     /// Return a full snapshot of all cached tickers
     pub fn snapshot(&self) -> Vec<NormalizedTicker> {
         let guard = self.inner.guard();
-        self.inner.iter(&guard).map(|(_, v)| v.clone()).collect()
+        self.inner.iter(&guard).map(|(_, v): (&String, &NormalizedTicker)| v.clone()).collect()
     }
 
     /// Number of entries in the cache

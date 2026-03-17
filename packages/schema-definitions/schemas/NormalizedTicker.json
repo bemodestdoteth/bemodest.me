@@ -1,0 +1,96 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "NormalizedTicker",
+    "type": "object",
+    "properties": {
+        "exchange": {
+            "type": "string",
+            "enum": [
+                "binance",
+                "binance_f",
+                "upbit",
+                "bithumb",
+                "bybit",
+                "bybit_f",
+                "gateio",
+                "bitget",
+                "bitget_f",
+                "coinbase",
+                "kraken",
+                "kucoin",
+                "okx",
+                "okx_f",
+                "dex"
+            ]
+        },
+        "base": {
+            "type": "string"
+        },
+        "quote": {
+            "type": "string"
+        },
+        "o": {
+            "type": "number"
+        },
+        "h": {
+            "type": "number"
+        },
+        "l": {
+            "type": "number"
+        },
+        "c": {
+            "type": "number"
+        },
+        "v_base": {
+            "type": "number"
+        },
+        "v_quote": {
+            "type": "number"
+        },
+        "liquidity": {
+            "type": "number"
+        },
+        "timestamp_ms": {
+            "type": "integer"
+        },
+        "market_state": {
+            "type": "string",
+            "enum": [
+                "Preview",
+                "Active",
+                "Suspended"
+            ]
+        },
+        "ingest_time_us": {
+            "type": "integer"
+        },
+        "o_krw": {
+            "type": "number"
+        },
+        "h_krw": {
+            "type": "number"
+        },
+        "l_krw": {
+            "type": "number"
+        },
+        "c_krw": {
+            "type": "number"
+        },
+        "v_quote_krw": {
+            "type": "number"
+        }
+    },
+    "required": [
+        "exchange",
+        "base",
+        "quote",
+        "o",
+        "h",
+        "l",
+        "c",
+        "v_base",
+        "v_quote",
+        "timestamp_ms",
+        "ingest_time_us"
+    ]
+}

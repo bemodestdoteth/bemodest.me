@@ -1,6 +1,6 @@
 use crate::cache::lvc::LatestValueCache;
 use crate::comparison::compare_pair;
-use crate::types::ticker::Exchange;
+use crate::types::Exchange;
 use serde_json::{json, Value};
 use log::debug;
 
@@ -114,13 +114,22 @@ fn api_error(cmd: &str, error: &str) -> Value {
     })
 }
 
-/// Parse exchange name string to Exchange enum
 fn parse_exchange(s: &str) -> Option<Exchange> {
     match s.to_lowercase().as_str() {
         "binance" => Some(Exchange::Binance),
-        "binance_f" | "binance_futures" => Some(Exchange::BinanceFutures),
+        "binance_f" | "binance_futures" => Some(Exchange::BinanceF),
         "upbit" => Some(Exchange::Upbit),
         "bithumb" => Some(Exchange::Bithumb),
+        "bybit" => Some(Exchange::Bybit),
+        "bybit_f" | "bybit_futures" => Some(Exchange::BybitF),
+        "gateio" | "gate" => Some(Exchange::Gateio),
+        "bitget" => Some(Exchange::Bitget),
+        "bitget_f" | "bitget_futures" => Some(Exchange::BitgetF),
+        "coinbase" => Some(Exchange::Coinbase),
+        "kraken" => Some(Exchange::Kraken),
+        "kucoin" => Some(Exchange::Kucoin),
+        "okx" => Some(Exchange::Okx),
+        "okx_f" | "okx_futures" => Some(Exchange::OkxF),
         _ => None,
     }
 }

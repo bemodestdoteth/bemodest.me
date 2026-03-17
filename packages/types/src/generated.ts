@@ -34,3 +34,49 @@ export enum Type {
     ExcludelistUpdated = "excludelist_updated",
     PinlistUpdated = "pinlist_updated",
 }
+
+export interface NormalizedTicker {
+    base:           string;
+    c:              number;
+    c_krw?:         number;
+    exchange:       Exchange;
+    h:              number;
+    h_krw?:         number;
+    ingest_time_us: number;
+    l:              number;
+    l_krw?:         number;
+    liquidity?:     number;
+    market_state?:  MarketState;
+    o:              number;
+    o_krw?:         number;
+    quote:          string;
+    timestamp_ms:   number;
+    v_base:         number;
+    v_quote:        number;
+    v_quote_krw?:   number;
+    [property: string]: any;
+}
+
+export enum Exchange {
+    Binance = "binance",
+    BinanceF = "binance_f",
+    Bitget = "bitget",
+    BitgetF = "bitget_f",
+    Bithumb = "bithumb",
+    Bybit = "bybit",
+    BybitF = "bybit_f",
+    Coinbase = "coinbase",
+    Dex = "dex",
+    Gateio = "gateio",
+    Kraken = "kraken",
+    Kucoin = "kucoin",
+    Okx = "okx",
+    OkxF = "okx_f",
+    Upbit = "upbit",
+}
+
+export enum MarketState {
+    Active = "Active",
+    Preview = "Preview",
+    Suspended = "Suspended",
+}

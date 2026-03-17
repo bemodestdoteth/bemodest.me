@@ -4,7 +4,7 @@ use log::{info, warn, error};
 
 use crate::cache::lvc::LatestValueCache;
 use crate::cache::EligibilityFilter;
-use crate::types::ticker::NormalizedTicker;
+use crate::types::NormalizedTicker;
 use std::sync::Arc;
 use serde_json::Value;
 

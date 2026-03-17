@@ -1,11 +1,14 @@
 import { getRedisClient, getDBClient } from '@bemodest/database';
 import { logger } from '@bemodest/utils';
 import { getRpcUrl, reportRpcFailure } from '@bemodest/utils';
-import {
+import { validateApiConfig } from '@bemodest/config';
+const config = validateApiConfig();
+const {
     COLLECTION_ADDRS,
     COLLECTION_CONTRACT_MAPPINGS,
     COLLECTION_COINGECKO_RANK,
-} from '../config/env.js';
+    COLLECTION_CHAINS
+} = config;
 // Removed shadow import
 import { getBalanceOnChain as sharedGetBalanceOnChain } from '@bemodest/utils';
 

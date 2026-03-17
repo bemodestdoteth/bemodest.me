@@ -3,12 +3,14 @@ import fs from 'node:fs/promises';
 import { MongoDBClient } from '@bemodest/database';
 import { ObjectId } from 'mongodb';
 import { logger } from '@bemodest/utils';
-import {
+import { validateApiConfig } from '@bemodest/config';
+const config = validateApiConfig();
+const {
     COLLECTION_ADDRS,
     COLLECTION_CHAINS,
     COLLECTION_ENTITES,
     IMAGE_SIZE_LIMIT_BYTES
-} from '../config/env.js';
+} = config;
 import {
     ChainGetSchema,
     EntityGetSchema,
@@ -758,42 +760,6 @@ export async function handleLabelUpdate(socket, payload) {
             error: {
                 code: err.name === 'ZodError' ? 'VALIDATION_ERROR' : 'UPDATE_ERROR',
                 message: err.message || 'Failed to update label'
-            }
-        });
-    }
-}
-
-export async function handleLabelDelete(socket, payload) {
-    try {
-        const validated = LabelDeleteSchema.parse(payload);
-        logger.info(`[Socket.IO] Client ${socket.id} sent labelDelete request`);
-
-        const dbClient = new MongoDBClient();
-        await dbClient.connect();
-        await dbClient.deleteOne(COLLECTION_ADDRS, validated.body);
-        const result = await dbClient.readMany(COLLECTION_ADDRS, {}, { projection: { _id: 0 } });
-        await dbClient.enrichLabelsWithEntityImages(result, COLLECTION_ENTITES);
-        await dbClient.close();
-
-        const io = getIO();
-        io.emit('labelUpdate', {
-            success: true,
-            data: result,
-            timestamp: Date.now()
-        });
-
-        socket.emit('success', {
-            success: true,
-            data: `Successfully deleted label: ${validated.body.addr}`,
-            timestamp: Date.now()
-        });
-    } catch (err) {
-        logger.error('[Socket.IO] labelDelete Error:', err);
-        socket.emit('failure', {
-            success: false,
-            error: {
-                code: err.name === 'ZodError' ? 'VALIDATION_ERROR' : 'DELETE_ERROR',
-                message: err.message || 'Failed to delete label'
             }
         });
     }

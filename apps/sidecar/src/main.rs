@@ -26,7 +26,7 @@ use std::error::Error;
 use tokio::sync::{broadcast, RwLock};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use crate::exchanges::{ExchangeManager, binance::BinanceExchange, upbit::UpbitExchange, bithumb::BithumbExchange, binance_f::BinanceFExchange, bybit::BybitExchange, bybit_f::BybitFExchange, gateio::GateioExchange, bitget::BitgetExchange, bitget_f::BitgetFExchange, coinbase::CoinbaseExchange, kraken::KrakenExchange, kucoin::KucoinExchange, okx::OkxExchange, okx_f::OkxFExchange};
+use crate::exchanges::{ExchangeManager, binance::BinanceExchange, upbit::UpbitExchange, bithumb::BithumbExchange, binance_f::BinanceFExchange, bybit::BybitExchange, bybit_f::BybitFExchange, gateio::GateioExchange, bitget::BitgetExchange, bitget_f::BitgetFExchange, coinbase::CoinbaseExchange, kraken::KrakenExchange, kucoin::KucoinExchange, okx::OkxExchange, okx_f::OkxFExchange, geckoterminal::GeckoterminalExchange};
 use redis::AsyncCommands;
 
 
@@ -338,6 +338,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         // Register OKX Futures (Lazy connect)
         let okx_f = Box::new(OkxFExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
         mg.register("okx_f", okx_f);
+
+        // Register Geckoterminal (DEX Poller)
+        let gt = Box::new(GeckoterminalExchange::new(tx.clone(), lvc.clone(), tac.clone(), config.clone()));
+        mg.register("geckoterminal", gt);
     }
     
     // Start DEX Redis subscriber (forwards dex_prices channel into broadcast tx)

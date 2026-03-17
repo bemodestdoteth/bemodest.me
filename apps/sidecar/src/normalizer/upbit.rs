@@ -1,4 +1,4 @@
-use crate::types::ticker::{
+use crate::types::{
     Exchange, MarketState, NormalizedTicker,
     parse_decimal, parse_korean_symbol, now_micros,
 };
@@ -52,7 +52,7 @@ pub fn normalize_upbit_ticker(
     raw: &Value,
     exchange: Exchange,
     krw_per_usd: Option<f64>,
-    btc_krw: Option<Decimal>,
+    btc_krw: Option<f64>,
 ) -> Option<NormalizedTicker> {
     let code = raw.get("cd")?.as_str()?;
     let (base, quote) = parse_korean_symbol(code)?;
@@ -71,6 +71,9 @@ pub fn normalize_upbit_ticker(
         .get("ms")
         .and_then(|v| v.as_str())
         .and_then(|s| MarketState::from_str(s).ok());
+
+    // Internal decimal btc_krw for calculations
+    let btc_krw_dec = btc_krw.and_then(|p| Decimal::from_f64_retain(p));
 
     // For KRW pairs: preserve originals and optionally convert to USD
     let (o, h, l, c, v_quote, o_krw, h_krw, l_krw, c_krw, v_quote_krw) = if quote == "KRW" {
@@ -99,7 +102,7 @@ pub fn normalize_upbit_ticker(
         }
     } else if quote == "BTC" {
         // BTC-denominated pair: convert to KRW via BTC/KRW price, then to USD
-        match btc_krw {
+        match btc_krw_dec {
             Some(btc_krw_price) if !btc_krw_price.is_zero() => {
                 let o_k = o_raw * btc_krw_price;
                 let h_k = h_raw * btc_krw_price;
@@ -138,24 +141,27 @@ pub fn normalize_upbit_ticker(
         (o_raw, h_raw, l_raw, c_raw, v_quote_raw, None, None, None, None, None)
     };
 
+    use rust_decimal::prelude::ToPrimitive;
+
     Some(NormalizedTicker {
         exchange,
         base,
         quote,
-        o,
-        h,
-        l,
-        c,
-        v_base,
-        v_quote,
+        o: o.to_f64().unwrap_or(0.0),
+        h: h.to_f64().unwrap_or(0.0),
+        l: l.to_f64().unwrap_or(0.0),
+        c: c.to_f64().unwrap_or(0.0),
+        v_base: v_base.to_f64().unwrap_or(0.0),
+        v_quote: v_quote.to_f64().unwrap_or(0.0),
         timestamp_ms,
         market_state,
         ingest_time_us: now_micros(),
-        o_krw,
-        h_krw,
-        l_krw,
-        c_krw,
-        v_quote_krw,
+        o_krw: o_krw.and_then(|v| v.to_f64()),
+        h_krw: h_krw.and_then(|v| v.to_f64()),
+        l_krw: l_krw.and_then(|v| v.to_f64()),
+        c_krw: c_krw.and_then(|v| v.to_f64()),
+        v_quote_krw: v_quote_krw.and_then(|v| v.to_f64()),
+        liquidity: None,
     })
 }
 

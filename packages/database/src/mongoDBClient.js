@@ -98,6 +98,7 @@ export class MongoDBClient {
    */
   async count(collectionName, query) {
     try {
+      this._ensureConnected();
       const collection = this.database.collection(collectionName);
       const count = await collection.countDocuments(query, { maxTimeMS: this.maxTimeMS }); // RULES D-6004
       return count;
@@ -120,6 +121,7 @@ export class MongoDBClient {
    */
   async createOne(collectionName, document) {
     try {
+      this._ensureConnected();
       const collection = this.database.collection(collectionName);
       const result = await collection.insertOne(document);
       return result;
@@ -141,6 +143,7 @@ export class MongoDBClient {
    */
   async readOne(collectionName, query) {
     try {
+      this._ensureConnected();
       const collection = this.database.collection(collectionName);
       const document = await collection.findOne(query, { maxTimeMS: this.maxTimeMS }); // RULES D-6004
       return document;
@@ -163,6 +166,7 @@ export class MongoDBClient {
    */
   async updateOne(collectionName, query, update) {
     try {
+      this._ensureConnected();
       const collection = this.database.collection(collectionName);
       const result = await collection.updateOne(query, update, { maxTimeMS: this.maxTimeMS }); // RULES D-6004
       return result;
@@ -184,6 +188,7 @@ export class MongoDBClient {
    */
   async deleteOne(collectionName, query) {
     try {
+      this._ensureConnected();
       const collection = this.database.collection(collectionName);
       const result = await collection.deleteOne(query, { maxTimeMS: this.maxTimeMS }); // RULES D-6004
       return result;
@@ -209,6 +214,7 @@ export class MongoDBClient {
    */
   async createMany(collectionName, documents) {
     try {
+      this._ensureConnected();
       const collection = this.database.collection(collectionName);
       const result = await collection.insertMany(documents);
       return result;
@@ -231,6 +237,7 @@ export class MongoDBClient {
    */
   async readMany(collectionName, query, options = {}) {
     try {
+      this._ensureConnected();
       const collection = this.database.collection(collectionName);
       // RULES D-6004: Add maxTimeMS timeout
       const cursor = collection.find(query, { ...options, maxTimeMS: this.maxTimeMS });
@@ -255,6 +262,7 @@ export class MongoDBClient {
    */
   async updateMany(collectionName, query, update) {
     try {
+      this._ensureConnected();
       const collection = this.database.collection(collectionName);
       const result = await collection.updateMany(query, update, { maxTimeMS: this.maxTimeMS }); // RULES D-6004
       return result;
@@ -276,6 +284,7 @@ export class MongoDBClient {
    */
   async deleteMany(collectionName, query) {
     try {
+      this._ensureConnected();
       const collection = this.database.collection(collectionName);
       const result = await collection.deleteMany(query, { maxTimeMS: this.maxTimeMS }); // RULES D-6004
       return result;
@@ -297,6 +306,7 @@ export class MongoDBClient {
    */
   async aggregate(collectionName, pipeline) {
     try {
+      this._ensureConnected();
       const collection = this.database.collection(collectionName);
       const cursor = collection.aggregate(pipeline, { maxTimeMS: this.maxTimeMS }); // RULES D-6004
       const result = await cursor.toArray();
@@ -310,6 +320,17 @@ export class MongoDBClient {
   // --------------------
   // Helper Methods
   // --------------------
+  /**
+   * Internal helper to ensure database is connected before operations
+   * @private
+   * @throws {Error} If database is not connected
+   */
+  _ensureConnected() {
+    if (!this.database) {
+      throw new Error('MongoDBClient: Database not connected. Call connect() first.');
+    }
+  }
+
   /**
    * Converts image file to Base64 string for BSON storage
    * @async
@@ -355,6 +376,7 @@ export class MongoDBClient {
    * @returns {Promise<Array>} - Enriched chains
    */
   async getChainsWithCounts(chainsCollection, addrsCollection, query = {}) {
+    this._ensureConnected();
     const chains = await this.readMany(chainsCollection, query);
 
     // Aggregate label counts per chain (unwind array → count each chain independently)
@@ -385,6 +407,7 @@ export class MongoDBClient {
    * @returns {Promise<Record<string, string>>}
    */
   async getCoingeckoToCAIP2Mapping(chainsCollection) {
+    this._ensureConnected();
     const chainsResult = await this.readMany(chainsCollection, {}, {
       projection: { "annotation.coingecko": 1, "caip2": 1, "_id": 0 }
     });
@@ -406,6 +429,7 @@ export class MongoDBClient {
    * @returns {Promise<Array<object>>} Enriched labels
    */
   async enrichLabelsWithEntityImages(labels, entitiesCollection) {
+    this._ensureConnected();
     if (!Array.isArray(labels) || labels.length === 0) return labels;
 
     const entities = await this.readMany(entitiesCollection, {}, { projection: { _id: 0, name: 1, image: 1 } });
@@ -432,6 +456,7 @@ export class MongoDBClient {
    * @returns {Promise<Record<string, string>>}
    */
   async getCoingeckoToDuneMapping(chainsCollection) {
+    this._ensureConnected();
     const chainsResult = await this.readMany(chainsCollection, {}, {
       projection: { "annotation.coingecko": 1, "annotation.dune": 1, "_id": 0 }
     });
@@ -452,6 +477,7 @@ export class MongoDBClient {
    * @returns {Promise<Record<string, string>>}
    */
   async getCaip2ToCoingeckoMapping(chainsCollection) {
+    this._ensureConnected();
     const chainsResult = await this.readMany(chainsCollection, {}, {
       projection: { "annotation.coingecko": 1, "caip2": 1, "_id": 0 }
     });
@@ -472,6 +498,7 @@ export class MongoDBClient {
    * @returns {Promise<Record<string, string>>}
    */
   async getCaip2ToGeckoTerminalMapping(chainsCollection) {
+    this._ensureConnected();
     const chainsResult = await this.readMany(chainsCollection, {}, {
       projection: { "annotation.geckoterminal": 1, "caip2": 1, "_id": 0 }
     });
@@ -488,18 +515,26 @@ export class MongoDBClient {
 
 // Singleton instances for common usage
 let sharedDB = null;
+let connectionPromise = null;
 
 /**
  * Get the shared MongoDB singleton instance
  * @returns {Promise<MongoDBClient>}
  */
 export async function getDBClient() {
-  if (!sharedDB) {
-    sharedDB = new MongoDBClient();
-    await sharedDB.connect();
-    logger.info('[DB] Shared MongoDB connection established');
+  if (sharedDB) return sharedDB;
+
+  if (!connectionPromise) {
+    connectionPromise = (async () => {
+      const db = new MongoDBClient();
+      await db.connect();
+      sharedDB = db;
+      logger.info('[DB] Shared MongoDB connection established');
+      return db;
+    })();
   }
-  return sharedDB;
+
+  return connectionPromise;
 }
 
 /**
@@ -510,6 +545,7 @@ export async function closeDBClient() {
   if (sharedDB) {
     await sharedDB.close();
     sharedDB = null;
+    connectionPromise = null;
     logger.info('[DB] Shared MongoDB connection closed');
   }
 }

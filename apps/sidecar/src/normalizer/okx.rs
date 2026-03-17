@@ -1,7 +1,8 @@
-use crate::types::ticker::{
+use crate::types::{
     Exchange, NormalizedTicker,
     parse_decimal, now_micros,
 };
+use rust_decimal::prelude::ToPrimitive;
 use serde_json::Value;
 
 /// Normalize an OKX SPOT ticker WebSocket push message.
@@ -87,12 +88,12 @@ pub fn normalize_okx_ticker(raw: &Value) -> Option<NormalizedTicker> {
         exchange: Exchange::Okx,
         base,
         quote,
-        o,
-        h,
-        l,
-        c,
-        v_base,
-        v_quote,
+        o: o.to_f64().unwrap_or(0.0),
+        h: h.to_f64().unwrap_or(0.0),
+        l: l.to_f64().unwrap_or(0.0),
+        c: c.to_f64().unwrap_or(0.0),
+        v_base: v_base.to_f64().unwrap_or(0.0),
+        v_quote: v_quote.to_f64().unwrap_or(0.0),
         timestamp_ms,
         market_state: None,
         ingest_time_us: now_micros(),
@@ -101,5 +102,6 @@ pub fn normalize_okx_ticker(raw: &Value) -> Option<NormalizedTicker> {
         l_krw: None,
         c_krw: None,
         v_quote_krw: None,
+        liquidity: None,
     })
 }

@@ -1,7 +1,8 @@
-use crate::types::ticker::{
+use crate::types::{
     Exchange, NormalizedTicker, MarketState,
     parse_decimal, parse_binance_symbol, now_micros, strip_scale_factor,
 };
+use rust_decimal::prelude::ToPrimitive;
 use serde_json::Value;
 
 /// Normalize a single Binance miniTicker object into NormalizedTicker
@@ -23,7 +24,7 @@ pub fn normalize_binance_ticker(raw: &Value, exchange: Exchange) -> Option<Norma
     let (raw_base, quote) = parse_binance_symbol(symbol)?;
 
     // For futures, strip any 1000x-style scale factor (e.g. "1000SHIB" -> "SHIB", divisor=1000)
-    let (base, scale) = if exchange == Exchange::BinanceFutures {
+    let (base, scale) = if exchange == Exchange::BinanceF {
         strip_scale_factor(&raw_base)
     } else {
         (raw_base, rust_decimal::Decimal::ONE)
@@ -41,12 +42,12 @@ pub fn normalize_binance_ticker(raw: &Value, exchange: Exchange) -> Option<Norma
         exchange,
         base,
         quote,
-        o,
-        h,
-        l,
-        c,
-        v_base,
-        v_quote,
+        o: o.to_f64().unwrap_or(0.0),
+        h: h.to_f64().unwrap_or(0.0),
+        l: l.to_f64().unwrap_or(0.0),
+        c: c.to_f64().unwrap_or(0.0),
+        v_base: v_base.to_f64().unwrap_or(0.0),
+        v_quote: v_quote.to_f64().unwrap_or(0.0),
         timestamp_ms,
         market_state: Some(MarketState::Active), // Binance doesn't provide this
         ingest_time_us: now_micros(),
@@ -55,6 +56,7 @@ pub fn normalize_binance_ticker(raw: &Value, exchange: Exchange) -> Option<Norma
         l_krw: None,
         c_krw: None,
         v_quote_krw: None,
+        liquidity: None,
     })
 }
 

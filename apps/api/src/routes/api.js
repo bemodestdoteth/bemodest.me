@@ -2,7 +2,9 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { getRedisClient, getDBClient } from '@bemodest/database';
 import { logger, validateSignature } from '@bemodest/utils';
-import {
+import { validateApiConfig } from '@bemodest/config';
+const config = validateApiConfig();
+const {
     JWT_SECRET,
     ADMIN_USERNAME,
     ADMIN_PASSWORD_HASH,
@@ -20,7 +22,7 @@ import {
     SIDECAR_URL,
     DW_TASKS_STREAM,
     DW_STATUS_TTL_S
-} from '../config/env.js';
+} = config;
 import {
     LabelDeleteBulkSchema,
     DwStatusBodySchema,
@@ -277,12 +279,6 @@ export const getExchSnapperReport = async (req, res) => {
 };
 
 
-
-export const labelDelete = (req, res) => {
-    // Placeholder for missing REST handler
-    logger.warn('labelDelete REST API called - implementation is missing');
-    res.status(501).json({ success: false, message: 'Not implemented' });
-};
 
 // ── Dynamic Excludelist Management ──────────────────────────────────────────
 

@@ -1,4 +1,5 @@
-import { COLLECTION_ADDRS } from '../config/env.js';
+import { validateApiConfig } from '@bemodest/config';
+const { COLLECTION_ADDRS } = validateApiConfig();
 import { JsonRpcProvider, FetchRequest } from 'ethers';
 import { MongoDBClient } from '@bemodest/database';
 import { logger } from '@bemodest/utils';

@@ -1,8 +1,9 @@
-use crate::types::ticker::{
+use crate::types::{
     Exchange, NormalizedTicker,
     parse_decimal, parse_binance_symbol, now_micros,
 };
 use serde_json::Value;
+use rust_decimal::prelude::ToPrimitive;
 
 /// Normalize a single Bybit spot ticker WebSocket message into [`NormalizedTicker`].
 ///
@@ -33,12 +34,12 @@ pub fn normalize_bybit_ticker(raw: &Value) -> Option<NormalizedTicker> {
     let symbol = data.get("symbol")?.as_str()?;
     let (base, quote) = parse_binance_symbol(symbol)?;
 
-    let o = parse_decimal(data.get("prevPrice24h")?.as_str()?)?;
-    let h = parse_decimal(data.get("highPrice24h")?.as_str()?)?;
-    let l = parse_decimal(data.get("lowPrice24h")?.as_str()?)?;
-    let c = parse_decimal(data.get("lastPrice")?.as_str()?)?;
-    let v_base = parse_decimal(data.get("volume24h")?.as_str()?)?;
-    let v_quote = parse_decimal(data.get("turnover24h")?.as_str()?)?;
+    let o = parse_decimal(data.get("prevPrice24h")?.as_str()?)?.to_f64().unwrap_or(0.0);
+    let h = parse_decimal(data.get("highPrice24h")?.as_str()?)?.to_f64().unwrap_or(0.0);
+    let l = parse_decimal(data.get("lowPrice24h")?.as_str()?)?.to_f64().unwrap_or(0.0);
+    let c = parse_decimal(data.get("lastPrice")?.as_str()?)?.to_f64().unwrap_or(0.0);
+    let v_base = parse_decimal(data.get("volume24h")?.as_str()?)?.to_f64().unwrap_or(0.0);
+    let v_quote = parse_decimal(data.get("turnover24h")?.as_str()?)?.to_f64().unwrap_or(0.0);
 
     // `ts` is the exchange timestamp in milliseconds
     let timestamp_ms = raw.get("ts")?.as_i64()?;
@@ -61,5 +62,6 @@ pub fn normalize_bybit_ticker(raw: &Value) -> Option<NormalizedTicker> {
         l_krw: None,
         c_krw: None,
         v_quote_krw: None,
+        liquidity: None,
     })
 }

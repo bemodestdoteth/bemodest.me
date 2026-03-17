@@ -11,7 +11,7 @@ use log::{info, warn, error, debug};
 
 use crate::cache::{LatestValueCache, PriceHistoryCache, PriceSample};
 use crate::config::Config;
-use crate::types::ticker::now_micros;
+use crate::types::now_micros;
 use crate::alert::types::{AlertCondition, AlertFiredEvent, AlertRule, AlertState, AlertStatus};
 use crate::alert::state::AlertStateStore;
 
@@ -122,7 +122,7 @@ pub async fn run_history_sampler(
             if now_us - ticker.ingest_time_us >= STALE_THRESHOLD_US {
                 continue;
             }
-            if ticker.v_quote.to_f64().unwrap_or(0.0) < VOLUME_FLOOR_USD {
+            if ticker.v_quote < VOLUME_FLOOR_USD {
                 continue;
             }
             history.push(
@@ -165,12 +165,12 @@ pub async fn run(
 
         // ── 2. Group live tickers by (base, quote) ───────────────────────
         // Key: "BASE:QUOTE", Value: list of (exchange_id, close_price, v_quote)
-        let mut groups: HashMap<String, Vec<(String, Decimal, Decimal)>> = HashMap::new();
+        let mut groups: HashMap<String, Vec<(String, f64, f64)>> = HashMap::new();
         for ticker in &snapshot {
             if now_us - ticker.ingest_time_us >= STALE_THRESHOLD_US {
                 continue;
             }
-            if ticker.v_quote.to_f64().unwrap_or(0.0) < VOLUME_FLOOR_USD {
+            if ticker.v_quote < VOLUME_FLOOR_USD {
                 continue;
             }
             let key = format!("{}:{}", ticker.base, ticker.quote);
@@ -199,7 +199,7 @@ pub async fn run(
             };
 
             // Filter to whitelisted exchanges (empty = all)
-            let entries: Vec<(String, Decimal, Decimal)> = if rule.exchanges.is_empty() {
+            let entries: Vec<(String, f64, f64)> = if rule.exchanges.is_empty() {
                 all_entries
             } else {
                 all_entries
@@ -226,14 +226,14 @@ pub async fn run(
                 };
 
             // Threshold check
-            if metric_value <= Decimal::from_f64_retain(rule.value).unwrap_or_default() {
+            if metric_value <= rule.value {
                 continue;
             }
 
             // Hysteresis: if already triggered check recovery_value
             // (We rely on the cooldown lock as the primary gate; this is a
             //  belt-and-suspenders check for fast re-trigger within one cooldown window.)
-            if metric_value <= Decimal::from_f64_retain(rule.recovery_value).unwrap_or_default() {
+            if metric_value <= rule.recovery_value {
                 continue;
             }
 
@@ -255,9 +255,9 @@ pub async fn run(
                 condition: rule.condition.clone(),
                 ticker: rule.ticker.clone(),
                 quote: rule.quote.clone(),
-                exchanges: entries.iter().map(|(ex, _, _)| ex.clone()).collect(),
+                exchanges: entries.iter().map(|(ex, _, _)| ex.to_string()).collect(),
                 value: metric_value,
-                threshold: Decimal::from_f64_retain(rule.value).unwrap_or_default(),
+                threshold: rule.value,
                 highest_exchange: highest_exchange.clone(),
                 lowest_exchange: lowest_exchange.clone(),
                 price_high,
@@ -302,7 +302,7 @@ pub async fn run(
                 !lower.starts_with("dex_")
             });
 
-            if let Some((_, price, _)) = entries.into_iter().max_by_key(|(_, _, vol)| *vol) {
+            if let Some((_, price, _)) = entries.into_iter().max_by(|(_, _, v1), (_, _, v2)| v1.partial_cmp(v2).unwrap()) {
                 // Key: BASE, Field: USD Price
                 // We use only the Base symbol as the key for lvc:prices hash
                 if let Some(base) = pair.split(':').next() {
@@ -328,19 +328,18 @@ pub async fn run(
 /// or `None` if the condition cannot be evaluated (e.g. insufficient history).
 fn evaluate_condition(
     rule: &AlertRule,
-    entries: &[(String, Decimal, Decimal)],
+    entries: &[(String, f64, f64)],
     history: &PriceHistoryCache,
-) -> Option<(Decimal, Option<String>, Option<String>, Option<Decimal>, Option<Decimal>)> {
+) -> Option<(f64, Option<String>, Option<String>, Option<f64>, Option<f64>)> {
     match rule.condition {
         // ── spread_pct ───────────────────────────────────────────────────
         AlertCondition::SpreadPct => {
-            let min = entries.iter().min_by_key(|(_, p, _)| *p)?;
-            let max = entries.iter().max_by_key(|(_, p, _)| *p)?;
-            if min.1.is_zero() {
+            let min = entries.iter().min_by(|(_, p1, _), (_, p2, _)| p1.partial_cmp(p2).unwrap())?;
+            let max = entries.iter().max_by(|(_, p1, _), (_, p2, _)| p1.partial_cmp(p2).unwrap())?;
+            if min.1 <= 0.0 {
                 return None;
             }
-            let hundred = Decimal::from(100u32);
-            let spread = (max.1 - min.1) / min.1 * hundred;
+            let spread = (max.1 - min.1) / min.1 * 100.0;
             Some((
                 spread,
                 Some(max.0.clone()),
@@ -353,17 +352,15 @@ fn evaluate_condition(
         // ── price_above ──────────────────────────────────────────────────
         AlertCondition::PriceAbove => {
             // Average price across whitelisted exchanges
-            let sum: Decimal = entries.iter().map(|(_, p, _)| *p).sum();
-            let count = Decimal::from(entries.len() as u32);
-            let avg = sum / count;
+            let sum: f64 = entries.iter().map(|(_, p, _)| *p).sum();
+            let avg = sum / (entries.len() as f64);
             Some((avg, None, None, None, None))
         }
 
         // ── price_below ──────────────────────────────────────────────────
         AlertCondition::PriceBelow => {
-            let sum: Decimal = entries.iter().map(|(_, p, _)| *p).sum();
-            let count = Decimal::from(entries.len() as u32);
-            let avg = sum / count;
+            let sum: f64 = entries.iter().map(|(_, p, _)| *p).sum();
+            let avg = sum / (entries.len() as f64);
             // For PriceBelow, the metric is -(avg) so the threshold comparison
             // `metric > rule.value` fires when avg < -rule.value.
             // We store the actual avg as price data but negate for the comparison.
@@ -378,13 +375,11 @@ fn evaluate_condition(
                 PriceHistoryCache::make_key(exchange, &rule.ticker, &rule.quote);
             let samples = history.get_last_n(&hist_key, 300); // up to 5 min
             let oldest = samples.first()?;
-            if oldest.price.is_zero() {
+            if oldest.price <= 0.0 {
                 return None;
             }
-            let hundred = Decimal::from(100u32);
-            let change_pct = (*current_price - oldest.price) / oldest.price * hundred;
-            let abs_change = change_pct.abs();
-            Some((abs_change, None, None, None, None))
+            let change_pct = (*current_price - oldest.price) / oldest.price * 100.0;
+            Some((change_pct.abs(), None, None, None, None))
         }
 
         // ── volume_spike ─────────────────────────────────────────────────
@@ -396,9 +391,8 @@ fn evaluate_condition(
             if samples.is_empty() {
                 return None;
             }
-            let avg_v: Decimal = samples.iter().map(|s| s.v_quote).sum::<Decimal>()
-                / Decimal::from(samples.len() as u32);
-            if avg_v.is_zero() {
+            let avg_v: f64 = samples.iter().map(|s| s.v_quote).sum::<f64>() / (samples.len() as f64);
+            if avg_v <= 0.0 {
                 return None;
             }
             let spike_ratio = *current_v_quote / avg_v;

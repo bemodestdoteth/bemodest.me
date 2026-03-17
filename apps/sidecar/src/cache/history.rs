@@ -1,6 +1,5 @@
 use std::collections::{HashMap, VecDeque};
 use std::sync::RwLock;
-use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 /// A single price/volume sample stored in the history buffer.
@@ -9,9 +8,9 @@ pub struct PriceSample {
     /// Unix timestamp in milliseconds (exchange-reported or local receipt time)
     pub timestamp_ms: i64,
     /// Close price — USD-denominated (matches LVC normalisation)
-    pub price: Decimal,
+    pub price: f64,
     /// 24-h quote volume — USD-denominated
-    pub v_quote: Decimal,
+    pub v_quote: f64,
 }
 
 /// Rolling 5-minute price history buffer — one sample per second,

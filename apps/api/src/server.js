@@ -39,7 +39,6 @@ import {
     deleteAlertRule,
     resetWebhookDead,
     markWebhookDead,
-    labelDelete,
     getExcludelist,
     updateExcludelist,
     getPinlist,
@@ -53,8 +52,7 @@ import { sseConnect } from './utils/sse.js';
 import { checkSocketIOStatus } from './socket/index.js';
 import { getStatus } from './routes/status.js';
 import { getRedisClient } from '@bemodest/database';
-import { initDexPricePoller } from './utils/dexPricePoller.js';
-import { COLLECTION_CHAINS } from './config/env.js';
+const { COLLECTION_CHAINS } = config;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,7 +96,6 @@ app.get('/api/status', getStatus);
 app.get('/entities', entityGet);
 app.get('/coingecko', coingeckoGet);
 app.get('/coingecko/solana', coingeckoGetSolana);
-app.post('/labels/delete', labelDelete);
 app.post('/api/removeFront', authMiddleware, removeFront);
 
 app.get('/api/config/excludelist', authMiddleware, getExcludelist);
@@ -158,9 +155,6 @@ initRpcManager({
         return docs.map(d => d.chain_identifier);
     }
 }).catch(err => logger.error('[RPC] Shared Init failed:', err));
-
-// Initialize DEX Price Poller
-initDexPricePoller();
 
 // Graceful Shutdown
 process.on('SIGTERM', async () => {

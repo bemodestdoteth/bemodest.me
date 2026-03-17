@@ -66,10 +66,10 @@ pub struct AlertFiredEvent {
     pub exchanges: Vec<String>,
 
     /// The computed metric value that triggered the alert (e.g. spread %)
-    pub value: Decimal,
+    pub value: f64,
 
     /// The configured threshold that was crossed
-    pub threshold: Decimal,
+    pub threshold: f64,
 
     /// Exchange with the highest price in this comparison (for spread alerts)
     pub highest_exchange: Option<String>,
@@ -78,10 +78,10 @@ pub struct AlertFiredEvent {
     pub lowest_exchange: Option<String>,
 
     /// Price at the highest exchange (USD)
-    pub price_high: Option<Decimal>,
+    pub price_high: Option<f64>,
 
     /// Price at the lowest exchange (USD)
-    pub price_low: Option<Decimal>,
+    pub price_low: Option<f64>,
 
     /// When the alert fired (UTC)
     pub triggered_at: DateTime<Utc>,

@@ -9,7 +9,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use super::Exchange;
 use crate::normalizer::upbit::normalize_upbit_ticker;
-use crate::types::ticker::Exchange as ExchangeType;
+use crate::types::Exchange as ExchangeType;
 use crate::cache::lvc::LatestValueCache;
 use crate::cache::TokenAnnotationCache;
 use crate::cache::ForexCache;
@@ -296,12 +296,10 @@ fn process_upbit_tickers(raw: &Value, lvc: &LatestValueCache, tac: &TokenAnnotat
 
     // Cache the BTC/KRW price from the LVC so BTC-denominated pairs can be converted.
     // Fallback to the global forex cache if the local pair isn't in memory yet.
-    let btc_krw: Option<Decimal> = lvc
+    let btc_krw: Option<f64> = lvc
         .get(&ExchangeType::Upbit, "BTC", "KRW")
         .and_then(|t| t.c_krw)
-        .or_else(|| {
-            forex.get_btc_krw().and_then(|p| Decimal::from_f64_retain(p))
-        });
+        .or_else(|| forex.get_btc_krw());
 
     if let Some(arr) = raw.as_array() {
         for item in arr {

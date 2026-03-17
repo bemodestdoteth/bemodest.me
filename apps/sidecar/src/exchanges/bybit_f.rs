@@ -9,7 +9,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use super::Exchange;
 use crate::normalizer::bybit_f::normalize_bybit_f_ticker;
-use crate::types::ticker::{Exchange as ExchangeType, parse_binance_symbol};
+use crate::types::{Exchange as ExchangeType, parse_binance_symbol};
 use crate::cache::lvc::LatestValueCache;
 use crate::cache::TokenAnnotationCache;
 use crate::cache::MarketCache;
@@ -170,7 +170,7 @@ impl BybitFExchange {
                                             let existing = if let Some(topic) = raw.get("topic").and_then(|t| t.as_str()) {
                                                 if let Some(symbol_str) = topic.strip_prefix("tickers.") {
                                                     if let Some((b, q)) = parse_binance_symbol(symbol_str) {
-                                                        lvc.get(&ExchangeType::BybitFutures, &b, &q)
+                                                        lvc.get(&ExchangeType::BybitF, &b, &q)
                                                     } else { None }
                                                 } else { None }
                                             } else { None };

@@ -1,5 +1,7 @@
 import { logger } from '@bemodest/utils';
-import { STATS_CUTOFF_MS } from '../config/env.js';
+import { validateApiConfig } from '@bemodest/config';
+const config = validateApiConfig();
+const { STATS_CUTOFF_MS } = config;
 
 export const reports = {};
 export const clients = [];

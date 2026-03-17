@@ -1,6 +1,5 @@
 use crate::cache::lvc::LatestValueCache;
-use crate::types::ticker::{Exchange, now_micros};
-use rust_decimal::Decimal;
+use crate::types::{Exchange, now_micros};
 use serde::Serialize;
 use log::debug;
 
@@ -8,7 +7,7 @@ use log::debug;
 #[derive(Debug, Clone, Serialize)]
 pub struct ExchangePrice {
     pub exchange: Exchange,
-    pub price: Decimal,
+    pub price: f64,
     pub timestamp_ms: i64,
 }
 
@@ -19,7 +18,7 @@ pub struct TickerComparison {
     pub quote: String,
     pub entries: Vec<ExchangePrice>,
     /// Spread as a percentage: (max - min) / min * 100
-    pub spread_pct: Option<Decimal>,
+    pub spread_pct: Option<f64>,
     pub highest_exchange: Option<Exchange>,
     pub lowest_exchange: Option<Exchange>,
 }
@@ -31,8 +30,6 @@ pub fn compare_pair(lvc: &LatestValueCache, base: &str, quote: &str) -> Option<T
         return None;
     }
 
-    use rust_decimal::prelude::ToPrimitive;
-
     // Staleness threshold: 10 seconds in microseconds (PRICE_ALERT_PLAN.md Phase 3)
     let now_us = now_micros();
     let stale_threshold_us: i64 = 10_000_000;
@@ -40,7 +37,7 @@ pub fn compare_pair(lvc: &LatestValueCache, base: &str, quote: &str) -> Option<T
     let entries: Vec<ExchangePrice> = tickers
         .iter()
         .filter(|t| now_us - t.ingest_time_us < stale_threshold_us)
-        .filter(|t| t.v_quote.to_f64().unwrap_or(0.0) >= 30000.0)
+        .filter(|t| t.v_quote >= 30000.0)
         .map(|t| ExchangePrice {
             exchange: t.exchange,
             price: t.c,
@@ -72,9 +69,8 @@ pub fn compare_pair(lvc: &LatestValueCache, base: &str, quote: &str) -> Option<T
     }
 
     // Compute spread percentage: (max - min) / min * 100
-    let spread_pct = if !min_entry.price.is_zero() {
-        let hundred = Decimal::from(100);
-        Some((max_entry.price - min_entry.price) / min_entry.price * hundred)
+    let spread_pct = if min_entry.price > 0.0 {
+        Some((max_entry.price - min_entry.price) / min_entry.price * 100.0)
     } else {
         None
     };

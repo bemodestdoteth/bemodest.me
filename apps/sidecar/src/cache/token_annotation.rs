@@ -2,7 +2,7 @@ use mongodb::{Client, bson::doc};
 use papaya::HashMap;
 use log::{info, error};
 use futures_util::TryStreamExt;
-use crate::types::ticker::Exchange as ExchangeType;
+use crate::types::Exchange as ExchangeType;
 
 /// Highly optimized token annotation cache.
 /// Maps "(exchange):(base_token)" -> "unified_token"

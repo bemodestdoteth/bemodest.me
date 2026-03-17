@@ -49,15 +49,10 @@ impl EligibilityFilter {
 
         // ── Condition 2: minimum spread ────────────────────────────────────
         // Use the USD-normalised close price (`c`) present on every NormalizedTicker.
-        // `rust_decimal::Decimal` → convert to f64 for the percentage arithmetic.
-        use rust_decimal::prelude::ToPrimitive;
-
-        let valid_sources: Vec<&crate::types::ticker::NormalizedTicker> = sources
+        let valid_sources: Vec<&crate::types::NormalizedTicker> = sources
             .iter()
             .filter(|t| {
-                let p = t.c.to_f64().unwrap_or(0.0);
-                let v = t.v_quote.to_f64().unwrap_or(0.0);
-                p > 0.0 && v >= 30000.0
+                t.c > 0.0 && t.v_quote >= 30000.0
             })
             .collect();
 
@@ -70,13 +65,10 @@ impl EligibilityFilter {
             return false;
         }
 
-        let min_source = valid_sources.iter().min_by(|a, b| a.c.cmp(&b.c)).unwrap();
-        let max_source = valid_sources.iter().max_by(|a, b| a.c.cmp(&b.c)).unwrap();
+        let min_source = valid_sources.iter().min_by(|a, b| a.c.partial_cmp(&b.c).unwrap()).unwrap();
+        let max_source = valid_sources.iter().max_by(|a, b| a.c.partial_cmp(&b.c).unwrap()).unwrap();
 
-        let min_price = min_source.c.to_f64().unwrap();
-        let max_price = max_source.c.to_f64().unwrap();
-
-        let spread_pct = (max_price - min_price) / min_price * 100.0;
+        let spread_pct = (max_source.c - min_source.c) / min_source.c * 100.0;
 
         if spread_pct < self.min_spread_pct {
             trace!(
@@ -86,8 +78,8 @@ impl EligibilityFilter {
             return false;
         }
         
-        let min_vol = min_source.v_quote.to_f64().unwrap_or(0.0);
-        let max_vol = max_source.v_quote.to_f64().unwrap_or(0.0);
+        let min_vol = min_source.v_quote;
+        let max_vol = max_source.v_quote;
 
         trace!(
             "[EligibilityFilter] {}/{} PASS: {} valid sources, spread {:.4}%, min_vol={:.0}, max_vol={:.0}",

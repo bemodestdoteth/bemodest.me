@@ -9,7 +9,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use super::Exchange;
 use crate::normalizer::binance::normalize_binance_ticker_array;
-use crate::types::ticker::Exchange as ExchangeType;
+use crate::types::Exchange as ExchangeType;
 use crate::cache::lvc::LatestValueCache;
 use crate::cache::TokenAnnotationCache;
 use crate::exchanges::batcher::TickerBatcher;

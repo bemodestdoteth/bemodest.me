@@ -45,7 +45,7 @@ pub struct AlertRule {
     pub webhook_url: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Condition {
     #[serde(rename = "change_pct_5m")]
@@ -70,7 +70,7 @@ pub struct SidecarConfigPayload {
     pub sidecar_config_payload_type: Type,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Type {
     #[serde(rename = "alertrules_updated")]
@@ -81,4 +81,90 @@ pub enum Type {
 
     #[serde(rename = "pinlist_updated")]
     PinlistUpdated,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NormalizedTicker {
+    pub base: String,
+
+    pub c: f64,
+
+    pub c_krw: Option<f64>,
+
+    pub exchange: Exchange,
+
+    pub h: f64,
+
+    pub h_krw: Option<f64>,
+
+    pub ingest_time_us: i64,
+
+    pub l: f64,
+
+    pub l_krw: Option<f64>,
+
+    pub liquidity: Option<f64>,
+
+    pub market_state: Option<MarketState>,
+
+    pub o: f64,
+
+    pub o_krw: Option<f64>,
+
+    pub quote: String,
+
+    pub timestamp_ms: i64,
+
+    pub v_base: f64,
+
+    pub v_quote: f64,
+
+    pub v_quote_krw: Option<f64>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Exchange {
+    Binance,
+
+    #[serde(rename = "binance_f")]
+    BinanceF,
+
+    Bitget,
+
+    #[serde(rename = "bitget_f")]
+    BitgetF,
+
+    Bithumb,
+
+    Bybit,
+
+    #[serde(rename = "bybit_f")]
+    BybitF,
+
+    Coinbase,
+
+    Dex,
+
+    Gateio,
+
+    Kraken,
+
+    Kucoin,
+
+    Okx,
+
+    #[serde(rename = "okx_f")]
+    OkxF,
+
+    Upbit,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum MarketState {
+    Active,
+
+    Preview,
+
+    Suspended,
 }

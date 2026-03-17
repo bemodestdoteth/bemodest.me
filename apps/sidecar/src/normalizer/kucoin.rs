@@ -1,8 +1,9 @@
-use crate::types::ticker::{
+use crate::types::{
     Exchange, NormalizedTicker,
     parse_decimal, now_micros,
 };
 use serde_json::Value;
+use rust_decimal::prelude::ToPrimitive;
 
 /// Normalize a KuCoin SPOT ticker WebSocket message.
 ///
@@ -58,9 +59,10 @@ pub fn normalize_kucoin_ticker(raw: &Value) -> Option<NormalizedTicker> {
     let v_base = d.get("size")
         .and_then(|v| v.as_str())
         .and_then(parse_decimal)
-        .unwrap_or(c - c); // zero
+        .and_then(|v| v.to_f64())
+        .unwrap_or(0.0);
 
-    let v_quote = v_base * c;
+    let v_quote = v_base * c.to_f64().unwrap_or(0.0);
 
     // Timestamp from "time" field (milliseconds)
     let timestamp_ms = d.get("time")
@@ -71,10 +73,10 @@ pub fn normalize_kucoin_ticker(raw: &Value) -> Option<NormalizedTicker> {
         exchange: Exchange::Kucoin,
         base,
         quote,
-        o,
-        h,
-        l,
-        c,
+        o: o.to_f64().unwrap_or(0.0),
+        h: h.to_f64().unwrap_or(0.0),
+        l: l.to_f64().unwrap_or(0.0),
+        c: c.to_f64().unwrap_or(0.0),
         v_base,
         v_quote,
         timestamp_ms,
@@ -85,5 +87,6 @@ pub fn normalize_kucoin_ticker(raw: &Value) -> Option<NormalizedTicker> {
         l_krw: None,
         c_krw: None,
         v_quote_krw: None,
+        liquidity: None,
     })
 }

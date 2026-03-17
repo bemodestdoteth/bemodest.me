@@ -1,4 +1,4 @@
-use crate::types::ticker::{Exchange, NormalizedTicker, now_micros};
+use crate::types::{Exchange, NormalizedTicker, now_micros};
 use serde_json::Value;
 use rust_decimal::Decimal;
 use rust_decimal::prelude::FromStr;
@@ -91,6 +91,7 @@ fn normalize_ticker_item(item: &Value) -> Option<NormalizedTicker> {
         l_krw: None,
         c_krw: None,
         v_quote_krw: None,
+        liquidity: None,
     })
 }
 
@@ -116,12 +117,12 @@ fn normalize_base(base: &str) -> String {
     }
 }
 
-fn parse_f64_field(item: &Value, key: &str) -> Option<Decimal> {
+fn parse_f64_field(item: &Value, key: &str) -> Option<f64> {
     let v = item.get(key)?;
     if let Some(f) = v.as_f64() {
-        Decimal::from_str(&f.to_string()).ok()
+        Some(f)
     } else if let Some(s) = v.as_str() {
-        Decimal::from_str(s).ok()
+        s.parse::<f64>().ok()
     } else {
         None
     }
