@@ -1,14 +1,9 @@
 pub use crate::types::generated::{Condition as AlertCondition, AlertRule as GeneratedAlertRule};
 
-// use rust_decimal::Decimal; // Pruned by SENTINEL
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-// Re-using the generated structs directly for most cases, but we might need 
-// to keep some legacy names or aliases for compatibility.
-
-// Note: AlertRule in engine will now use GeneratedAlertRule or we rename it.
-// To minimize breakage, we'll alias it.
+// Sentinel: Integrated with shared schema pipeline.
 pub type AlertRule = GeneratedAlertRule;
 
 fn default_cooldown_secs() -> u64 {

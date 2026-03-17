@@ -1,10 +1,11 @@
 use std::sync::Arc;
 use tokio::sync::broadcast;
 use tokio::time::{sleep, Duration};
-use openssl::hash::MessageDigest;
-use openssl::pkey::PKey;
-use openssl::sign::Signer;
+use hmac::{Hmac, Mac};
+use sha2::Sha256;
 use log::{error, info, warn};
+
+type HmacSha256 = Hmac<Sha256>;
 
 use crate::alert::types::AlertFiredEvent;
 use crate::config::Config;
@@ -164,15 +165,16 @@ async fn deliver_with_retry(
 /// The message is `payload_bytes || timestamp_ms_decimal_string`, matching the
 /// validation the Node API performs (same SNAPPER_API_SECRET, same algorithm).
 fn sign_payload(payload: &[u8], timestamp_ms: i64, secret: &str) -> String {
-    let pkey = PKey::hmac(secret.as_bytes()).expect("[Webhook] HMAC PKey creation failed");
-    let mut signer =
-        Signer::new(MessageDigest::sha256(), &pkey).expect("[Webhook] HMAC Signer creation failed");
-    signer.update(payload).expect("[Webhook] HMAC update(payload) failed");
-    signer
-        .update(timestamp_ms.to_string().as_bytes())
-        .expect("[Webhook] HMAC update(timestamp) failed");
-    let mac = signer.sign_to_vec().expect("[Webhook] HMAC sign failed");
-    mac.iter().map(|b| format!("{:02x}", b)).collect()
+    let mut mac = HmacSha256::new_from_slice(secret.as_bytes())
+        .expect("[Webhook] HMAC initialization failed");
+    
+    mac.update(payload);
+    mac.update(timestamp_ms.to_string().as_bytes());
+    
+    let result = mac.finalize();
+    let code_bytes = result.into_bytes();
+    
+    hex::encode(code_bytes)
 }
 
 // ============================================================================

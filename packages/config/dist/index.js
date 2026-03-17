@@ -66,7 +66,7 @@ const ApiConfigSchema = zod_1.z.object({
     DW_TASKS_STREAM: zod_1.z.string().default('dw_tasks'),
     DW_STATUS_TTL_S: zod_1.z.string().default('86400'),
     DEX_POLL_WORKERS: zod_1.z.string().default('3'),
-    DEX_REDIS_CHANNEL: zod_1.z.string().default('dex_price_updates'),
+    DEX_REDIS_CHANNEL: zod_1.z.string().default('dex_prices'),
 });
 /**
  * Validates and returns web app configuration

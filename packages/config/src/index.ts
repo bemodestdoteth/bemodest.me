@@ -63,7 +63,7 @@ const ApiConfigSchema = z.object({
   DW_TASKS_STREAM: z.string().default('dw_tasks'),
   DW_STATUS_TTL_S: z.string().default('86400'),
   DEX_POLL_WORKERS: z.string().default('3'),
-  DEX_REDIS_CHANNEL: z.string().default('dex_price_updates'),
+  DEX_REDIS_CHANNEL: z.string().default('dex_prices'),
 });
 
 export type WebConfig = z.infer<typeof WebConfigSchema>;

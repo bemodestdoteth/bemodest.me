@@ -47,38 +47,27 @@ impl Config {
             .parse()
             .unwrap_or(1800);
 
-        // Attempt to build MONGO_URI from API's separated variables
-        let mongo_uri = match env::var("MONGO_URI") {
-            Ok(uri) => Some(uri),
-            Err(_) => {
-                if let (Ok(host), Ok(port), Ok(db), Ok(user), Ok(pass), Ok(tls), Ok(auth_source)) = (
-                    env::var("MONGO_HOST"),
-                    env::var("MONGO_PORT"),
-                    env::var("MONGO_DB_NAME"),
-                    env::var("MONGO_USER"),
-                    env::var("MONGO_PASSWORD"),
-                    env::var("MONGO_TLS"),
-                    env::var("MONGO_AUTH_SOURCE"),
-                ) {
-                    let encoded_pass = urlencoding::encode(&pass);
-                    Some(format!(
-                        "mongodb://{user}:{encoded_pass}@{host}:{port}/{db}?tls={tls}&authSource={auth_source}"
-                    ))
-                } else {
-                    None
-                }
+        // Sentinel: Simplified Mongo URI assembly. Prioritize MONGO_URI.
+        let mongo_uri = env::var("MONGO_URI").ok().or_else(|| {
+            if let (Ok(h), Ok(p), Ok(db), Ok(u), Ok(pw), Ok(tls), Ok(asrc)) = (
+                env::var("MONGO_HOST"), env::var("MONGO_PORT"), env::var("MONGO_DB_NAME"),
+                env::var("MONGO_USER"), env::var("MONGO_PASSWORD"), env::var("MONGO_TLS"), env::var("MONGO_AUTH_SOURCE")
+            ) {
+                Some(format!("mongodb://{u}:{}@{h}:{p}/{db}?tls={tls}&authSource={asrc}", urlencoding::encode(&pw)))
+            } else {
+                None
             }
-        };
+        });
 
         // Build Redis URL from shared .env vars
-        let redis_host = env::var("REDIS_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
-        let redis_port = env::var("REDIS_PORT").unwrap_or_else(|_| "6379".to_string());
-        let redis_url = match env::var("REDIS_PASSWORD") {
-            Ok(pass) if !pass.is_empty() => {
-                format!("redis://:{pass}@{redis_host}:{redis_port}")
+        let redis_url = env::var("REDIS_URL").unwrap_or_else(|_| {
+            let host = env::var("REDIS_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+            let port = env::var("REDIS_PORT").unwrap_or_else(|_| "6380".to_string()); // Default to TS port
+            match env::var("REDIS_PASSWORD") {
+                Ok(pass) if !pass.is_empty() => format!("redis://:{pass}@{host}:{port}"),
+                _ => format!("redis://{host}:{port}"),
             }
-            _ => format!("redis://{redis_host}:{redis_port}"),
-        };
+        });
 
         let dex_redis_channel = env::var("DEX_REDIS_CHANNEL")
             .unwrap_or_else(|_| "dex_prices".to_string());
