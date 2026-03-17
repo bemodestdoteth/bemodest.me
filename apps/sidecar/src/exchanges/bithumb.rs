@@ -36,10 +36,12 @@ pub struct BithumbExchange {
     forex: Arc<ForexCache>,
     market_cache: Arc<MarketCache>,
     config: Arc<Config>,
+    refresh_tx: broadcast::Sender<()>,
 }
 
 impl BithumbExchange {
     pub fn new(tx: broadcast::Sender<String>, verbose: bool, lvc: Arc<LatestValueCache>, tac: Arc<TokenAnnotationCache>, forex: Arc<ForexCache>, market_cache: Arc<MarketCache>, config: Arc<Config>) -> Self {
+        let (refresh_tx, _) = broadcast::channel(16);
         Self {
             tx,
             verbose,
@@ -50,6 +52,7 @@ impl BithumbExchange {
             forex,
             market_cache,
             config,
+            refresh_tx,
         }
     }
 
@@ -62,6 +65,7 @@ impl BithumbExchange {
         forex: Arc<ForexCache>,
         market_cache: Arc<MarketCache>,
         config: Arc<Config>,
+        refresh_tx: broadcast::Sender<()>,
     ) {
         // Wait for market cache to populate (poll every 500ms, max 30s)
         let mut waited = 0u64;
@@ -146,8 +150,26 @@ impl BithumbExchange {
                     let mut batcher = TickerBatcher::new(tx.clone(), "bithumb".to_string(), lvc.clone(), filter);
                     let mut flush_interval = interval(Duration::from_millis(config.batch_duration_ms));
 
+                    let mut refresh_rx = refresh_tx.subscribe();
+
                     loop {
                         tokio::select! {
+                            _ = refresh_rx.recv() => {
+                                info!("[BithumbExchange] Refreshing subscriptions...");
+                                let symbols = market_cache.get_bithumb_markets().await;
+                                for chunk in symbols.chunks(SUBSCRIBE_BATCH_SIZE) {
+                                    let subscription_payload = serde_json::json!({
+                                        "type": "ticker",
+                                        "symbols": chunk,
+                                        "tickTypes": ["24H", "MID"]
+                                    });
+                                    if let Err(e) = write.send(Message::Text(subscription_payload.to_string().into())).await {
+                                        error!("Failed to send subscription refresh to Bithumb: {}", e);
+                                        break;
+                                    }
+                                }
+                                info!("Subscribed to {} Bithumb tickers (refresh)", symbols.len());
+                            }
                             _ = flush_interval.tick() => {
                                 batcher.flush();
                             }
@@ -246,16 +268,21 @@ impl Exchange for BithumbExchange {
         let forex = self.forex.clone();
         let market_cache = self.market_cache.clone();
         let config = self.config.clone();
+        let refresh_tx = self.refresh_tx.clone();
 
         tokio::spawn(async move {
             info!("[BithumbExchange] Connection task started");
-            Self::connect_and_loop(tx, connected, verbose, lvc, tac, forex, market_cache, config).await;
+            Self::connect_and_loop(tx, connected, verbose, lvc, tac, forex, market_cache, config, refresh_tx).await;
         });
         info!("[BithumbExchange] Task spawned successfully");
     }
 
     fn is_connected(&self) -> bool {
         self.connected.load(Ordering::SeqCst)
+    }
+
+    async fn refresh_subscriptions(&self) {
+        let _ = self.refresh_tx.send(());
     }
 }
 

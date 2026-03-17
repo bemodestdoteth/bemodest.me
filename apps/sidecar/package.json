@@ -5,8 +5,5 @@
     "scripts": {
         "dev": "NODE_ENV=dev cargo run",
         "build": "cargo build --release"
-    },
-    "dependencies": {
-        "ws": "^8.19.0"
     }
 }

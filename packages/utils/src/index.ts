@@ -5,3 +5,4 @@ export * from './security.js';
 export * from './chains.js';
 export * from './config';
 export * from './blockchain';
+export * from './rpc';

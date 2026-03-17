@@ -3,7 +3,7 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { SuiClient } from '@mysten/sui/client';
 import { StargateClient } from '@cosmjs/stargate';
-import { getChainTypeFromCAIP2, getEipChainId } from './index';
+import { getChainTypeFromCAIP2, getEipChainId } from './chains';
 
 const ERC20_ABI = [
     'function balanceOf(address) view returns (uint256)',
@@ -11,10 +11,10 @@ const ERC20_ABI = [
 ];
 
 export async function evmBalanceUsd(
-    addr: string, 
-    caip2Id: string, 
-    contractAddr: string, 
-    price: number, 
+    addr: string,
+    caip2Id: string,
+    contractAddr: string,
+    price: number,
     rpcUrl: string,
     attempt: number = 1
 ): Promise<number> {
@@ -38,9 +38,9 @@ export async function evmBalanceUsd(
 }
 
 export async function evmNativeBalanceUsd(
-    addr: string, 
-    caip2Id: string, 
-    price: number, 
+    addr: string,
+    caip2Id: string,
+    price: number,
     rpcUrl: string,
     attempt: number = 1
 ): Promise<number> {
@@ -60,9 +60,9 @@ export async function evmNativeBalanceUsd(
 }
 
 export async function solanaBalanceUsd(
-    addr: string, 
-    contractAddr: string | null, 
-    price: number, 
+    addr: string,
+    contractAddr: string | null,
+    price: number,
     rpcUrl: string,
     attempt: number = 1
 ): Promise<number> {
@@ -87,9 +87,9 @@ export async function solanaBalanceUsd(
 }
 
 export async function suiBalanceUsd(
-    addr: string, 
-    coinType: string | null, 
-    price: number, 
+    addr: string,
+    coinType: string | null,
+    price: number,
     rpcUrl: string,
     attempt: number = 1
 ): Promise<number> {
@@ -108,10 +108,10 @@ export async function suiBalanceUsd(
 }
 
 export async function cosmosBalanceUsd(
-    addr: string, 
-    rpcEndpoint: string, 
-    denom: string | null, 
-    price: number, 
+    addr: string,
+    rpcEndpoint: string,
+    denom: string | null,
+    price: number,
     attempt: number = 1
 ): Promise<number> {
     try {
@@ -129,9 +129,9 @@ export async function cosmosBalanceUsd(
 }
 
 export async function getBalanceOnChain(
-    caip2Id: string, 
-    addr: string, 
-    contractAddr: string | null, 
+    caip2Id: string,
+    addr: string,
+    contractAddr: string | null,
     price: number,
     rpcUrl: string
 ): Promise<number> {

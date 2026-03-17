@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { getRedisClient, getDBClient } from '@bemodest/database';
-import logger from '../config/logger.js';
+import { logger, validateSignature } from '@bemodest/utils';
 import {
     JWT_SECRET,
     ADMIN_USERNAME,
@@ -27,13 +27,8 @@ import {
     DwDeepDiveTaskSchema,
     AlertRuleSchema,
 } from '@bemodest/database';
-import {
-    getCoingeckoToCAIP2Mapping,
-    enrichLabelsWithEntityImages,
-    reports,
-    validateSignature,
-    updateClients
-} from '../utils/helpers.js';
+
+import { reports, updateClients } from '../utils/sse.js';
 import { getIO } from '../socket/state.js';
 import { getHotWalletBalances } from '../utils/balance.js';
 
@@ -138,7 +133,7 @@ export const coingeckoGet = async (req, res) => {
         });
 
         const finalResult = [];
-        const coingeckoToCAIP2Mapping = await getCoingeckoToCAIP2Mapping(dbClient);
+        const coingeckoToCAIP2Mapping = await dbClient.getCoingeckoToCAIP2Mapping(COLLECTION_CHAINS);
 
         rankResult.forEach(obj1 => {
             const platforms = geckoMap.get(obj1.id);
@@ -192,7 +187,7 @@ export const coingeckoGetSolana = async (req, res) => {
         });
 
         const finalResult = [];
-        const coingeckoToCAIP2Mapping = await getCoingeckoToCAIP2Mapping(dbClient);
+        const coingeckoToCAIP2Mapping = await dbClient.getCoingeckoToCAIP2Mapping(COLLECTION_CHAINS);
         rankResult.forEach(obj1 => {
             const platforms = geckoMap.get(obj1.id);
 
@@ -231,7 +226,7 @@ export const removeFront = async (req, res) => {
         await dbClient.deleteMany(COLLECTION_ADDRS, { addr: { $in: addresses } });
 
         const result = await dbClient.readMany(COLLECTION_ADDRS, {}, { projection: { _id: 0 } });
-        await enrichLabelsWithEntityImages(result, dbClient);
+        await dbClient.enrichLabelsWithEntityImages(result, COLLECTION_ENTITES);
 
         const io = getIO();
         if (io) {

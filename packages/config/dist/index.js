@@ -63,7 +63,7 @@ const ApiConfigSchema = zod_1.z.object({
     ETHERSCAN_KEY: zod_1.z.string().optional(),
     STATS_CUTOFF_MS: zod_1.z.string().default('60000'),
     IMAGE_SIZE_LIMIT_BYTES: zod_1.z.string().default('1048576'),
-    DW_TASKS_STREAM: zod_1.z.string().default('dw:tasks'),
+    DW_TASKS_STREAM: zod_1.z.string().default('dw_tasks'),
     DW_STATUS_TTL_S: zod_1.z.string().default('86400'),
     DEX_POLL_WORKERS: zod_1.z.string().default('3'),
     DEX_REDIS_CHANNEL: zod_1.z.string().default('dex_price_updates'),

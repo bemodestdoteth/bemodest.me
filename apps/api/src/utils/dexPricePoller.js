@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { getRedisClient, getDBClient } from '@bemodest/database';
-import logger from '../config/logger.js';
+import { logger } from '@bemodest/utils';
 import {
     COLLECTION_CONTRACT_MAPPINGS,
     DEX_POLL_WORKERS,
@@ -10,7 +10,7 @@ import {
 } from '../config/env.js';
 
 const GECKOTERMINAL_BASE_URL = 'https://api.geckoterminal.com/api/v2/networks';
-import { getCaip2ToGeckoTerminalMapping } from './helpers.js';
+// Removed shadow import
 const MAX_ADDRESSES_PER_REQUEST = 30;
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_BACKOFF_FACTOR = 2;
@@ -246,7 +246,7 @@ export async function initDexPricePoller() {
     const generator = getTaskGenerator(networkToAddresses);
 
     // Build reverse map: GT Network -> CAIP-2
-    const caip2ToGT = await getCaip2ToGeckoTerminalMapping(db);
+    const caip2ToGT = await db.getCaip2ToGeckoTerminalMapping(COLLECTION_CHAINS);
 
     const gtToCaip2 = {};
     for (const [caip2, gt] of Object.entries(caip2ToGT)) {

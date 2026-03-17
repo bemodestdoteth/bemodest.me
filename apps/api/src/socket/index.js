@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import logger from '../config/logger.js';
+import { logger } from '@bemodest/utils';
 import { CHROME_EXTENSION_ID, PORT, CORS_ORIGIN_ALLOWED } from '../config/env.js';
 import { socketAuthMiddleware } from '../middleware/auth.js';
 import { setIO, getIO } from './state.js';

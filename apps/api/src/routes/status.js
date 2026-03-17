@@ -1,5 +1,5 @@
 import { getRedisClient } from '@bemodest/database';
-import logger from '../config/logger.js';
+import { logger } from '@bemodest/utils';
 
 export const getStatus = async (req, res) => {
     try {

@@ -60,7 +60,7 @@ const ApiConfigSchema = z.object({
   ETHERSCAN_KEY: z.string().optional(),
   STATS_CUTOFF_MS: z.string().default('60000'),
   IMAGE_SIZE_LIMIT_BYTES: z.string().default('1048576'),
-  DW_TASKS_STREAM: z.string().default('dw:tasks'),
+  DW_TASKS_STREAM: z.string().default('dw_tasks'),
   DW_STATUS_TTL_S: z.string().default('86400'),
   DEX_POLL_WORKERS: z.string().default('3'),
   DEX_REDIS_CHANNEL: z.string().default('dex_price_updates'),

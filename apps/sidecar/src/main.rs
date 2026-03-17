@@ -62,6 +62,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let alert_rules: Arc<RwLock<Vec<crate::alert::types::AlertRule>>> =
         Arc::new(RwLock::new(Vec::new()));
 
+    // Initialize Exchange Manager
+    let manager = ExchangeManager::new();
+    let manager = Arc::new(Mutex::new(manager));
+    let manager_clone = manager.clone();
+
     // Start Redis configuration subscriber for dynamically updating excludelist
     let pubsub_client_res = redis::Client::open(config.redis_url.clone());
     if let Ok(client) = pubsub_client_res {
@@ -126,28 +131,35 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                     if let Ok(payload) = std::str::from_utf8(bytes) {
                                                         if let Ok(json) = serde_json::from_str::<crate::types::generated::SidecarConfigPayload>(payload) {
                                                             match json.sidecar_config_payload_type {
-                                                                crate::types::generated::Type::ExcludelistUpdated => {
-                                                                    let new_list: redis::RedisResult<Vec<String>> = conn.smembers("config:excludelist").await;
-                                                                    if let Ok(list) = new_list {
-                                                                        let mut write_lock = config_clone.excludelist.write().unwrap();
-                                                                        write_lock.clear();
-                                                                        for item in list {
-                                                                            write_lock.insert(item.to_uppercase());
-                                                                        }
-                                                                        info!("Updated sidecar excludelist from Redis stream: {:?}", *write_lock);
-                                                                    }
-                                                                }
-                                                                crate::types::generated::Type::PinlistUpdated => {
-                                                                    let new_pin_list: redis::RedisResult<Vec<String>> = conn.smembers("config:pinlist").await;
-                                                                    if let Ok(list) = new_pin_list {
-                                                                        let mut write_lock = config_clone.pinlist.write().unwrap();
-                                                                        write_lock.clear();
-                                                                        for item in list {
-                                                                            write_lock.insert(item.to_uppercase());
-                                                                        }
-                                                                        info!("Updated sidecar pinlist from Redis stream: {:?}", *write_lock);
-                                                                    }
-                                                                }
+                                                                 crate::types::generated::Type::ExcludelistUpdated => {
+                                                                     let new_list: redis::RedisResult<Vec<String>> = conn.smembers("config:excludelist").await;
+                                                                     if let Ok(list) = new_list {
+                                                                         {
+                                                                             let mut write_lock = config_clone.excludelist.write().unwrap();
+                                                                             write_lock.clear();
+                                                                             for item in list {
+                                                                                 write_lock.insert(item.to_uppercase());
+                                                                             }
+                                                                         }
+                                                                         info!("Updated sidecar excludelist from Redis stream");
+                                                                     }
+                                                                 }
+                                                                 crate::types::generated::Type::PinlistUpdated => {
+                                                                     let new_pin_list: redis::RedisResult<Vec<String>> = conn.smembers("config:pinlist").await;
+                                                                     if let Ok(list) = new_pin_list {
+                                                                         {
+                                                                             let mut write_lock = config_clone.pinlist.write().unwrap();
+                                                                             write_lock.clear();
+                                                                             for item in list {
+                                                                                 write_lock.insert(item.to_uppercase());
+                                                                             }
+                                                                         }
+                                                                         info!("Updated sidecar pinlist from Redis stream");
+                                                                         
+                                                                         // Trigger dynamic subscription refresh for all exchanges
+                                                                         manager_clone.lock().await.refresh_all_subscriptions().await;
+                                                                     }
+                                                                 }
                                                                 crate::types::generated::Type::AlertrulesUpdated => {
                                                                     let reloaded = load_alert_rules(&config_clone).await;
                                                                     let count = reloaded.len();
@@ -269,66 +281,64 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Buffer sized for 20s lag tolerance before message drop
     let (tx, _) = broadcast::channel(10000);
     
-    // Initialize Exchange Manager
-    let mut manager = ExchangeManager::new();
-    
-    // Register Binance (Lazy connect)
-    let binance = Box::new(BinanceExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), config.clone()));
-    manager.register("binance", binance);
-    
-    // Register Upbit (Lazy connect)
-    let upbit = Box::new(UpbitExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), forex_cache.clone(), market_cache.clone(), config.clone()));
-    manager.register("upbit", upbit);
+    {
+        let mut mg = manager.lock().await;
+        // Register Binance (Lazy connect)
+        let binance = Box::new(BinanceExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), config.clone()));
+        mg.register("binance", binance);
+        
+        // Register Upbit (Lazy connect)
+        let upbit = Box::new(UpbitExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), forex_cache.clone(), market_cache.clone(), config.clone()));
+        mg.register("upbit", upbit);
 
-    // Register Bithumb (Lazy connect)
-    let bithumb = Box::new(BithumbExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), forex_cache.clone(), market_cache.clone(), config.clone()));
-    manager.register("bithumb", bithumb);
+        // Register Bithumb (Lazy connect)
+        let bithumb = Box::new(BithumbExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), forex_cache.clone(), market_cache.clone(), config.clone()));
+        mg.register("bithumb", bithumb);
 
-    // Register Binance Futures (Lazy connect)
-    let binance_f = Box::new(BinanceFExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), config.clone()));
-    manager.register("binance_f", binance_f);
+        // Register Binance Futures (Lazy connect)
+        let binance_f = Box::new(BinanceFExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), config.clone()));
+        mg.register("binance_f", binance_f);
 
-    // Register Bybit Spot (Lazy connect)
-    let bybit = Box::new(BybitExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
-    manager.register("bybit", bybit);
+        // Register Bybit Spot (Lazy connect)
+        let bybit = Box::new(BybitExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
+        mg.register("bybit", bybit);
 
-    // Register Bybit Futures (Lazy connect)
-    let bybit_f = Box::new(BybitFExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
-    manager.register("bybit_f", bybit_f);
+        // Register Bybit Futures (Lazy connect)
+        let bybit_f = Box::new(BybitFExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
+        mg.register("bybit_f", bybit_f);
 
-    // Register Gateio Spot (Lazy connect)
-    let gateio = Box::new(GateioExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
-    manager.register("gateio", gateio);
+        // Register Gateio Spot (Lazy connect)
+        let gateio = Box::new(GateioExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
+        mg.register("gateio", gateio);
 
-    // Register Bitget Spot (Lazy connect)
-    let bitget = Box::new(BitgetExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
-    manager.register("bitget", bitget);
+        // Register Bitget Spot (Lazy connect)
+        let bitget = Box::new(BitgetExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
+        mg.register("bitget", bitget);
 
-    // Register Bitget Futures (Lazy connect)
-    let bitget_f = Box::new(BitgetFExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
-    manager.register("bitget_f", bitget_f);
+        // Register Bitget Futures (Lazy connect)
+        let bitget_f = Box::new(BitgetFExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
+        mg.register("bitget_f", bitget_f);
 
-    // Register Coinbase Spot (Lazy connect)
-    let coinbase = Box::new(CoinbaseExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
-    manager.register("coinbase", coinbase);
-    
-    // Register Kraken Spot (Lazy connect)
-    let kraken = Box::new(KrakenExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
-    manager.register("kraken", kraken);
+        // Register Coinbase Spot (Lazy connect)
+        let coinbase = Box::new(CoinbaseExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
+        mg.register("coinbase", coinbase);
+        
+        // Register Kraken Spot (Lazy connect)
+        let kraken = Box::new(KrakenExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
+        mg.register("kraken", kraken);
 
-    // Register KuCoin Spot (Lazy connect)
-    let kucoin = Box::new(KucoinExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
-    manager.register("kucoin", kucoin);
+        // Register KuCoin Spot (Lazy connect)
+        let kucoin = Box::new(KucoinExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
+        mg.register("kucoin", kucoin);
 
-    // Register OKX Spot (Lazy connect)
-    let okx = Box::new(OkxExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
-    manager.register("okx", okx);
-    
-    // Register OKX Futures (Lazy connect)
-    let okx_f = Box::new(OkxFExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
-    manager.register("okx_f", okx_f);
-    
-    let manager = Arc::new(Mutex::new(manager));
+        // Register OKX Spot (Lazy connect)
+        let okx = Box::new(OkxExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
+        mg.register("okx", okx);
+        
+        // Register OKX Futures (Lazy connect)
+        let okx_f = Box::new(OkxFExchange::new(tx.clone(), true, lvc.clone(), tac.clone(), market_cache.clone(), config.clone()));
+        mg.register("okx_f", okx_f);
+    }
     
     // Start DEX Redis subscriber (forwards dex_prices channel into broadcast tx)
     let dex_tx = tx.clone();

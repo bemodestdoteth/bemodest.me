@@ -1,7 +1,7 @@
 import { COLLECTION_ADDRS } from '../config/env.js';
 import { JsonRpcProvider, FetchRequest } from 'ethers';
 import { MongoDBClient } from '@bemodest/database';
-import logger from '../config/logger.js';
+import { logger } from '@bemodest/utils';
 import { initRpcManager, getRpcUrl, reportRpcFailure } from '../utils/rpc.js';
 
 // ─── Parameters ────────────────────────────────────────────────────────────────

@@ -139,20 +139,21 @@
         if (!p) return '0.00';
         p = parseFloat(p);
 
-        if (p < 0.001 && p > 0) {
-            let strNumber = p.toFixed(20).replace(/0+$/, '');
-            let match = strNumber.match(/^0\.0+/);
+        if (p < 0.01 && p > 0) {
+            let str = p.toFixed(20);
+            let match = str.match(/0\.0+/);
             if (match) {
                 let zerosCount = match[0].length - 2;
-                if (zerosCount >= 3) {
-                    let significant = strNumber.substring(2 + zerosCount).substring(0, 4);
-                    // if significant doesn't have 4 digits, pad with zero? No, just display what's there
+                if (zerosCount >= 2) {
+                    let val = Math.round(p * Math.pow(10, zerosCount + 4));
+                    let significant = val.toString().slice(0, 4).padEnd(4, '0');
                     return '0.0' + toSuperscript(zerosCount) + significant;
                 }
             }
         }
 
         if (p < 0.0001) return p.toFixed(8);
+        if (p < 0.1) return p.toFixed(5);
         if (p < 1) return p.toFixed(4);
         if (p < 10) return p.toFixed(3);
         if (p > 1000) return p.toLocaleString(undefined, { maximumFractionDigits: 2 });
@@ -988,6 +989,9 @@
                     activeExchanges.forEach(ex => activeDeepDiveExchanges.add(ex));
 
                     isDeepDiveActive = true;
+                    // Clear stale data from any previous session before fetching fresh state
+                    for (const key in dwStatusCache) delete dwStatusCache[key];
+                    for (const key in hotBalanceCache) delete hotBalanceCache[key];
                     ddBtn.textContent = '← Exit Deep Dive';
                     ddBtn.style.backgroundColor = 'var(--neon-red)';
                     document.getElementById('dwServerStatus').style.display = 'flex';

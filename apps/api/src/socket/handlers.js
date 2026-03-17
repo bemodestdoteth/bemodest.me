@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'node:fs/promises';
 import { MongoDBClient } from '@bemodest/database';
 import { ObjectId } from 'mongodb';
-import logger from '../config/logger.js';
+import { logger } from '@bemodest/utils';
 import {
     COLLECTION_ADDRS,
     COLLECTION_CHAINS,
@@ -24,7 +24,7 @@ import {
     ChainUpdateSchema,
     ChainDeleteSchema
 } from '@bemodest/database';
-import { enrichLabelsWithEntityImages, getChainsWithCounts, compileChainRegexes } from '../utils/helpers.js';
+import { compileChainRegexes } from '@bemodest/utils';
 import { getIO } from './state.js';
 
 export async function handleChainGet(socket, payload) {
@@ -35,7 +35,7 @@ export async function handleChainGet(socket, payload) {
         const dbClient = new MongoDBClient();
         await dbClient.connect();
 
-        const result = await getChainsWithCounts(dbClient, validated.params);
+        const result = await dbClient.getChainsWithCounts(COLLECTION_CHAINS, COLLECTION_ADDRS, validated.params);
 
         await dbClient.close();
 
@@ -92,7 +92,7 @@ export async function handleChainInsert(socket, payload) {
 
         await dbClient.createOne(COLLECTION_CHAINS, chain);
 
-        const result = await getChainsWithCounts(dbClient, {});
+        const result = await dbClient.getChainsWithCounts(COLLECTION_CHAINS, COLLECTION_ADDRS, {});
         await dbClient.close();
 
         const io = getIO();
@@ -142,7 +142,7 @@ export async function handleChainUpdate(socket, payload) {
 
         await dbClient.updateOne(COLLECTION_CHAINS, { _id: targetId }, { $set: updateData });
 
-        const result = await getChainsWithCounts(dbClient, {});
+        const result = await dbClient.getChainsWithCounts(COLLECTION_CHAINS, COLLECTION_ADDRS, {});
         await dbClient.close();
 
         const io = getIO();
@@ -215,7 +215,7 @@ export async function handleChainDelete(socket, payload) {
 
         await dbClient.deleteOne(COLLECTION_CHAINS, { name: validated.body.name });
 
-        const result = await getChainsWithCounts(dbClient, {});
+        const result = await dbClient.getChainsWithCounts(COLLECTION_CHAINS, COLLECTION_ADDRS, {});
         await dbClient.close();
 
         const io = getIO();
@@ -500,7 +500,7 @@ export async function handleLabelGet(socket, payload) {
         const dbClient = new MongoDBClient();
         await dbClient.connect();
         const result = await dbClient.readMany(COLLECTION_ADDRS, validated.params, { projection: { _id: 0 } });
-        await enrichLabelsWithEntityImages(result, dbClient);
+        await dbClient.enrichLabelsWithEntityImages(result, COLLECTION_ENTITES);
         await dbClient.close();
 
         const io = getIO();
@@ -575,7 +575,7 @@ export async function handleLabelInsert(socket, payload) {
 
         await dbClient.createOne(COLLECTION_ADDRS, validated.body);
         const result = await dbClient.readMany(COLLECTION_ADDRS, {}, { projection: { _id: 0 } });
-        await enrichLabelsWithEntityImages(result, dbClient);
+        await dbClient.enrichLabelsWithEntityImages(result, COLLECTION_ENTITES);
         await dbClient.close();
 
         const io = getIO();
@@ -611,7 +611,7 @@ export async function handleLabelInsert(socket, payload) {
 export async function handleLabelUpdate(socket, payload) {
     try {
         logger.info(`[Socket.IO] handleLabelUpdate entry - payload: ${JSON.stringify(payload)}`);
-        
+
         let validated;
         try {
             validated = LabelUpdateSchema.parse(payload);
@@ -704,20 +704,20 @@ export async function handleLabelUpdate(socket, payload) {
                 return re.test(updateData.addr);
             });
         });
-        
+
         if (invalidChains.length > 0) {
             logger.warn(`[Socket.IO] Incompatible chains for update: ${updateData.chains.join(', ')} - Address ${updateData.addr} is invalid for: ${invalidChains.join(', ')}`);
             await dbClient.close();
-            socket.emit('failure', { 
-                success: false, 
-                error: { 
-                    code: 'INCOMPATIBLE_CHAINS', 
-                    message: `The address "${updateData.addr}" is not valid for the following selected chains: ${invalidChains.join(', ')}. Please ensure all selected chains share the same address format.` 
-                } 
+            socket.emit('failure', {
+                success: false,
+                error: {
+                    code: 'INCOMPATIBLE_CHAINS',
+                    message: `The address "${updateData.addr}" is not valid for the following selected chains: ${invalidChains.join(', ')}. Please ensure all selected chains share the same address format.`
+                }
             });
             return;
         }
-        
+
         logger.info(`[Socket.IO] Chains compatible (address validated for all ${updateData.chains.length} chains)`);
 
         const updateResult = await dbClient.updateOne(COLLECTION_ADDRS, { addr: originalAddr }, { $set: updateData });
@@ -735,7 +735,7 @@ export async function handleLabelUpdate(socket, payload) {
         logger.info(`[Socket.IO] successfully updated label for ${originalAddr} (modified: ${updateResult.modifiedCount})`);
 
         const result = await dbClient.readMany(COLLECTION_ADDRS, {}, { projection: { _id: 0 } });
-        await enrichLabelsWithEntityImages(result, dbClient);
+        await dbClient.enrichLabelsWithEntityImages(result, COLLECTION_ENTITES);
         await dbClient.close();
 
         const io = getIO();
@@ -772,7 +772,7 @@ export async function handleLabelDelete(socket, payload) {
         await dbClient.connect();
         await dbClient.deleteOne(COLLECTION_ADDRS, validated.body);
         const result = await dbClient.readMany(COLLECTION_ADDRS, {}, { projection: { _id: 0 } });
-        await enrichLabelsWithEntityImages(result, dbClient);
+        await dbClient.enrichLabelsWithEntityImages(result, COLLECTION_ENTITES);
         await dbClient.close();
 
         const io = getIO();

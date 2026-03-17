@@ -1,13 +1,22 @@
-import winston from 'winston';
 /**
- * Creates Winston logger instance following RULES O-8001, O-8002, O-8003
- * @param {string} logDir - Directory for log files
- * @param {string} level - Log level (error, warn, info, debug)
- * @returns {winston.Logger} Configured Winston logger
- * @example
- * const logger = createLogger('./logs', 'info');
- * logger.info('Server started', { port: 3000 });
+ * Interface representing basic logging methods.
+ * Matches common winston.Logger methods used in the codebase.
  */
-export declare function createLogger(logDir: string, level?: string): winston.Logger;
-export declare const logger: winston.Logger;
+export interface GenericLogger {
+    error: (message: string, ...args: any[]) => void;
+    warn: (message: string, ...args: any[]) => void;
+    info: (message: string, ...args: any[]) => void;
+    debug: (message: string, ...args: any[]) => void;
+}
+/**
+ * Creates a logger instance.
+ * In Node.js, it creates a Winston logger following RULES O-8001, O-8002, O-8003.
+ * In Browser environments, it creates a simplified console-based logger.
+ *
+ * @param {string} logDir - Directory for log files (Node.js only)
+ * @param {string} level - Log level (error, warn, info, debug)
+ * @returns {GenericLogger} Configured logger instance
+ */
+export declare function createLogger(logDir: string, level?: string): GenericLogger;
+export declare const logger: GenericLogger;
 export default logger;

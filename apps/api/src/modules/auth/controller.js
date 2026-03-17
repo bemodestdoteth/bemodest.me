@@ -1,4 +1,4 @@
-import logger from '../../config/logger.js';
+import { logger } from '@bemodest/utils';
 import { COOKIE_NAME, COOKIE_SAME_SITE, COOKIE_MAX_AGE_MS, SIDECAR_URL } from '../../config/env.js';
 import * as authService from './service.js';
 

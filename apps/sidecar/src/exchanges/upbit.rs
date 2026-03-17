@@ -35,10 +35,12 @@ pub struct UpbitExchange {
     forex: Arc<ForexCache>,
     market_cache: Arc<MarketCache>,
     config: Arc<Config>,
+    refresh_tx: broadcast::Sender<()>,
 }
 
 impl UpbitExchange {
     pub fn new(tx: broadcast::Sender<String>, verbose: bool, lvc: Arc<LatestValueCache>, tac: Arc<TokenAnnotationCache>, forex: Arc<ForexCache>, market_cache: Arc<MarketCache>, config: Arc<Config>) -> Self {
+        let (refresh_tx, _) = broadcast::channel(16);
         Self {
             tx,
             verbose,
@@ -49,6 +51,7 @@ impl UpbitExchange {
             forex,
             market_cache,
             config,
+            refresh_tx,
         }
     }
 
@@ -61,6 +64,7 @@ impl UpbitExchange {
         forex: Arc<ForexCache>,
         market_cache: Arc<MarketCache>,
         config: Arc<Config>,
+        refresh_tx: broadcast::Sender<()>,
     ) {
         // Wait for market cache to populate (poll every 500ms, max 30s)
         let mut waited = 0u64;
@@ -145,8 +149,29 @@ impl UpbitExchange {
                     let mut batcher = TickerBatcher::new(tx.clone(), "upbit".to_string(), lvc.clone(), filter);
                     let mut flush_interval = interval(Duration::from_millis(config.batch_duration_ms));
 
+                    let mut refresh_rx = refresh_tx.subscribe();
+
                     loop {
                         tokio::select! {
+                            _ = refresh_rx.recv() => {
+                                info!("[UpbitExchange] Refreshing subscriptions...");
+                                let mut symbols = market_cache.get_upbit_markets().await;
+                                if !symbols.contains(&"KRW-BTC".to_string()) {
+                                    symbols.push("KRW-BTC".to_string());
+                                }
+                                let ticket_id = uuid::Uuid::new_v4().to_string();
+                                let mut payload_array = vec![serde_json::json!({"ticket": ticket_id})];
+                                for chunk in symbols.chunks(SUBSCRIBE_BATCH_SIZE) {
+                                    payload_array.push(serde_json::json!({"type": "ticker", "codes": chunk}));
+                                }
+                                payload_array.push(serde_json::json!({"format": "SIMPLE_LIST"}));
+                                let subscription_payload = serde_json::Value::Array(payload_array);
+                                if let Err(e) = write.send(Message::Text(subscription_payload.to_string().into())).await {
+                                    error!("Failed to send subscription refresh to Upbit: {}", e);
+                                    break;
+                                }
+                                info!("Subscribed to {} Upbit tickers (refresh)", symbols.len());
+                            }
                             _ = flush_interval.tick() => {
                                 batcher.flush();
                             }
@@ -246,16 +271,21 @@ impl Exchange for UpbitExchange {
         let forex = self.forex.clone();
         let market_cache = self.market_cache.clone();
         let config = self.config.clone();
+        let refresh_tx = self.refresh_tx.clone();
 
         tokio::spawn(async move {
             info!("[UpbitExchange] Connection task started");
-            Self::connect_and_loop(tx, connected, verbose, lvc, tac, forex, market_cache, config).await;
+            Self::connect_and_loop(tx, connected, verbose, lvc, tac, forex, market_cache, config, refresh_tx).await;
         });
         info!("[UpbitExchange] Task spawned successfully");
     }
 
     fn is_connected(&self) -> bool {
         self.connected.load(Ordering::SeqCst)
+    }
+
+    async fn refresh_subscriptions(&self) {
+        let _ = self.refresh_tx.send(());
     }
 }
 

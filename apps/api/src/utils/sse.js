@@ -1,0 +1,50 @@
+import { logger } from '@bemodest/utils';
+import { STATS_CUTOFF_MS } from '../config/env.js';
+
+export const reports = {};
+export const clients = [];
+
+export const sseConnect = (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    clients.push(res);
+    logger.info(`[SSE] Client connected. Total clients: ${clients.length}`);
+
+    req.on('close', () => {
+        const index = clients.indexOf(res);
+        if (index !== -1) {
+            clients.splice(index, 1);
+        }
+        logger.info(`[SSE] Client disconnected. Total clients: ${clients.length}`);
+    });
+};
+
+export const updateClients = () => {
+    const data = JSON.stringify(calculateStats());
+    clients.forEach(client => client.write(`data: ${data}\n\n`));
+};
+
+export const calculateStats = () => {
+    const now = Date.now();
+    const cutoff = now - STATS_CUTOFF_MS;
+    const stats = {};
+
+    for (const target in reports) {
+        const recentReports = reports[target].filter(report => report.timestamp >= cutoff);
+        const successes = recentReports.filter(r => r.status === 'success').length;
+        const failures = recentReports.filter(r => r.status === 'failure').length;
+        const total = successes + failures;
+        const successRate = total > 0 ? ((successes / total) * 100).toFixed(2) : 'N/A';
+
+        stats[target] = {
+            successRate,
+            successes,
+            failures
+        };
+    }
+
+    return stats;
+};

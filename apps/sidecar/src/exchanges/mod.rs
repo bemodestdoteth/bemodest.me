@@ -20,6 +20,8 @@ pub mod okx_f;
 pub trait Exchange: Send + Sync {
     async fn connect(&mut self);
     fn is_connected(&self) -> bool;
+    /// Signal the exchange to refresh its WebSocket subscriptions based on the latest market cache/pinlist.
+    async fn refresh_subscriptions(&self) {}
 }
 
 pub struct ExchangeManager {
@@ -56,6 +58,16 @@ impl ExchangeManager {
             exchange.is_connected()
         } else {
             false
+        }
+    }
+
+    pub async fn refresh_all_subscriptions(&self) {
+        log::info!("[ExchangeManager] refreshing subscriptions for all exchanges");
+        for (name, exchange) in &self.exchanges {
+            if exchange.is_connected() {
+                log::info!("[ExchangeManager] refreshing {}", name);
+                exchange.refresh_subscriptions().await;
+            }
         }
     }
 }

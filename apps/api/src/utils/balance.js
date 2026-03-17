@@ -1,12 +1,12 @@
 import { getRedisClient, getDBClient } from '@bemodest/database';
-import logger from '../config/logger.js';
-import { getRpcUrl, reportRpcFailure } from './rpc.js';
+import { logger } from '@bemodest/utils';
+import { getRpcUrl, reportRpcFailure } from '@bemodest/utils';
 import {
     COLLECTION_ADDRS,
     COLLECTION_CONTRACT_MAPPINGS,
     COLLECTION_COINGECKO_RANK,
 } from '../config/env.js';
-import { getCaip2ToGeckoTerminalMapping } from './helpers.js';
+// Removed shadow import
 import { getBalanceOnChain as sharedGetBalanceOnChain } from '@bemodest/utils';
 
 /**
@@ -20,7 +20,7 @@ export async function getHotWalletBalances(ticker, exchanges) {
 
     try {
         // 1. Get CAIP-2 → GeckoTerminal mapping
-        const caip2ToGecko = await getCaip2ToGeckoTerminalMapping(db);
+        const caip2ToGecko = await db.getCaip2ToGeckoTerminalMapping(COLLECTION_CHAINS);
 
         // 2. Fetch Price: Priority is LVC (Redis) -> Fallback to COINGECKO_RANK (Mongo)
         const lvcPrice = await redis.hget('lvc:prices', upperTicker);
@@ -52,14 +52,14 @@ export async function getHotWalletBalances(ticker, exchanges) {
 
         const exchangeSet = new Set(exchanges.map(e => e.toLowerCase()));
         const filteredAddrs = allHotAddrs.filter(doc => {
-            const exName = doc.entity?.replace(/\s*Hot$/i, '').toLowerCase();
+            const exName = doc.entity?.replace(/\s*Hot$/i, '').toLowerCase().replace(/[^a-z0-9]/g, '');
             return exchangeSet.has(exName);
         });
 
         // 5. Build balance fetching tasks
         const tasks = [];
         for (const doc of filteredAddrs) {
-            const exchange = doc.entity.replace(/\s*Hot$/i, '').toLowerCase();
+            const exchange = doc.entity.replace(/\s*Hot$/i, '').toLowerCase().replace(/[^a-z0-9]/g, '');
             for (const caip2 of (doc.chains ?? [])) {
                 // Find corresponding GeckoTerminal network to get the contract address
                 const gtNet = caip2ToGecko[caip2];
