@@ -9,7 +9,7 @@ import {
     WS_STATUS_ERROR
 } from '../shared/constants';
 import { debounce } from '../utils/debounce';
-import { ExtensionFormDraftSchema, type ExtensionFormDraft } from '../shared/draftSchemas';
+import { ExtensionFormDraftSchema, type ExtensionFormDraft } from '@bemodest/types';
 import { getSelectedChainsFromUI, setSelectedChainsInUI } from '../shared/labels';
 
 const API_URL = "http://localhost:25833"; // TODO: Make dynamic based on environment

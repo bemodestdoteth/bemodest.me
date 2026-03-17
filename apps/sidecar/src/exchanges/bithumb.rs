@@ -17,7 +17,7 @@ use crate::cache::MarketCache;
 use crate::exchanges::batcher::TickerBatcher;
 use crate::cache::EligibilityFilter;
 use crate::config::Config;
-use rust_decimal::Decimal;
+// use rust_decimal::Decimal; // Pruned by SENTINEL
 
 
 const TICKER_STREAM_URL: &str = "wss://ws-api.bithumb.com/websocket/v1";

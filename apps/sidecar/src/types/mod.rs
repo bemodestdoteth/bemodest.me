@@ -1,5 +1,5 @@
 pub mod generated;
-pub use generated::{AlertRule, SidecarConfigPayload, NormalizedTicker, Exchange, MarketState};
+pub use generated::{NormalizedTicker, Exchange, MarketState};
 
 impl std::str::FromStr for MarketState {
     type Err = ();

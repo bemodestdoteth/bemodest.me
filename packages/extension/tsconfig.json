@@ -25,6 +25,9 @@
             ],
             "@bemodest/utils": [
                 "../utils/src"
+            ],
+            "@bemodest/types": [
+                "../types/src"
             ]
         }
     },

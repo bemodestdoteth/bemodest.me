@@ -28,7 +28,7 @@ import {
     DwStatusBodySchema,
     DwDeepDiveTaskSchema,
     AlertRuleSchema,
-} from '@bemodest/database';
+} from '@bemodest/types';
 
 import { reports, updateClients } from '../utils/sse.js';
 import { getIO } from '../socket/state.js';

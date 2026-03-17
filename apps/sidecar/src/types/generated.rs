@@ -45,7 +45,7 @@ pub struct AlertRule {
     pub webhook_url: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Condition {
     #[serde(rename = "change_pct_5m")]
@@ -70,7 +70,7 @@ pub struct SidecarConfigPayload {
     pub sidecar_config_payload_type: Type,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Type {
     #[serde(rename = "alertrules_updated")]
@@ -122,7 +122,7 @@ pub struct NormalizedTicker {
     pub v_quote_krw: Option<f64>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Exchange {
     Binance,
@@ -160,7 +160,7 @@ pub enum Exchange {
     Upbit,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum MarketState {
     Active,
 

@@ -1,6 +1,6 @@
 pub use crate::types::generated::{Condition as AlertCondition, AlertRule as GeneratedAlertRule};
 
-use rust_decimal::Decimal;
+// use rust_decimal::Decimal; // Pruned by SENTINEL
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 

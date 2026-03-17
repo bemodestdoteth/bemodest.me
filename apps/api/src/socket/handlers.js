@@ -25,7 +25,7 @@ import {
     ChainInsertSchema,
     ChainUpdateSchema,
     ChainDeleteSchema
-} from '@bemodest/database';
+} from '@bemodest/types';
 import { compileChainRegexes } from '@bemodest/utils';
 import { getIO } from './state.js';
 

@@ -30,10 +30,10 @@ pub fn normalize_binance_ticker(raw: &Value, exchange: Exchange) -> Option<Norma
         (raw_base, rust_decimal::Decimal::ONE)
     };
 
-    let o = parse_decimal(raw.get("o")?.as_str()?)? / scale;
-    let h = parse_decimal(raw.get("h")?.as_str()?)? / scale;
-    let l = parse_decimal(raw.get("l")?.as_str()?)? / scale;
-    let c = parse_decimal(raw.get("c")?.as_str()?)? / scale;
+    let o: rust_decimal::Decimal = parse_decimal(raw.get("o")?.as_str()?)? / scale;
+    let h: rust_decimal::Decimal = parse_decimal(raw.get("h")?.as_str()?)? / scale;
+    let l: rust_decimal::Decimal = parse_decimal(raw.get("l")?.as_str()?)? / scale;
+    let c: rust_decimal::Decimal = parse_decimal(raw.get("c")?.as_str()?)? / scale;
     let v_base = parse_decimal(raw.get("v")?.as_str()?)?;
     let v_quote = parse_decimal(raw.get("q")?.as_str()?)?;
     let timestamp_ms = raw.get("E")?.as_i64()?;

@@ -1,7 +1,7 @@
 use crate::types::{Exchange, NormalizedTicker, now_micros};
 use serde_json::Value;
-use rust_decimal::Decimal;
-use rust_decimal::prelude::FromStr;
+// use rust_decimal::Decimal; // Pruned by SENTINEL
+// use rust_decimal::prelude::FromStr; // Pruned by SENTINEL
 use chrono::Utc;
 
 /// Normalize a single Kraken WebSocket v2 ticker data item into [`NormalizedTicker`].
