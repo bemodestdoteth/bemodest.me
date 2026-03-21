@@ -3,10 +3,10 @@
  * Matches common winston.Logger methods used in the codebase.
  */
 export interface GenericLogger {
-    error: (message: string, ...args: any[]) => void;
-    warn: (message: string, ...args: any[]) => void;
-    info: (message: string, ...args: any[]) => void;
-    debug: (message: string, ...args: any[]) => void;
+    error: (message: string, ...args: unknown[]) => void;
+    warn: (message: string, ...args: unknown[]) => void;
+    info: (message: string, ...args: unknown[]) => void;
+    debug: (message: string, ...args: unknown[]) => void;
 }
 /**
  * Creates a logger instance.
@@ -19,4 +19,3 @@ export interface GenericLogger {
  */
 export declare function createLogger(logDir: string, level?: string): GenericLogger;
 export declare const logger: GenericLogger;
-export default logger;

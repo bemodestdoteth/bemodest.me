@@ -4,7 +4,7 @@ const config = validateApiConfig();
 const { STATS_CUTOFF_MS } = config;
 
 export const reports = {};
-export const clients = [];
+const clients = [];
 
 export const sseConnect = (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
@@ -29,7 +29,7 @@ export const updateClients = () => {
     clients.forEach(client => client.write(`data: ${data}\n\n`));
 };
 
-export const calculateStats = () => {
+const calculateStats = () => {
     const now = Date.now();
     const cutoff = now - STATS_CUTOFF_MS;
     const stats = {};

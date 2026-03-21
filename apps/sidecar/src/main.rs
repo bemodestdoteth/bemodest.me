@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+mod errors;
 mod auth;
 mod config;
 mod websocket;
@@ -22,7 +23,6 @@ use crate::alert::engine::{load_alert_rules, run_history_sampler};
 use crate::alert::state::AlertStateStore;
 use crate::alert::types::AlertFiredEvent;
 use log::{info, error};
-use std::error::Error;
 use tokio::sync::{broadcast, RwLock};
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -31,7 +31,7 @@ use redis::AsyncCommands;
 
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> crate::errors::Result<()> {
     let mut set = tokio::task::JoinSet::new();
 
 

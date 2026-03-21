@@ -5,10 +5,10 @@ const isBrowser = typeof window !== 'undefined' || typeof self !== 'undefined';
  * Matches common winston.Logger methods used in the codebase.
  */
 export interface GenericLogger {
-  error: (message: string, ...args: any[]) => void;
-  warn: (message: string, ...args: any[]) => void;
-  info: (message: string, ...args: any[]) => void;
-  debug: (message: string, ...args: any[]) => void;
+  error: (message: string, ...args: unknown[]) => void;
+  warn: (message: string, ...args: unknown[]) => void;
+  info: (message: string, ...args: unknown[]) => void;
+  debug: (message: string, ...args: unknown[]) => void;
 }
 
 /**
@@ -100,6 +100,4 @@ export const logger = createLogger(
   (typeof process !== 'undefined' && process.env.LOG_DIR) || './logs',
   (typeof process !== 'undefined' && process.env.LOG_LEVEL) || 'info'
 );
-
-export default logger;
 
