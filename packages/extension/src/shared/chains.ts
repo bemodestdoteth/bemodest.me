@@ -809,6 +809,7 @@ export class Chains {
             const body: any = {
                 name,
                 caip2,
+                chain: caip2,
                 symbol,
                 annotation,
                 isTestnet,

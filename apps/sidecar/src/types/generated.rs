@@ -79,6 +79,9 @@ pub enum Type {
     #[serde(rename = "excludelist_updated")]
     ExcludelistUpdated,
 
+    #[serde(rename = "market_cache_updated")]
+    MarketCacheUpdated,
+
     #[serde(rename = "pinlist_updated")]
     PinlistUpdated,
 }

@@ -15,11 +15,13 @@ import { getBalanceOnChain as sharedGetBalanceOnChain } from '@bemodest/utils';
 /**
  * Retrieves hot wallet balances for a given ticker and set of exchanges.
  * USES: sidecar LVC prices from Redis and standardises communication via CAIP-2.
+ * Deduplicates: multiple hot wallet addresses on the same (exchange, chain) are summed.
  */
 export async function getHotWalletBalances(ticker, exchanges) {
     const db = await getDBClient();
     const redis = getRedisClient();
     const upperTicker = ticker.toUpperCase();
+    const lowerTicker = ticker.toLowerCase();
 
     try {
         // 1. Get CAIP-2 → GeckoTerminal mapping
@@ -30,7 +32,7 @@ export async function getHotWalletBalances(ticker, exchanges) {
         let price = lvcPrice ? parseFloat(lvcPrice) : 0;
 
         if (!price) {
-            const coingeckoDoc = await db.readOne(COLLECTION_COINGECKO_RANK, { symbol: upperTicker });
+            const coingeckoDoc = await db.readOne(COLLECTION_COINGECKO_RANK, { symbol: lowerTicker });
             price = coingeckoDoc?.current_price || 0;
         }
 
@@ -39,7 +41,7 @@ export async function getHotWalletBalances(ticker, exchanges) {
         }
 
         // 3. Resolve contract addresses via coingeckoContractMappings
-        const mappingDoc = await db.readOne(COLLECTION_CONTRACT_MAPPINGS, { symbol: upperTicker });
+        const mappingDoc = await db.readOne(COLLECTION_CONTRACT_MAPPINGS, { symbol: lowerTicker });
         if (!mappingDoc || !mappingDoc.contracts) {
             return { success: false, message: `Contract mapping not found for ticker: ${ticker}` };
         }
@@ -47,67 +49,97 @@ export async function getHotWalletBalances(ticker, exchanges) {
         // Map GeckoTerminal Net -> Contract Address
         const netToAddr = mappingDoc.contracts;
 
-        // 4. Fetch Hot Wallets
+        // 4. Fetch Hot Wallets (include label and comment for filtering)
         const hotFilter = { entity: { $regex: /Hot$/i } };
         const allHotAddrs = await db.readMany(COLLECTION_ADDRS, hotFilter, {
-            projection: { _id: 0, addr: 1, chains: 1, entity: 1 }
+            projection: { _id: 0, addr: 1, chains: 1, entity: 1, label: 1, comment: 1 }
         });
 
         const exchangeSet = new Set(exchanges.map(e => e.toLowerCase()));
-        const filteredAddrs = allHotAddrs.filter(doc => {
-            const exName = doc.entity?.replace(/\s*Hot$/i, '').toLowerCase().replace(/[^a-z0-9]/g, '');
-            return exchangeSet.has(exName);
-        });
 
-        // 5. Build balance fetching tasks
-        const tasks = [];
+        // Filter by exchange first, then skip deprecated wallets
+        const hotByExchange = {};
+        for (const doc of allHotAddrs) {
+            const exName = doc.entity?.replace(/\s*Hot$/i, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (!exchangeSet.has(exName)) continue;
+            if (/deprecated/i.test(doc.comment || '')) continue;
+            if (!hotByExchange[exName]) hotByExchange[exName] = [];
+            hotByExchange[exName].push(doc);
+        }
+
+        // For each exchange: prefer wallets labelled with (TICKER); fall back to all
+        const tickerPattern = new RegExp(`\\(${upperTicker}\\)`, 'i');
+        const filteredAddrs = [];
+        for (const [, addrs] of Object.entries(hotByExchange)) {
+            const labelled = addrs.filter(d => tickerPattern.test(d.label || ''));
+            filteredAddrs.push(...(labelled.length > 0 ? labelled : addrs));
+        }
+
+        // Log a single summary line: how many addresses per exchange were found
+        const addrCountByExchange = {};
+        for (const doc of filteredAddrs) {
+            const ex = doc.entity.replace(/\s*Hot$/i, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            addrCountByExchange[ex] = (addrCountByExchange[ex] || 0) + 1;
+        }
+        logger.debug(`[Balance] ${upperTicker} — hot wallet addresses found: ${JSON.stringify(addrCountByExchange)}`);
+
+        // 5. Build tasks grouped by (exchange, chain, contractAddr) to avoid duplicates.
+        //    Multiple addresses on the same chain are fetched concurrently and summed.
+        // Map: `${exchange}:${caip2}` -> { exchange, caip2, contractAddr, addrs[], dwStatus }
+        const taskMap = new Map();
+
         for (const doc of filteredAddrs) {
             const exchange = doc.entity.replace(/\s*Hot$/i, '').toLowerCase().replace(/[^a-z0-9]/g, '');
             for (const caip2 of (doc.chains ?? [])) {
-                // Find corresponding GeckoTerminal network to get the contract address
                 const gtNet = caip2ToGecko[caip2];
                 if (!gtNet) continue;
 
                 const contractAddr = netToAddr[gtNet] || null;
+                const key = `${exchange}:${caip2}`;
 
-                tasks.push((async () => {
-                    // Check dwStatus in Redis
-                    const caip2Encoded = caip2.replace(':', '/');
-                    const dwKey = `dw:${exchange}:${caip2Encoded}:${upperTicker}`;
-                    const dwStatus = await redis.get(dwKey);
-
-                    // Skip if no active deposit/withdrawal session
-                    if (!dwStatus) return null;
-
-                    let usdBalance = 0;
-                    try {
-                        const rpcUrl = getRpcUrl(caip2);
-                        if (!rpcUrl) return null;
-
-                        usdBalance = await sharedGetBalanceOnChain(caip2, doc.addr, contractAddr, price, rpcUrl);
-                    } catch (err) {
-                        logger.error(`[Balance] Fetch error for ${exchange}:${caip2}: ${err.message}`);
-                        if (err.message.includes('RPC')) {
-                            const rpcUrl = getRpcUrl(caip2);
-                            if (rpcUrl) reportRpcFailure(rpcUrl);
-                        }
-                    }
-
-                    return { exchange, chain: caip2, usdBalance, dwStatus };
-                })());
+                if (!taskMap.has(key)) {
+                    taskMap.set(key, { exchange, caip2, contractAddr, addrs: [], dwStatus: null });
+                }
+                taskMap.get(key).addrs.push(doc.addr);
             }
         }
 
+        // 6. Execute one task per (exchange, chain): check DW status, then sum across all addresses
+        const tasks = Array.from(taskMap.values()).map(async ({ exchange, caip2, contractAddr, addrs }) => {
+            // Check dwStatus in Redis
+            const caip2Encoded = caip2.replace(':', '/');
+            const dwKey = `dw:${exchange}:${caip2Encoded}:${upperTicker}`;
+            const dwStatus = await redis.get(dwKey);
+
+            // Skip if no active deposit/withdrawal session
+            if (!dwStatus) return null;
+
+            const rpcUrl = getRpcUrl(caip2);
+            if (!rpcUrl) return null;
+
+            // Fetch balance from ALL addresses on this chain in one call
+            let usdBalance = await sharedGetBalanceOnChain(caip2, addrs, contractAddr, price, rpcUrl).catch(err => {
+                logger.error(`[Balance] Fetch error for ${exchange}:${caip2} addrs=${addrs.length}: ${err.message}`);
+                if (err.message?.includes('RPC')) reportRpcFailure(rpcUrl);
+                return null;
+            });
+
+            logger.debug(`[Balance] ${upperTicker} ${exchange}:${caip2} — ${addrs.length} addr(s), balance: ${usdBalance !== null ? `$${usdBalance.toFixed(2)}` : 'FAILED'}`);
+
+            return { exchange, chain: caip2, usdBalance, dwStatus };
+        });
+
+
         const taskResults = await Promise.allSettled(tasks);
 
-        // 6. Group by exchange
+        // 7. Group by exchange — one entry per (exchange, chain)
         const byExchange = {};
         for (const res of taskResults) {
             if (res.status !== 'fulfilled' || !res.value) continue;
             const { exchange, chain, usdBalance, dwStatus } = res.value;
             if (!byExchange[exchange]) byExchange[exchange] = { chains: [], usdTotal: 0 };
             byExchange[exchange].chains.push({ chain, usdBalance, dwStatus });
-            byExchange[exchange].usdTotal += usdBalance;
+            byExchange[exchange].usdTotal += (usdBalance ?? 0);
         }
 
         // Finalise result

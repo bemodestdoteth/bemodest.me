@@ -15,15 +15,16 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "winston": "^3.18.3",
-    "ethers": "^6.16.0",
-    "@solana/web3.js": "^1.98.4",
-    "@solana/spl-token": "^0.4.14",
+    "@cosmjs/stargate": "^0.33.0",
     "@mysten/sui": "^1.21.2",
-    "@cosmjs/stargate": "^0.33.0"
+    "@solana/spl-token": "^0.4.14",
+    "@solana/web3.js": "^1.98.4",
+    "ethers": "^6.16.0",
+    "winston": "^3.18.3"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^4.1.0"
   }
 }

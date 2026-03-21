@@ -37,27 +37,27 @@ export function createLogger(logDir: string, level: string = 'info'): GenericLog
   // A safer way is to use a separate file for Node logger or guard imports if possible.
   // Since we are fixing a build that ALREADY fails because of these imports, 
   // we must ensure they are NOT at the top level if we want to avoid the error.
-  
+
   // For simplicity and immediate fix of the build error:
   // We'll use a dynamic import approach if supported, or just return the console logger 
   // if winston is missing (which it will be in the browser if not bundled).
-  
+
   try {
     // In many build tools, even inside a try-catch, static imports are tracked.
     // However, if we are in Node, we expect winston and path to be available.
     // If we are in Vite (browser), we've already returned above.
-    
+
     // NOTE: This file is currently being imported by the extension via Vite.
     // To fix the extension build, we MUST remove the top-level imports that Vite is trying to resolve.
-    
+
     // We'll use require here because it's more resilient in some build configurations,
     // though for ESM we might need to be more clever.
     // But since the error specifically mentioned vite failing to resolve 'fs' for winston,
     // we need to hide winston from the browser build.
-    
+
     // Actually, the best way for Vite is to use define to mock modules or alias them.
     // But changing the code to not import them at top level is safer.
-    
+
     const winston = require('winston');
     const path = require('node:path');
 
@@ -81,7 +81,7 @@ export function createLogger(logDir: string, level: string = 'info'): GenericLog
             winston.format.colorize(),
             winston.format.simple()
           ),
-          level: 'warn',
+          level: level,
         }),
       ],
     });

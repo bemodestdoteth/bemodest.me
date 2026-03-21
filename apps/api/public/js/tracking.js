@@ -181,30 +181,42 @@
     function _renderDwForNode(source) {
         if (!source) return '';
         const lower = source.toLowerCase();
-        const matches = Object.entries(dwStatusCache)
-            .filter(([key]) => key.toLowerCase().startsWith(lower + ':'))
-            .map(([key, status]) => {
-                const parts = key.split(':');
-                const network = parts.slice(1).join(':'); // Handle CAIP-2 correctly
-                
-                // Normalize for mapping lookup (slash to colon, common in payloads)
-                const normalizedNetwork = network.replace(/\//g, ':');
-                const displayNetwork = marketCaipMap[normalizedNetwork] || network;
-                
-                // Check if it's CAIP-2 format (namespace:reference). 
-                // We allow either colon or slash since both occur in our data pipe.
-                const isCaip2 = /^[a-z0-9]+[:/][a-z0-9-]+$/i.test(network);
-                
-                const balance = hotBalanceCache[`${lower}:${network}`] || 0;
-                const balanceStr = balance > 0 ? ` $${formatVolume(balance)}` : ' $0';
-                
-                let networkHtml = displayNetwork;
-                if (!isCaip2) {
-                    networkHtml = `<span style="color: var(--neon-red); text-decoration: underline;">${displayNetwork}</span>`;
-                }
 
-                return `${STATUS_EMOJI[status] || '❓'} ${networkHtml}${balanceStr}`;
+        // Unique set of networks from BOTH caches for this exchange
+        const networksSet = new Set();
+        [dwStatusCache, hotBalanceCache].forEach(cache => {
+            Object.keys(cache).forEach(key => {
+                const kLower = key.toLowerCase();
+                if (kLower.startsWith(lower + ':')) {
+                    networksSet.add(key.split(':').slice(1).join(':'));
+                }
             });
+        });
+
+        const networks = Array.from(networksSet).sort();
+        const matches = networks.map(network => {
+            const status = dwStatusCache[`${lower}:${network}`] ?? dwStatusCache[`${source}:${network}`];
+            const balance = hotBalanceCache[`${lower}:${network}`];
+
+            const normalizedNetwork = network.replace(/\//g, ':');
+            const displayNetwork = marketCaipMap[normalizedNetwork] || network;
+            const isCaip2 = /^[a-z0-9]+[:/][a-z0-9-]+$/i.test(network);
+
+            const balanceStr = (balance === null || balance === undefined) ? ' -' : (balance > 0 ? ` $${formatVolume(balance)}` : ' $0');
+
+            let networkHtml = displayNetwork;
+            if (!isCaip2) {
+                networkHtml = `<span style="color: var(--neon-red); text-decoration: underline;">${displayNetwork}</span>`;
+            }
+
+            if (status) {
+                return `${STATUS_EMOJI[status] || '❓'} ${networkHtml}${balanceStr}`;
+            } else {
+                // Balance exists but no D/W status reported
+                return `💰 ${networkHtml}${balanceStr}`;
+            }
+        });
+
         return matches.length ? matches.join(' · ') : '';
     }
 
@@ -256,7 +268,14 @@
                 for (const chainEntry of exData.chains) {
                     const network = chainEntry.chain;
                     const key = `${exLower}:${network}`;
-                    newExchangeBalances[key] = (newExchangeBalances[key] || 0) + (chainEntry.usdBalance || 0);
+                    const val = chainEntry.usdBalance;
+                    if (val === null || val === undefined) {
+                        if (newExchangeBalances[key] === undefined) {
+                            newExchangeBalances[key] = null;
+                        }
+                    } else {
+                        newExchangeBalances[key] = (newExchangeBalances[key] || 0) + val;
+                    }
                 }
             }
 
@@ -593,6 +612,9 @@
                         console.log(`[DeepDive] New exchange connected during active session: ${exName}. Sending start task.`);
                         sendDeepDiveTask('start', selectedSymbol, [exName]);
                         activeDeepDiveExchanges.add(exName);
+
+                        // Immediately fetch the hot balances for the newly connected exchange
+                        fetchHotBalances(selectedSymbol, [exName]);
                     }
                 }
             } else {
@@ -761,6 +783,27 @@
                     }
                     else if (data.type === 'normalized_ticker') {
                         processTickerPayload(data);
+                    }
+                    else if (data.type === 'forex') {
+                        const d = data.data;
+                        if (d.usd_krw) {
+                            document.getElementById('forexUsdKrw').textContent = formatPrice(d.usd_krw);
+                        }
+                        if (d.upbit_usdt_krw) {
+                            document.getElementById('forexUpbitUsdt').textContent = '₩' + formatKrwPrice(d.upbit_usdt_krw);
+                        }
+                        if (d.bithumb_usdt_krw) {
+                            document.getElementById('forexBithumbUsdt').textContent = '₩' + formatKrwPrice(d.bithumb_usdt_krw);
+                        }
+
+                        if (d.upbit_usdt_krw && d.usd_krw) {
+                            const premium = ((d.upbit_usdt_krw - d.usd_krw) / d.usd_krw) * 100;
+                            const premEl = document.getElementById('forexPremium');
+                            if (premEl) {
+                                premEl.textContent = premium.toFixed(2) + '%';
+                                premEl.style.color = premium >= 0 ? 'var(--neon-green)' : 'var(--neon-red)';
+                            }
+                        }
                     }
 
                     function processTickerPayload(data) {
@@ -1299,6 +1342,8 @@
             });
 
             socket.on('dwStatusUpdate', (payload) => {
+                if (!isDeepDiveActive) return;
+
                 const statusIndicator = document.getElementById('dwServerStatus');
                 const statusText = document.getElementById('dwServerStatusText');
                 const statusDot = statusIndicator?.querySelector('.status-dot');
@@ -1317,7 +1362,15 @@
 
                 // Update constellation node if ticker matches current view
                 if (payload.ticker === selectedSymbol) {
+                    const cacheKey = `${payload.exchange}:${payload.network}`;
+                    const prevStatus = dwStatusCache[cacheKey];
+
                     updateNodeDwStatus(payload.exchange, payload.network, payload.status);
+
+                    // If it just became active or doesn't have a balance yet, immediately fetch the balance
+                    if (payload.status && (!prevStatus || hotBalanceCache[cacheKey] === undefined)) {
+                        fetchHotBalances(selectedSymbol, [payload.exchange]);
+                    }
                 }
             });
         }

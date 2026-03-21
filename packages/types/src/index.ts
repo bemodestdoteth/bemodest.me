@@ -221,6 +221,7 @@ export const AlertRuleSchema = z.any(); // Placeholder as per deprecated origina
 export const ChainInsertSchema = z.object({
   body: z.object({
     caip2: Caip2Schema,
+    chain: z.string().min(1, 'Chain identifier is required'),
     name: z.string().min(1, 'Name is required'),
     symbol: z.string().optional().or(z.literal('')),
     chainId: z.number().optional(),
@@ -267,6 +268,7 @@ export const ChainUpdateSchema = z.object({
       message: 'Valid ID is required for update',
     }),
     caip2: Caip2Schema,
+    chain: z.string().min(1, 'Chain identifier is required'),
     name: z.string().min(1, 'Name is required'),
     code: z.string().regex(/^[A-Z0-9]+$/, 'Code must be uppercase alphanumeric').optional().or(z.literal('')),
     symbol: z.string().optional().or(z.literal('')),

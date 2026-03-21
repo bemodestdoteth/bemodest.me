@@ -317,11 +317,14 @@ export class EtherAddressLookup {
 
         return imgTag +
             `<span class="ext-etheraddresslookup-link ext-multichain-label"
+                   style="position:relative;display:inline-block;--chain-angle:135deg;">
+                <a href="${label.primaryChain.blockExplorerPrefix}${label.address}"
+                   target="_blank"
                    title="${label.label}"
                    style="padding:2px;background:${gradient};color:${label.primaryChain.fontColor}!important;
-                          border:1px solid;border-radius:0.25rem;position:relative;
-                          --chain-angle:135deg;cursor:pointer;display:inline-block;">
-                ${label.label}
+                          border:1px solid;border-radius:0.25rem;display:inline-block;text-decoration:none;">
+                    ${label.label}
+                </a>
                 <span class="ext-chain-tooltip"
                       style="display:none;position:absolute;top:100%;left:0;background:#fff;
                              border:1px solid #ccc;border-radius:4px;padding:4px 8px;z-index:9999;

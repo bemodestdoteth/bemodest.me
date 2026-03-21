@@ -182,6 +182,7 @@ exports.AlertRuleSchema = zod_1.z.any(); // Placeholder as per deprecated origin
 exports.ChainInsertSchema = zod_1.z.object({
     body: zod_1.z.object({
         caip2: exports.Caip2Schema,
+        chain: zod_1.z.string().min(1, 'Chain identifier is required'),
         name: zod_1.z.string().min(1, 'Name is required'),
         symbol: zod_1.z.string().optional().or(zod_1.z.literal('')),
         chainId: zod_1.z.number().optional(),
@@ -227,6 +228,7 @@ exports.ChainUpdateSchema = zod_1.z.object({
             message: 'Valid ID is required for update',
         }),
         caip2: exports.Caip2Schema,
+        chain: zod_1.z.string().min(1, 'Chain identifier is required'),
         name: zod_1.z.string().min(1, 'Name is required'),
         code: zod_1.z.string().regex(/^[A-Z0-9]+$/, 'Code must be uppercase alphanumeric').optional().or(zod_1.z.literal('')),
         symbol: zod_1.z.string().optional().or(zod_1.z.literal('')),

@@ -4,6 +4,7 @@ use std::time::Duration;
 use log::{info, warn, error};
 use serde::Deserialize;
 use tokio::sync::RwLock;
+use redis::AsyncCommands;
 
 /// Holds dynamically-fetched market symbol lists for exchanges.
 ///
@@ -298,11 +299,15 @@ impl MarketCache {
         }
     }
 
-    /// Spawn a background task that refreshes both listings every `interval`.
+    /// Spawn a background task that refreshes all market listings every `interval`.
     ///
-    /// Reads `UPBIT_MARKET_URL` and `BITHUMB_MARKET_URL` from env.
-    /// Assumes `initial_fetch` was already called, so the first action is sleep.
-    pub fn start_poller(cache: Arc<Self>, interval: Duration) {
+    /// When the Upbit or Bithumb market list changes between polls (new KRW pairs added
+    /// or removed), a `market_cache_updated` event is published to the `sidecar:config`
+    /// Redis stream so that `main.rs` can call `refresh_all_subscriptions()` and the
+    /// running WebSocket session picks up the new subscription set immediately.
+    ///
+    /// Reads market URLs and `redis_url` from the caller (no env reads inside the task).
+    pub fn start_poller(cache: Arc<Self>, interval: Duration, redis_url: String) {
         let upbit_url = std::env::var("UPBIT_MARKET_URL").ok();
         let bithumb_url = std::env::var("BITHUMB_MARKET_URL").ok();
         let bybit_url = std::env::var("BYBIT_MARKET_URL").ok();
@@ -325,16 +330,32 @@ impl MarketCache {
                 .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
                 .build()
                 .unwrap_or_else(|_| reqwest::Client::new());
+
+            // Optional Redis client — only used when Upbit/Bithumb lists change.
+            // A connection failure here is non-fatal; we just skip the notification.
+            let redis_client = redis::Client::open(redis_url.clone()).ok();
+
             loop {
                 // Sleep first — initial_fetch already populated the cache
                 tokio::time::sleep(interval).await;
 
+                let mut korean_markets_changed = false;
+
                 // ── Upbit ──
                 if let Some(ref url) = upbit_url {
                     match fetch_and_filter(&client, url).await {
-                        Ok(markets) => {
-                            info!("[MarketCache] Refreshed {} Upbit markets", markets.len());
-                            *cache.upbit.write().await = markets;
+                        Ok(new_markets) => {
+                            let old_set: HashSet<String> = cache.upbit.read().await.iter().cloned().collect();
+                            let new_set: HashSet<String> = new_markets.iter().cloned().collect();
+                            if old_set != new_set {
+                                info!(
+                                    "[MarketCache] Upbit market list changed ({} → {} symbols); will signal subscription refresh",
+                                    old_set.len(), new_set.len()
+                                );
+                                korean_markets_changed = true;
+                            }
+                            info!("[MarketCache] Refreshed {} Upbit markets", new_markets.len());
+                            *cache.upbit.write().await = new_markets;
                         }
                         Err(e) => error!("[MarketCache] Upbit refresh failed: {}", e),
                     }
@@ -343,11 +364,45 @@ impl MarketCache {
                 // ── Bithumb ──
                 if let Some(ref url) = bithumb_url {
                     match fetch_and_filter(&client, url).await {
-                        Ok(markets) => {
-                            info!("[MarketCache] Refreshed {} Bithumb markets", markets.len());
-                            *cache.bithumb.write().await = markets;
+                        Ok(new_markets) => {
+                            let old_set: HashSet<String> = cache.bithumb.read().await.iter().cloned().collect();
+                            let new_set: HashSet<String> = new_markets.iter().cloned().collect();
+                            if old_set != new_set {
+                                info!(
+                                    "[MarketCache] Bithumb market list changed ({} → {} symbols); will signal subscription refresh",
+                                    old_set.len(), new_set.len()
+                                );
+                                korean_markets_changed = true;
+                            }
+                            info!("[MarketCache] Refreshed {} Bithumb markets", new_markets.len());
+                            *cache.bithumb.write().await = new_markets;
                         }
                         Err(e) => error!("[MarketCache] Bithumb refresh failed: {}", e),
+                    }
+                }
+
+                // Publish market_cache_updated once per poll cycle (not once per exchange)
+                // so the sidecar only re-subscribes one time even if both lists changed.
+                if korean_markets_changed {
+                    if let Some(ref rc) = redis_client {
+                        match rc.get_multiplexed_async_connection().await {
+                            Ok(mut conn) => {
+                                let payload = serde_json::json!({ "type": "market_cache_updated" }).to_string();
+                                let result: redis::RedisResult<String> = conn
+                                    .xadd_maxlen(
+                                        "sidecar:config",
+                                        redis::streams::StreamMaxlen::Approx(1000),
+                                        "*",
+                                        &[("payload", payload.as_str())],
+                                    )
+                                    .await;
+                                match result {
+                                    Ok(_) => info!("[MarketCache] Published market_cache_updated to sidecar:config stream"),
+                                    Err(e) => error!("[MarketCache] Failed to publish market_cache_updated: {}", e),
+                                }
+                            }
+                            Err(e) => error!("[MarketCache] Redis connection failed, skipping market_cache_updated publish: {}", e),
+                        }
                     }
                 }
 

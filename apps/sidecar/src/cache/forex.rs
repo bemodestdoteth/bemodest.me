@@ -11,6 +11,10 @@ pub struct ForexCache {
     krw_per_usd: AtomicU64,
     /// KRW per 1 BTC — stored as raw IEEE-754 bits in an AtomicU64
     btc_krw: AtomicU64,
+    /// KRW per 1 USDT from Upbit — stored as raw IEEE-754 bits in an AtomicU64
+    upbit_usdt_krw: AtomicU64,
+    /// KRW per 1 USDT from Bithumb — stored as raw IEEE-754 bits in an AtomicU64
+    bithumb_usdt_krw: AtomicU64,
 }
 
 #[derive(Deserialize)]
@@ -24,6 +28,8 @@ impl ForexCache {
         Arc::new(Self {
             krw_per_usd: AtomicU64::new(0),
             btc_krw: AtomicU64::new(0),
+            upbit_usdt_krw: AtomicU64::new(0),
+            bithumb_usdt_krw: AtomicU64::new(0),
         })
     }
 
@@ -47,6 +53,24 @@ impl ForexCache {
         }
     }
 
+    pub fn get_upbit_usdt_krw(&self) -> Option<f64> {
+        let bits = self.upbit_usdt_krw.load(Ordering::Relaxed);
+        if bits == 0 {
+            None
+        } else {
+            Some(f64::from_bits(bits))
+        }
+    }
+
+    pub fn get_bithumb_usdt_krw(&self) -> Option<f64> {
+        let bits = self.bithumb_usdt_krw.load(Ordering::Relaxed);
+        if bits == 0 {
+            None
+        } else {
+            Some(f64::from_bits(bits))
+        }
+    }
+
     /// Overwrite the stored USD rate.
     fn set_krw_per_usd(&self, rate: f64) {
         self.krw_per_usd.store(rate.to_bits(), Ordering::Relaxed);
@@ -57,9 +81,17 @@ impl ForexCache {
         self.btc_krw.store(rate.to_bits(), Ordering::Relaxed);
     }
 
+    fn set_upbit_usdt_krw(&self, rate: f64) {
+        self.upbit_usdt_krw.store(rate.to_bits(), Ordering::Relaxed);
+    }
+
+    fn set_bithumb_usdt_krw(&self, rate: f64) {
+        self.bithumb_usdt_krw.store(rate.to_bits(), Ordering::Relaxed);
+    }
+
     /// Spawn a background task that refreshes the rate every `interval`.
     /// Reads the URL from the `UPBIT_FOREX_URL` environment variable.
-    pub fn start_poller(cache: Arc<Self>, interval: Duration) {
+    pub fn start_poller(cache: Arc<Self>, tx: tokio::sync::broadcast::Sender<String>, interval: Duration) {
         let url = match std::env::var("UPBIT_FOREX_URL") {
             Ok(u) => u,
             Err(_) => {
@@ -70,15 +102,22 @@ impl ForexCache {
 
         tokio::spawn(async move {
             let client = reqwest::Client::new();
-            let btc_url = "https://api.upbit.com/v1/ticker?markets=KRW-BTC";
+            let upbit_url = "https://api.upbit.com/v1/ticker?markets=KRW-BTC,KRW-USDT";
+            let bithumb_url = "https://api.bithumb.com/public/ticker/USDT_KRW";
 
             loop {
+                let mut usd_krw = None;
+                let mut btc_krw = None;
+                let mut upbit_usdt_krw = None;
+                let mut bithumb_usdt_krw = None;
+
                 // 1) Fetch KRW/USD
                 match client.get(&url).send().await {
                     Ok(resp) => match resp.json::<Vec<ForexEntry>>().await {
                         Ok(entries) => {
                             if let Some(entry) = entries.first() {
                                 cache.set_krw_per_usd(entry.base_price);
+                                usd_krw = Some(entry.base_price);
                                 info!(
                                     "[ForexCache] KRW/USD basePrice updated: {}",
                                     entry.base_price
@@ -90,20 +129,61 @@ impl ForexCache {
                     Err(e) => warn!("[ForexCache] Failed to fetch forex data: {}", e),
                 }
 
-                // 2) Fetch BTC/KRW
-                match client.get(btc_url).send().await {
+                // 2) Fetch Upbit (BTC & USDT)
+                match client.get(upbit_url).send().await {
                     Ok(resp) => {
                         if let Ok(json) = resp.json::<serde_json::Value>().await {
-                            if let Some(ticker) = json.as_array().and_then(|a| a.get(0)) {
-                                if let Some(price) = ticker.get("trade_price").and_then(|v| v.as_f64()) {
-                                    cache.set_btc_krw(price);
-                                    info!("[ForexCache] BTC/KRW price updated: {}", price);
+                            if let Some(tickers) = json.as_array() {
+                                for ticker in tickers {
+                                    if let Some(market) = ticker.get("market").and_then(|v| v.as_str()) {
+                                        if let Some(price) = ticker.get("trade_price").and_then(|v| v.as_f64()) {
+                                            if market == "KRW-BTC" {
+                                                cache.set_btc_krw(price);
+                                                btc_krw = Some(price);
+                                                info!("[ForexCache] BTC/KRW price updated: {}", price);
+                                            } else if market == "KRW-USDT" {
+                                                cache.set_upbit_usdt_krw(price);
+                                                upbit_usdt_krw = Some(price);
+                                                info!("[ForexCache] Upbit USDT/KRW price updated: {}", price);
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-                    Err(e) => warn!("[ForexCache] Failed to fetch BTC/KRW price: {}", e),
+                    Err(e) => warn!("[ForexCache] Failed to fetch Upbit prices: {}", e),
                 }
+
+                // 3) Fetch Bithumb USDT
+                match client.get(bithumb_url).send().await {
+                    Ok(resp) => {
+                        if let Ok(json) = resp.json::<serde_json::Value>().await {
+                            if let Some(data) = json.get("data") {
+                                if let Some(price_str) = data.get("closing_price").and_then(|v| v.as_str()) {
+                                    if let Ok(price) = price_str.parse::<f64>() {
+                                        cache.set_bithumb_usdt_krw(price);
+                                        bithumb_usdt_krw = Some(price);
+                                        info!("[ForexCache] Bithumb USDT/KRW price updated: {}", price);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Err(e) => warn!("[ForexCache] Failed to fetch Bithumb prices: {}", e),
+                }
+
+                // Broadcast
+                let msg = serde_json::json!({
+                    "type": "forex",
+                    "data": {
+                        "usd_krw": usd_krw.or_else(|| cache.get_krw_per_usd()),
+                        "btc_krw": btc_krw.or_else(|| cache.get_btc_krw()),
+                        "upbit_usdt_krw": upbit_usdt_krw.or_else(|| cache.get_upbit_usdt_krw()),
+                        "bithumb_usdt_krw": bithumb_usdt_krw.or_else(|| cache.get_bithumb_usdt_krw())
+                    }
+                });
+                let _ = tx.send(msg.to_string());
 
                 tokio::time::sleep(interval).await;
             }

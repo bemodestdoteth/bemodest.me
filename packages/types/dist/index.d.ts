@@ -551,6 +551,7 @@ export declare const AlertRuleSchema: z.ZodAny;
 export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     body: z.ZodObject<{
         caip2: z.ZodString;
+        chain: z.ZodString;
         name: z.ZodString;
         symbol: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
         chainId: z.ZodOptional<z.ZodNumber>;
@@ -580,6 +581,7 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         supersededBy: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         name: string;
+        chain: string;
         status: "active" | "deprecated";
         caip2: string;
         isTestnet: boolean;
@@ -605,6 +607,7 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         supersededBy?: string | undefined;
     }, {
         name: string;
+        chain: string;
         caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -632,6 +635,7 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     body: {
         name: string;
+        chain: string;
         status: "active" | "deprecated";
         caip2: string;
         isTestnet: boolean;
@@ -659,6 +663,7 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
 }, {
     body: {
         name: string;
+        chain: string;
         caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -686,6 +691,7 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
 }>, {
     body: {
         name: string;
+        chain: string;
         status: "active" | "deprecated";
         caip2: string;
         isTestnet: boolean;
@@ -713,6 +719,7 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
 }, {
     body: {
         name: string;
+        chain: string;
         caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -740,6 +747,7 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
 }>, {
     body: {
         name: string;
+        chain: string;
         status: "active" | "deprecated";
         caip2: string;
         isTestnet: boolean;
@@ -767,6 +775,7 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
 }, {
     body: {
         name: string;
+        chain: string;
         caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -796,6 +805,7 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     body: z.ZodObject<{
         _id: z.ZodEffects<z.ZodUnion<[z.ZodString, z.ZodNumber]>, string | number, string | number>;
         caip2: z.ZodString;
+        chain: z.ZodString;
         name: z.ZodString;
         code: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
         symbol: z.ZodUnion<[z.ZodOptional<z.ZodString>, z.ZodLiteral<"">]>;
@@ -827,6 +837,7 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         _id: string | number;
         name: string;
+        chain: string;
         status: "active" | "deprecated";
         caip2: string;
         isTestnet: boolean;
@@ -854,6 +865,7 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     }, {
         _id: string | number;
         name: string;
+        chain: string;
         caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -883,6 +895,7 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     body: {
         _id: string | number;
         name: string;
+        chain: string;
         status: "active" | "deprecated";
         caip2: string;
         isTestnet: boolean;
@@ -912,6 +925,7 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     body: {
         _id: string | number;
         name: string;
+        chain: string;
         caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -941,6 +955,7 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     body: {
         _id: string | number;
         name: string;
+        chain: string;
         status: "active" | "deprecated";
         caip2: string;
         isTestnet: boolean;
@@ -970,6 +985,7 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     body: {
         _id: string | number;
         name: string;
+        chain: string;
         caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -999,6 +1015,7 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     body: {
         _id: string | number;
         name: string;
+        chain: string;
         status: "active" | "deprecated";
         caip2: string;
         isTestnet: boolean;
@@ -1028,6 +1045,7 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
     body: {
         _id: string | number;
         name: string;
+        chain: string;
         caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;

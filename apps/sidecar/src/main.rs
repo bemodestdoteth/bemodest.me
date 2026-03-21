@@ -160,7 +160,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                          manager_clone.lock().await.refresh_all_subscriptions().await;
                                                                      }
                                                                  }
-                                                                crate::types::generated::Type::AlertrulesUpdated => {
+                                                                 crate::types::generated::Type::MarketCacheUpdated => {
+                                                                     info!("[Sidecar] market_cache_updated received; refreshing all WebSocket subscriptions");
+                                                                     manager_clone.lock().await.refresh_all_subscriptions().await;
+                                                                 }
+                                                                 crate::types::generated::Type::AlertrulesUpdated => {
                                                                     let reloaded = load_alert_rules(&config_clone).await;
                                                                     let count = reloaded.len();
                                                                     let mut guard = alert_rules_clone.write().await;
@@ -206,6 +210,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let token_cache = Arc::new(token_cache);
     info!("[Sidecar] Token cache initialized with {} entries", token_cache.entry_count());
 
+    // Main broadcast channel for ticker data
+    // Binance !ticker@arr sends ~300-500 messages/sec
+    // Buffer sized for 20s lag tolerance before message drop
+    let (tx, _) = broadcast::channel(10000);
+
     // Initialize Latest-Value Cache (Phase 3)
     let lvc = Arc::new(LatestValueCache::new());
     info!("[Sidecar] Latest-Value Cache initialized");
@@ -216,13 +225,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Initialize Forex Rate Cache — polls UPBIT_FOREX_URL using configurable interval
     let forex_cache = ForexCache::new();
-    ForexCache::start_poller(forex_cache.clone(), std::time::Duration::from_secs(config.forex_update_interval_sec));
+    ForexCache::start_poller(forex_cache.clone(), tx.clone(), std::time::Duration::from_secs(config.forex_update_interval_sec));
     info!("[Sidecar] Forex Rate Cache initialized (polling every {}s)", config.forex_update_interval_sec);
 
     // Initialize Market Cache — fetch once (blocking), then poll using configurable interval
     let market_cache = MarketCache::new();
     MarketCache::initial_fetch(&market_cache).await;
-    MarketCache::start_poller(market_cache.clone(), std::time::Duration::from_secs(config.market_cache_update_interval_sec));
+    MarketCache::start_poller(market_cache.clone(), std::time::Duration::from_secs(config.market_cache_update_interval_sec), config.redis_url.clone());
     info!("[Sidecar] Market Cache initialized (polling every {}s)", config.market_cache_update_interval_sec);
 
     // ── Alert System (Phase 5 wiring) ────────────────────────────────────────
@@ -277,9 +286,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     info!("[Sidecar] Webhook dispatcher spawned");
 
-    // Binance !ticker@arr sends ~300-500 messages/sec
-    // Buffer sized for 20s lag tolerance before message drop
-    let (tx, _) = broadcast::channel(10000);
     
     {
         let mut mg = manager.lock().await;

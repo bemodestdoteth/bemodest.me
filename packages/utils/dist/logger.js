@@ -58,7 +58,7 @@ function createLogger(logDir, level = 'info') {
                 }),
                 new winston.transports.Console({
                     format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
-                    level: 'warn',
+                    level: level,
                 }),
             ],
         });

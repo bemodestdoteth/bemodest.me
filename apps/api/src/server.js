@@ -70,9 +70,10 @@ app
     .use(express.static(publicDir))
     .use(cookieParser())
     .use(rateLimit({
-        windowMs: RATE_LIMIT_WINDOW_MS,
-        max: RATE_LIMIT_MAX,
-        message: RATE_LIMIT_MESSAGE
+        windowMs: parseInt(RATE_LIMIT_WINDOW_MS, 10),
+        max: parseInt(RATE_LIMIT_MAX, 10),
+        message: RATE_LIMIT_MESSAGE,
+        skip: () => config.NODE_ENV === 'dev'
     }))
     .use(cors({
         origin: [...CORS_ORIGIN_ALLOWED, `chrome - extension://${CHROME_EXTENSION_ID}`],

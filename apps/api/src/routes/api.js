@@ -20,6 +20,7 @@ const {
     COOKIE_NAME,
     COOKIE_SAME_SITE,
     SIDECAR_URL,
+    SNAPPER_API_SECRET,
     DW_TASKS_STREAM,
     DW_STATUS_TTL_S
 } = config;
@@ -254,7 +255,7 @@ export const removeFront = async (req, res) => {
 };
 
 export const getExchSnapperReport = async (req, res) => {
-    if (!validateSignature(req.header('X-Signature'), req.header('X-Timestamp'))) {
+    if (!validateSignature(req.header('X-Signature'), req.header('X-Timestamp'), SNAPPER_API_SECRET)) {
         res.status(401).json({ message: 'Invalid signature.' });
         return;
     }
@@ -419,7 +420,7 @@ export const updatePinlist = async (req, res) => {
 // ── D/W Status ───────────────────────────────────────────────────────────────
 
 export const postDwStatus = async (req, res) => {
-    if (!validateSignature(req.header('X-Signature'), req.header('X-Timestamp'))) {
+    if (!validateSignature(req.header('X-Signature'), req.header('X-Timestamp'), SNAPPER_API_SECRET)) {
         return res.status(401).json({ message: 'Invalid signature.' });
     }
 
