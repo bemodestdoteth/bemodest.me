@@ -1,34 +1,19 @@
 import { z } from 'zod';
+import { SystemConfigSchema } from '@bemodest/types';
+
 
 /**
  * Web app environment configuration schema
- * @description Validates environment variables for Next.js app following RULES S-3001
  */
-const WebConfigSchema = z.object({
-  NODE_ENV: z.enum(['dev', 'prod', 'test']).default('dev'),
-  MONGO_USER: z.string().min(1),
-  MONGO_PASSWORD: z.string().min(1),
-  MONGO_HOST: z.string().min(1),
-  MONGO_PORT: z.string().default('27017'),
-  MONGO_DB_NAME: z.string().min(1),
-  JWT_SECRET: z.string().min(32),
+const WebConfigSchema = SystemConfigSchema.extend({
   ADMIN_USERNAME: z.string().min(1),
   ADMIN_PASSWORD_HASH: z.string().min(1),
-  PORT: z.string().default('3000'),
 });
 
 /**
  * API server environment configuration schema
  */
-const ApiConfigSchema = z.object({
-  NODE_ENV: z.enum(['dev', 'prod', 'test']).default('dev'),
-  PORT: z.string().default('3001'),
-  MONGO_USER: z.string().min(1),
-  MONGO_PASSWORD: z.string().min(1),
-  MONGO_HOST: z.string().min(1),
-  MONGO_PORT: z.string().default('27017'),
-  MONGO_DB_NAME: z.string().min(1),
-  JWT_SECRET: z.string().min(32),
+const ApiConfigSchema = SystemConfigSchema.extend({
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
   LOGFILE: z.string().default('./logs/api.log'),
   CORS_ORIGIN: z.string().default('http://localhost:25833'),
@@ -51,11 +36,7 @@ const ApiConfigSchema = z.object({
   COOKIE_MAX_AGE_MS: z.string().default('604800000'),
   COOKIE_SAME_SITE: z.string().default('lax'),
   SIDECAR_URL: z.string().optional(),
-  SNAPPER_API_SECRET: z.string().optional(),
   PROXY_URL: z.string().optional(),
-  REDIS_HOST: z.string().optional(),
-  REDIS_PORT: z.string().default('6380'),
-  REDIS_PASSWORD: z.string().optional(),
   INFURA_KEY: z.string().optional(),
   ETHERSCAN_KEY: z.string().optional(),
   STATS_CUTOFF_MS: z.string().default('60000'),
@@ -63,23 +44,32 @@ const ApiConfigSchema = z.object({
   DW_TASKS_STREAM: z.string().default('dw_tasks'),
   DW_STATUS_TTL_S: z.string().default('86400'),
   DEX_POLL_WORKERS: z.string().default('3'),
-  DEX_REDIS_CHANNEL: z.string().default('dex_prices'),
 });
 
 export type WebConfig = z.infer<typeof WebConfigSchema>;
 export type ApiConfig = z.infer<typeof ApiConfigSchema>;
 
-/**
- * Validates and returns web app configuration
- * @returns {WebConfig} Validated configuration object
- * @throws {z.ZodError} If environment variables are invalid
- * @example
- * const config = validateWebConfig();
- * console.log(config.MONGO_HOST);
- */
+function transformEnvToConfig(env: NodeJS.ProcessEnv): Record<string, any> {
+  const config: Record<string, any> = {};
+  for (const [key, value] of Object.entries(env)) {
+    if (value !== undefined) {
+      // Type casting for numeric fields (Schema now uses UPPERCASE)
+      if (['PORT', 'API_PORT', 'SIDECAR_PORT', 'BATCHING_DURATION_MS', 'FILTER_MIN_SOURCES'].includes(key)) {
+        config[key] = parseInt(value, 10);
+      } else if (['FILTER_MIN_SPREAD_PCT'].includes(key)) {
+        config[key] = parseFloat(value);
+      } else {
+        config[key] = value;
+      }
+    }
+  }
+  return config;
+}
+
+
 export function validateWebConfig(): WebConfig {
   try {
-    return WebConfigSchema.parse(process.env);
+    return WebConfigSchema.parse(transformEnvToConfig(process.env));
   } catch (error) {
     if (error instanceof z.ZodError) {
       const issues = error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ');
@@ -89,17 +79,9 @@ export function validateWebConfig(): WebConfig {
   }
 }
 
-/**
- * Validates and returns API server configuration
- * @returns {ApiConfig} Validated configuration object
- * @throws {z.ZodError} If environment variables are invalid
- * @example
- * const config = validateApiConfig();
- * console.log(config.PORT);
- */
 export function validateApiConfig(): ApiConfig {
   try {
-    return ApiConfigSchema.parse(process.env);
+    return ApiConfigSchema.parse(transformEnvToConfig(process.env));
   } catch (error) {
     if (error instanceof z.ZodError) {
       const issues = error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ');
@@ -109,13 +91,7 @@ export function validateApiConfig(): ApiConfig {
   }
 }
 
-/**
- * Encodes database password for URI following RULES S-3002
- * @param {string} password - Raw password string
- * @returns {string} URL-encoded password
- * @example
- * const encoded = encodeDbPassword('my@pass#word');
- */
 export function encodeDbPassword(password: string): string {
   return encodeURIComponent(password);
 }
+

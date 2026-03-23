@@ -129,9 +129,9 @@ async fn main() -> crate::errors::Result<()> {
                                             if let Some(payload_val) = msg.map.get("payload") {
                                                 if let redis::Value::BulkString(bytes) = payload_val {
                                                     if let Ok(payload) = std::str::from_utf8(bytes) {
-                                                        if let Ok(json) = serde_json::from_str::<crate::types::generated::SidecarConfigPayload>(payload) {
-                                                            match json.sidecar_config_payload_type {
-                                                                 crate::types::generated::Type::ExcludelistUpdated => {
+                                                        if let Ok(json) = serde_json::from_str::<crate::types::SidecarConfigPayload>(payload) {
+                                                            match json.type_ {
+                                                                 crate::types::Type::ExcludelistUpdated => {
                                                                      let new_list: redis::RedisResult<Vec<String>> = conn.smembers("config:excludelist").await;
                                                                      if let Ok(list) = new_list {
                                                                          {
@@ -144,7 +144,7 @@ async fn main() -> crate::errors::Result<()> {
                                                                          info!("Updated sidecar excludelist from Redis stream");
                                                                      }
                                                                  }
-                                                                 crate::types::generated::Type::PinlistUpdated => {
+                                                                 crate::types::Type::PinlistUpdated => {
                                                                      let new_pin_list: redis::RedisResult<Vec<String>> = conn.smembers("config:pinlist").await;
                                                                      if let Ok(list) = new_pin_list {
                                                                          {
@@ -160,11 +160,11 @@ async fn main() -> crate::errors::Result<()> {
                                                                          manager_clone.lock().await.refresh_all_subscriptions().await;
                                                                      }
                                                                  }
-                                                                 crate::types::generated::Type::MarketCacheUpdated => {
+                                                                 crate::types::Type::MarketCacheUpdated => {
                                                                      info!("[Sidecar] market_cache_updated received; refreshing all WebSocket subscriptions");
                                                                      manager_clone.lock().await.refresh_all_subscriptions().await;
                                                                  }
-                                                                 crate::types::generated::Type::AlertrulesUpdated => {
+                                                                 crate::types::Type::AlertrulesUpdated => {
                                                                     let reloaded = load_alert_rules(&config_clone).await;
                                                                     let count = reloaded.len();
                                                                     let mut guard = alert_rules_clone.write().await;
@@ -348,6 +348,9 @@ async fn main() -> crate::errors::Result<()> {
         // Register Geckoterminal (DEX Poller)
         let gt = Box::new(GeckoterminalExchange::new(tx.clone(), lvc.clone(), tac.clone(), config.clone()));
         mg.register("geckoterminal", gt);
+
+        // FORCE CONNECT FOR DEBUGGING
+        let _ = mg.ensure_connected("binance").await;
     }
     
     // Start DEX Redis subscriber (forwards dex_prices channel into broadcast tx)

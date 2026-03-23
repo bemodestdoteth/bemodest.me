@@ -44,9 +44,10 @@ pub fn normalize_bybit_ticker(raw: &Value) -> Option<NormalizedTicker> {
     // `ts` is the exchange timestamp in milliseconds
     let timestamp_ms = raw.get("ts")?.as_i64()?;
 
-    Some(NormalizedTicker {
+    let ticker = NormalizedTicker {
         exchange: Exchange::Bybit,
-        base,
+        base: base.clone(),
+        raw_base: base,
         quote,
         o,
         h,
@@ -63,5 +64,6 @@ pub fn normalize_bybit_ticker(raw: &Value) -> Option<NormalizedTicker> {
         c_krw: None,
         v_quote_krw: None,
         liquidity: None,
-    })
+    };
+    Some(ticker)
 }

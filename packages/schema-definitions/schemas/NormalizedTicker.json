@@ -1,88 +1,93 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "NormalizedTicker",
-    "type": "object",
-    "properties": {
+  "$ref": "#/definitions/NormalizedTicker",
+  "definitions": {
+    "NormalizedTicker": {
+      "type": "object",
+      "properties": {
         "exchange": {
-            "type": "string",
-            "enum": [
-                "binance",
-                "binance_f",
-                "upbit",
-                "bithumb",
-                "bybit",
-                "bybit_f",
-                "gateio",
-                "bitget",
-                "bitget_f",
-                "coinbase",
-                "kraken",
-                "kucoin",
-                "okx",
-                "okx_f",
-                "dex"
-            ]
+          "type": "string",
+          "enum": [
+            "binance",
+            "binance_f",
+            "upbit",
+            "bithumb",
+            "bybit",
+            "bybit_f",
+            "gateio",
+            "bitget",
+            "bitget_f",
+            "coinbase",
+            "kraken",
+            "kucoin",
+            "okx",
+            "okx_f",
+            "dex"
+          ]
         },
         "base": {
-            "type": "string"
+          "type": "string"
+        },
+        "raw_base": {
+          "type": "string"
         },
         "quote": {
-            "type": "string"
+          "type": "string"
         },
         "o": {
-            "type": "number"
+          "type": "number"
         },
         "h": {
-            "type": "number"
+          "type": "number"
         },
         "l": {
-            "type": "number"
+          "type": "number"
         },
         "c": {
-            "type": "number"
+          "type": "number"
         },
         "v_base": {
-            "type": "number"
+          "type": "number"
         },
         "v_quote": {
-            "type": "number"
+          "type": "number"
         },
         "liquidity": {
-            "type": "number"
+          "type": "number"
         },
         "timestamp_ms": {
-            "type": "integer"
+          "type": "integer"
         },
         "market_state": {
-            "type": "string",
-            "enum": [
-                "Preview",
-                "Active",
-                "Suspended"
-            ]
+          "type": "string",
+          "enum": [
+            "Preview",
+            "Active",
+            "Suspended"
+          ]
         },
         "ingest_time_us": {
-            "type": "integer"
+          "type": "integer"
         },
         "o_krw": {
-            "type": "number"
+          "type": "number"
         },
         "h_krw": {
-            "type": "number"
+          "type": "number"
         },
         "l_krw": {
-            "type": "number"
+          "type": "number"
         },
         "c_krw": {
-            "type": "number"
+          "type": "number"
         },
         "v_quote_krw": {
-            "type": "number"
+          "type": "number"
         }
-    },
-    "required": [
+      },
+      "required": [
         "exchange",
         "base",
+        "raw_base",
         "quote",
         "o",
         "h",
@@ -92,5 +97,9 @@
         "v_quote",
         "timestamp_ms",
         "ingest_time_us"
-    ]
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
 }

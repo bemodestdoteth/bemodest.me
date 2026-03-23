@@ -1,5 +1,5 @@
 use crate::cache::lvc::LatestValueCache;
-use log::trace;
+use log::{debug, trace};
 use std::sync::{Arc, RwLock};
 use std::collections::HashSet;
 
@@ -40,8 +40,8 @@ impl EligibilityFilter {
 
         // ── Condition 1: minimum source count ──────────────────────────────
         if sources.len() < self.min_sources {
-            trace!(
-                "[EligibilityFilter] {}/{} rejected: {} source(s) < min {}",
+            debug!(
+                "[EligibilityFilter] {}/{} rejected: found {} source(s), but min_sources is {}",
                 base, quote, sources.len(), self.min_sources
             );
             return false;
@@ -58,9 +58,9 @@ impl EligibilityFilter {
 
         if valid_sources.len() < self.min_sources {
             // Fewer usable prices than required (e.g. all zero/missing or < $30k volume)
-            trace!(
-                "[EligibilityFilter] {}/{} rejected: fewer than {} usable sources with >= $30k volume",
-                base, quote, self.min_sources
+            debug!(
+                "[EligibilityFilter] {}/{} rejected: found only {}/{} usable source(s) with >= $30k 24h volume",
+                base, quote, valid_sources.len(), sources.len()
             );
             return false;
         }
@@ -71,8 +71,8 @@ impl EligibilityFilter {
         let spread_pct = (max_source.c - min_source.c) / min_source.c * 100.0;
 
         if spread_pct < self.min_spread_pct {
-            trace!(
-                "[EligibilityFilter] {}/{} rejected: spread {:.4}% < min {:.1}%",
+            debug!(
+                "[EligibilityFilter] {}/{} rejected: spread {:.4}% is below min {:.1}%",
                 base, quote, spread_pct, self.min_spread_pct
             );
             return false;

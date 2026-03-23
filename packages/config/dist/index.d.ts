@@ -1,54 +1,103 @@
 import { z } from 'zod';
 /**
  * Web app environment configuration schema
- * @description Validates environment variables for Next.js app following RULES S-3001
  */
 declare const WebConfigSchema: z.ZodObject<{
-    NODE_ENV: z.ZodDefault<z.ZodEnum<["dev", "prod", "test"]>>;
-    MONGO_USER: z.ZodString;
-    MONGO_PASSWORD: z.ZodString;
-    MONGO_HOST: z.ZodString;
-    MONGO_PORT: z.ZodDefault<z.ZodString>;
-    MONGO_DB_NAME: z.ZodString;
+    PORT: z.ZodDefault<z.ZodNumber>;
+    API_PORT: z.ZodDefault<z.ZodNumber>;
+    SIDECAR_PORT: z.ZodDefault<z.ZodNumber>;
     JWT_SECRET: z.ZodString;
+    SNAPPER_API_SECRET: z.ZodOptional<z.ZodString>;
+    MONGO_USER: z.ZodOptional<z.ZodString>;
+    MONGO_PASSWORD: z.ZodOptional<z.ZodString>;
+    MONGO_HOST: z.ZodOptional<z.ZodString>;
+    MONGO_PORT: z.ZodDefault<z.ZodString>;
+    MONGO_DB_NAME: z.ZodOptional<z.ZodString>;
+    MONGO_URI: z.ZodOptional<z.ZodString>;
+    REDIS_HOST: z.ZodOptional<z.ZodString>;
+    REDIS_PORT: z.ZodDefault<z.ZodString>;
+    REDIS_PASSWORD: z.ZodOptional<z.ZodString>;
+    REDIS_URL: z.ZodOptional<z.ZodString>;
+    NODE_ENV: z.ZodDefault<z.ZodEnum<["dev", "prod", "test"]>>;
+    DEX_REDIS_CHANNEL: z.ZodDefault<z.ZodString>;
+    BATCHING_DURATION_MS: z.ZodDefault<z.ZodNumber>;
+    FILTER_MIN_SOURCES: z.ZodDefault<z.ZodNumber>;
+    FILTER_MIN_SPREAD_PCT: z.ZodDefault<z.ZodNumber>;
+} & {
     ADMIN_USERNAME: z.ZodString;
     ADMIN_PASSWORD_HASH: z.ZodString;
-    PORT: z.ZodDefault<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    NODE_ENV: "dev" | "prod" | "test";
-    MONGO_USER: string;
-    MONGO_PASSWORD: string;
-    MONGO_HOST: string;
+    ADMIN_USERNAME: string;
+    ADMIN_PASSWORD_HASH: string;
+    PORT: number;
+    API_PORT: number;
+    SIDECAR_PORT: number;
+    JWT_SECRET: string;
     MONGO_PORT: string;
-    MONGO_DB_NAME: string;
-    JWT_SECRET: string;
-    ADMIN_USERNAME: string;
-    ADMIN_PASSWORD_HASH: string;
-    PORT: string;
+    REDIS_PORT: string;
+    NODE_ENV: "dev" | "prod" | "test";
+    DEX_REDIS_CHANNEL: string;
+    BATCHING_DURATION_MS: number;
+    FILTER_MIN_SOURCES: number;
+    FILTER_MIN_SPREAD_PCT: number;
+    SNAPPER_API_SECRET?: string | undefined;
+    MONGO_USER?: string | undefined;
+    MONGO_PASSWORD?: string | undefined;
+    MONGO_HOST?: string | undefined;
+    MONGO_DB_NAME?: string | undefined;
+    MONGO_URI?: string | undefined;
+    REDIS_HOST?: string | undefined;
+    REDIS_PASSWORD?: string | undefined;
+    REDIS_URL?: string | undefined;
 }, {
-    MONGO_USER: string;
-    MONGO_PASSWORD: string;
-    MONGO_HOST: string;
-    MONGO_DB_NAME: string;
-    JWT_SECRET: string;
     ADMIN_USERNAME: string;
     ADMIN_PASSWORD_HASH: string;
-    NODE_ENV?: "dev" | "prod" | "test" | undefined;
+    JWT_SECRET: string;
+    PORT?: number | undefined;
+    API_PORT?: number | undefined;
+    SIDECAR_PORT?: number | undefined;
+    SNAPPER_API_SECRET?: string | undefined;
+    MONGO_USER?: string | undefined;
+    MONGO_PASSWORD?: string | undefined;
+    MONGO_HOST?: string | undefined;
     MONGO_PORT?: string | undefined;
-    PORT?: string | undefined;
+    MONGO_DB_NAME?: string | undefined;
+    MONGO_URI?: string | undefined;
+    REDIS_HOST?: string | undefined;
+    REDIS_PORT?: string | undefined;
+    REDIS_PASSWORD?: string | undefined;
+    REDIS_URL?: string | undefined;
+    NODE_ENV?: "dev" | "prod" | "test" | undefined;
+    DEX_REDIS_CHANNEL?: string | undefined;
+    BATCHING_DURATION_MS?: number | undefined;
+    FILTER_MIN_SOURCES?: number | undefined;
+    FILTER_MIN_SPREAD_PCT?: number | undefined;
 }>;
 /**
  * API server environment configuration schema
  */
 declare const ApiConfigSchema: z.ZodObject<{
-    NODE_ENV: z.ZodDefault<z.ZodEnum<["dev", "prod", "test"]>>;
-    PORT: z.ZodDefault<z.ZodString>;
-    MONGO_USER: z.ZodString;
-    MONGO_PASSWORD: z.ZodString;
-    MONGO_HOST: z.ZodString;
-    MONGO_PORT: z.ZodDefault<z.ZodString>;
-    MONGO_DB_NAME: z.ZodString;
+    PORT: z.ZodDefault<z.ZodNumber>;
+    API_PORT: z.ZodDefault<z.ZodNumber>;
+    SIDECAR_PORT: z.ZodDefault<z.ZodNumber>;
     JWT_SECRET: z.ZodString;
+    SNAPPER_API_SECRET: z.ZodOptional<z.ZodString>;
+    MONGO_USER: z.ZodOptional<z.ZodString>;
+    MONGO_PASSWORD: z.ZodOptional<z.ZodString>;
+    MONGO_HOST: z.ZodOptional<z.ZodString>;
+    MONGO_PORT: z.ZodDefault<z.ZodString>;
+    MONGO_DB_NAME: z.ZodOptional<z.ZodString>;
+    MONGO_URI: z.ZodOptional<z.ZodString>;
+    REDIS_HOST: z.ZodOptional<z.ZodString>;
+    REDIS_PORT: z.ZodDefault<z.ZodString>;
+    REDIS_PASSWORD: z.ZodOptional<z.ZodString>;
+    REDIS_URL: z.ZodOptional<z.ZodString>;
+    NODE_ENV: z.ZodDefault<z.ZodEnum<["dev", "prod", "test"]>>;
+    DEX_REDIS_CHANNEL: z.ZodDefault<z.ZodString>;
+    BATCHING_DURATION_MS: z.ZodDefault<z.ZodNumber>;
+    FILTER_MIN_SOURCES: z.ZodDefault<z.ZodNumber>;
+    FILTER_MIN_SPREAD_PCT: z.ZodDefault<z.ZodNumber>;
+} & {
     LOG_LEVEL: z.ZodDefault<z.ZodEnum<["error", "warn", "info", "debug"]>>;
     LOGFILE: z.ZodDefault<z.ZodString>;
     CORS_ORIGIN: z.ZodDefault<z.ZodString>;
@@ -71,11 +120,7 @@ declare const ApiConfigSchema: z.ZodObject<{
     COOKIE_MAX_AGE_MS: z.ZodDefault<z.ZodString>;
     COOKIE_SAME_SITE: z.ZodDefault<z.ZodString>;
     SIDECAR_URL: z.ZodOptional<z.ZodString>;
-    SNAPPER_API_SECRET: z.ZodOptional<z.ZodString>;
     PROXY_URL: z.ZodOptional<z.ZodString>;
-    REDIS_HOST: z.ZodOptional<z.ZodString>;
-    REDIS_PORT: z.ZodDefault<z.ZodString>;
-    REDIS_PASSWORD: z.ZodOptional<z.ZodString>;
     INFURA_KEY: z.ZodOptional<z.ZodString>;
     ETHERSCAN_KEY: z.ZodOptional<z.ZodString>;
     STATS_CUTOFF_MS: z.ZodDefault<z.ZodString>;
@@ -83,16 +128,18 @@ declare const ApiConfigSchema: z.ZodObject<{
     DW_TASKS_STREAM: z.ZodDefault<z.ZodString>;
     DW_STATUS_TTL_S: z.ZodDefault<z.ZodString>;
     DEX_POLL_WORKERS: z.ZodDefault<z.ZodString>;
-    DEX_REDIS_CHANNEL: z.ZodDefault<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    NODE_ENV: "dev" | "prod" | "test";
-    MONGO_USER: string;
-    MONGO_PASSWORD: string;
-    MONGO_HOST: string;
-    MONGO_PORT: string;
-    MONGO_DB_NAME: string;
+    PORT: number;
+    API_PORT: number;
+    SIDECAR_PORT: number;
     JWT_SECRET: string;
-    PORT: string;
+    MONGO_PORT: string;
+    REDIS_PORT: string;
+    NODE_ENV: "dev" | "prod" | "test";
+    DEX_REDIS_CHANNEL: string;
+    BATCHING_DURATION_MS: number;
+    FILTER_MIN_SOURCES: number;
+    FILTER_MIN_SPREAD_PCT: number;
     LOG_LEVEL: "error" | "warn" | "info" | "debug";
     LOGFILE: string;
     CORS_ORIGIN: string;
@@ -111,34 +158,50 @@ declare const ApiConfigSchema: z.ZodObject<{
     COOKIE_NAME: string;
     COOKIE_MAX_AGE_MS: string;
     COOKIE_SAME_SITE: string;
-    REDIS_PORT: string;
     STATS_CUTOFF_MS: string;
     IMAGE_SIZE_LIMIT_BYTES: string;
     DW_TASKS_STREAM: string;
     DW_STATUS_TTL_S: string;
     DEX_POLL_WORKERS: string;
-    DEX_REDIS_CHANNEL: string;
     ADMIN_USERNAME?: string | undefined;
     ADMIN_PASSWORD_HASH?: string | undefined;
-    CHROME_EXTENSION_ID?: string | undefined;
-    SIDECAR_URL?: string | undefined;
     SNAPPER_API_SECRET?: string | undefined;
-    PROXY_URL?: string | undefined;
+    MONGO_USER?: string | undefined;
+    MONGO_PASSWORD?: string | undefined;
+    MONGO_HOST?: string | undefined;
+    MONGO_DB_NAME?: string | undefined;
+    MONGO_URI?: string | undefined;
     REDIS_HOST?: string | undefined;
     REDIS_PASSWORD?: string | undefined;
+    REDIS_URL?: string | undefined;
+    CHROME_EXTENSION_ID?: string | undefined;
+    SIDECAR_URL?: string | undefined;
+    PROXY_URL?: string | undefined;
     INFURA_KEY?: string | undefined;
     ETHERSCAN_KEY?: string | undefined;
 }, {
-    MONGO_USER: string;
-    MONGO_PASSWORD: string;
-    MONGO_HOST: string;
-    MONGO_DB_NAME: string;
     JWT_SECRET: string;
-    NODE_ENV?: "dev" | "prod" | "test" | undefined;
-    MONGO_PORT?: string | undefined;
     ADMIN_USERNAME?: string | undefined;
     ADMIN_PASSWORD_HASH?: string | undefined;
-    PORT?: string | undefined;
+    PORT?: number | undefined;
+    API_PORT?: number | undefined;
+    SIDECAR_PORT?: number | undefined;
+    SNAPPER_API_SECRET?: string | undefined;
+    MONGO_USER?: string | undefined;
+    MONGO_PASSWORD?: string | undefined;
+    MONGO_HOST?: string | undefined;
+    MONGO_PORT?: string | undefined;
+    MONGO_DB_NAME?: string | undefined;
+    MONGO_URI?: string | undefined;
+    REDIS_HOST?: string | undefined;
+    REDIS_PORT?: string | undefined;
+    REDIS_PASSWORD?: string | undefined;
+    REDIS_URL?: string | undefined;
+    NODE_ENV?: "dev" | "prod" | "test" | undefined;
+    DEX_REDIS_CHANNEL?: string | undefined;
+    BATCHING_DURATION_MS?: number | undefined;
+    FILTER_MIN_SOURCES?: number | undefined;
+    FILTER_MIN_SPREAD_PCT?: number | undefined;
     LOG_LEVEL?: "error" | "warn" | "info" | "debug" | undefined;
     LOGFILE?: string | undefined;
     CORS_ORIGIN?: string | undefined;
@@ -159,11 +222,7 @@ declare const ApiConfigSchema: z.ZodObject<{
     COOKIE_MAX_AGE_MS?: string | undefined;
     COOKIE_SAME_SITE?: string | undefined;
     SIDECAR_URL?: string | undefined;
-    SNAPPER_API_SECRET?: string | undefined;
     PROXY_URL?: string | undefined;
-    REDIS_HOST?: string | undefined;
-    REDIS_PORT?: string | undefined;
-    REDIS_PASSWORD?: string | undefined;
     INFURA_KEY?: string | undefined;
     ETHERSCAN_KEY?: string | undefined;
     STATS_CUTOFF_MS?: string | undefined;
@@ -171,34 +230,10 @@ declare const ApiConfigSchema: z.ZodObject<{
     DW_TASKS_STREAM?: string | undefined;
     DW_STATUS_TTL_S?: string | undefined;
     DEX_POLL_WORKERS?: string | undefined;
-    DEX_REDIS_CHANNEL?: string | undefined;
 }>;
 export type WebConfig = z.infer<typeof WebConfigSchema>;
 export type ApiConfig = z.infer<typeof ApiConfigSchema>;
-/**
- * Validates and returns web app configuration
- * @returns {WebConfig} Validated configuration object
- * @throws {z.ZodError} If environment variables are invalid
- * @example
- * const config = validateWebConfig();
- * console.log(config.MONGO_HOST);
- */
 export declare function validateWebConfig(): WebConfig;
-/**
- * Validates and returns API server configuration
- * @returns {ApiConfig} Validated configuration object
- * @throws {z.ZodError} If environment variables are invalid
- * @example
- * const config = validateApiConfig();
- * console.log(config.PORT);
- */
 export declare function validateApiConfig(): ApiConfig;
-/**
- * Encodes database password for URI following RULES S-3002
- * @param {string} password - Raw password string
- * @returns {string} URL-encoded password
- * @example
- * const encoded = encodeDbPassword('my@pass#word');
- */
 export declare function encodeDbPassword(password: string): string;
 export {};

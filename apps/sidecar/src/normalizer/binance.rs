@@ -27,7 +27,7 @@ pub fn normalize_binance_ticker(raw: &Value, exchange: Exchange) -> Option<Norma
     let (base, scale) = if exchange == Exchange::BinanceF {
         strip_scale_factor(&raw_base)
     } else {
-        (raw_base, rust_decimal::Decimal::ONE)
+        (raw_base.clone(), rust_decimal::Decimal::ONE)
     };
 
     let o: rust_decimal::Decimal = parse_decimal(raw.get("o")?.as_str()?)? / scale;
@@ -41,6 +41,7 @@ pub fn normalize_binance_ticker(raw: &Value, exchange: Exchange) -> Option<Norma
     Some(NormalizedTicker {
         exchange,
         base,
+        raw_base: raw_base.to_string(),
         quote,
         o: o.to_f64().unwrap_or(0.0),
         h: h.to_f64().unwrap_or(0.0),

@@ -294,7 +294,8 @@ fn normalize_gt_token(
 
     Some(NormalizedTicker {
         exchange: ExchangeType::Dex,
-        base,
+        base: base.clone(),
+        raw_base: base,
         quote: "USD".to_string(),
         o: price_usd,
         h: price_usd,

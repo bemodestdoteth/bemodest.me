@@ -1,34 +1,27 @@
-pub mod generated;
-pub use generated::{NormalizedTicker, Exchange, MarketState};
-
-impl std::str::FromStr for MarketState {
-    type Err = ();
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_uppercase().as_str() {
-            "ACTIVE" => Ok(MarketState::Active),
-            "PREVIEW" => Ok(MarketState::Preview),
-            "SUSPENDED" => Ok(MarketState::Suspended),
-            _ => Err(()),
-        }
-    }
+pub mod generated {
+    #![allow(clippy::all, unused_imports, non_camel_case_types, non_snake_case)]
+    include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 }
 
-use rust_decimal::Decimal;
-use std::str::FromStr;
+pub use generated::*;
+pub use generated::{
+    NormalizedTickerExchange as Exchange, 
+    NormalizedTickerMarketState as MarketState,
+    AlertRuleCondition as Condition,
+    SidecarConfigPayloadType as Type,
+};
 
-impl std::fmt::Display for Exchange {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = serde_json::to_string(self).map_err(|_| std::fmt::Error)?;
-        write!(f, "{}", s.trim_matches('"'))
-    }
-}
+
+
+
 
 // ============================================================================
 // Helper Functions
 // ============================================================================
 
-pub fn parse_decimal(s: &str) -> Option<Decimal> {
-    Decimal::from_str(s).ok()
+pub fn parse_decimal(s: &str) -> Option<rust_decimal::Decimal> {
+    use std::str::FromStr;
+    rust_decimal::Decimal::from_str(s).ok()
 }
 
 pub fn parse_binance_symbol(symbol: &str) -> Option<(String, String)> {
@@ -58,7 +51,7 @@ pub fn now_micros() -> i64 {
     chrono::Utc::now().timestamp_micros()
 }
 
-pub fn strip_scale_factor(base: &str) -> (String, Decimal) {
+pub fn strip_scale_factor(base: &str) -> (String, rust_decimal::Decimal) {
     const PREFIXES: &[(&str, u64)] = &[
         ("1000000", 1_000_000), ("100000", 100_000), ("10000", 10_000), ("1000", 1_000),
     ];
@@ -67,13 +60,13 @@ pub fn strip_scale_factor(base: &str) -> (String, Decimal) {
     ];
     for (prefix, divisor) in PREFIXES {
         if let Some(stripped) = base.strip_prefix(prefix) {
-            if !stripped.is_empty() { return (stripped.to_string(), Decimal::from(*divisor)); }
+            if !stripped.is_empty() { return (stripped.to_string(), rust_decimal::Decimal::from(*divisor)); }
         }
     }
     for (suffix, divisor) in SUFFIXES {
         if let Some(stripped) = base.strip_suffix(suffix) {
-            if !stripped.is_empty() { return (stripped.to_string(), Decimal::from(*divisor)); }
+            if !stripped.is_empty() { return (stripped.to_string(), rust_decimal::Decimal::from(*divisor)); }
         }
     }
-    (base.to_string(), Decimal::ONE)
+    (base.to_string(), rust_decimal::Decimal::ONE)
 }

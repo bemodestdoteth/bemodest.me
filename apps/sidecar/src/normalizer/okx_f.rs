@@ -86,7 +86,8 @@ pub fn normalize_okx_f_ticker(raw: &Value) -> Option<NormalizedTicker> {
 
     Some(NormalizedTicker {
         exchange: Exchange::OkxF,
-        base,
+        base: base.clone(),
+        raw_base: base,
         quote,
         o: o.to_f64().unwrap_or(0.0),
         h: h.to_f64().unwrap_or(0.0),

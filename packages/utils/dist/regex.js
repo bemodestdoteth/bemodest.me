@@ -71,3 +71,4 @@ function compileChainRegexes(chains) {
     });
     return { chainRegexMap, regexFingerprintMap };
 }
+//# sourceMappingURL=regex.js.map

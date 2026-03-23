@@ -76,6 +76,7 @@ fn normalize_ticker_item(item: &Value) -> Option<NormalizedTicker> {
     Some(NormalizedTicker {
         exchange: Exchange::Kraken,
         base,
+        raw_base: raw_base.to_string(),
         quote,
         o,
         h,

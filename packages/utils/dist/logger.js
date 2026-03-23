@@ -74,3 +74,4 @@ function createLogger(logDir, level = 'info') {
     }
 }
 exports.logger = createLogger((typeof process !== 'undefined' && process.env.LOG_DIR) || './logs', (typeof process !== 'undefined' && process.env.LOG_LEVEL) || 'info');
+//# sourceMappingURL=logger.js.map

@@ -3,11 +3,14 @@
     "version": "1.0.0",
     "description": "JSON Schemas for polyglot type generation",
     "scripts": {
-        "generate:ts": "quicktype -s schema schemas/AlertRule.json schemas/SidecarConfigPayload.json schemas/NormalizedTicker.json -o ../types/src/generated.ts --just-types",
-        "generate:rs": "quicktype -s schema schemas/AlertRule.json schemas/SidecarConfigPayload.json schemas/NormalizedTicker.json -o ../../apps/sidecar/src/types/generated.rs --visibility public --derive-debug --derive-clone",
-        "build": "pnpm run generate:ts && pnpm run generate:rs"
+        "generate:json": "node --import tsx src/generate.ts",
+        "generate:ts": "quicktype -s schema schemas/AlertRule.json schemas/SidecarConfigPayload.json schemas/NormalizedTicker.json schemas/SystemConfig.json -o ../types/src/generated.ts --just-types",
+        "generate:rs": "quicktype -s schema schemas/AlertRule.json schemas/SidecarConfigPayload.json schemas/NormalizedTicker.json schemas/SystemConfig.json -o ../../apps/sidecar/src/types/generated.rs --visibility public --derive-debug --derive-clone",
+        "build": "pnpm run generate:json && pnpm run generate:ts && pnpm run generate:rs"
     },
     "devDependencies": {
-        "quicktype": "^23.0.170"
+        "quicktype": "^23.0.170",
+        "tsx": "^4.21.0",
+        "zod-to-json-schema": "^3.25.1"
     }
 }

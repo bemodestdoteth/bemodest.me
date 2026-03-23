@@ -1,16 +1,24 @@
 {
-    "type": "object",
-    "properties": {
+  "$ref": "#/definitions/SidecarConfigPayload",
+  "definitions": {
+    "SidecarConfigPayload": {
+      "type": "object",
+      "properties": {
         "type": {
-            "type": "string",
-            "enum": [
-                "excludelist_updated",
-                "pinlist_updated",
-                "alertrules_updated"
-            ]
+          "type": "string",
+          "enum": [
+            "excludelist_updated",
+            "pinlist_updated",
+            "alertrules_updated",
+            "market_cache_updated"
+          ]
         }
-    },
-    "required": [
+      },
+      "required": [
         "type"
-    ]
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
 }

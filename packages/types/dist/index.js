@@ -15,7 +15,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExtensionFormDraftSchema = exports.DraftChainFormSchema = exports.DraftEntityFormSchema = exports.DraftLabelFormSchema = exports.DwDeepDiveTaskSchema = exports.DwStatusBodySchema = exports.ChainDeleteSchema = exports.ChainUpdateSchema = exports.ChainInsertSchema = exports.AlertRuleSchema = exports.LabelDeleteBulkSchema = exports.LabelInsertBulkSchema = exports.LabelDeleteSchema = exports.LabelUpdateSchema = exports.LabelInsertSchema = exports.LabelGetSchema = exports.EntityUpdateSchema = exports.EntityDeleteSchema = exports.EntityInsertSchema = exports.EntityGetSchema = exports.ChainGetSchema = exports.ErrorObjectSchema = exports.ApiResponseSchema = exports.LoginRequestSchema = exports.AuthSessionSchema = exports.EntitySchema = exports.LabelSchema = exports.AliasSchema = exports.Caip2RedisSchema = exports.Caip2Schema = exports.ALERT_CONDITIONS = exports.DW_STATUS_VALUES = exports.CAIP2_DB_RE = exports.CAIP2_RE = void 0;
-__exportStar(require("./generated.js"), exports);
+__exportStar(require("./schemas/index.js"), exports);
 const zod_1 = require("zod");
 // ==========================================
 // Constants & Regex
@@ -333,3 +333,4 @@ exports.ExtensionFormDraftSchema = zod_1.z.object({
     chains: exports.DraftChainFormSchema.optional(),
     activeTab: zod_1.z.string().optional(),
 });
+//# sourceMappingURL=index.js.map

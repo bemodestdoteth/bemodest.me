@@ -1,0 +1,91 @@
+{
+  "$ref": "#/definitions/SystemConfig",
+  "definitions": {
+    "SystemConfig": {
+      "type": "object",
+      "properties": {
+        "PORT": {
+          "type": "integer",
+          "default": 3000
+        },
+        "API_PORT": {
+          "type": "integer",
+          "default": 3001
+        },
+        "SIDECAR_PORT": {
+          "type": "integer",
+          "default": 25834
+        },
+        "JWT_SECRET": {
+          "type": "string",
+          "minLength": 32
+        },
+        "SNAPPER_API_SECRET": {
+          "type": "string"
+        },
+        "MONGO_USER": {
+          "type": "string"
+        },
+        "MONGO_PASSWORD": {
+          "type": "string"
+        },
+        "MONGO_HOST": {
+          "type": "string"
+        },
+        "MONGO_PORT": {
+          "type": "string",
+          "default": "27017"
+        },
+        "MONGO_DB_NAME": {
+          "type": "string"
+        },
+        "MONGO_URI": {
+          "type": "string"
+        },
+        "REDIS_HOST": {
+          "type": "string"
+        },
+        "REDIS_PORT": {
+          "type": "string",
+          "default": "6380"
+        },
+        "REDIS_PASSWORD": {
+          "type": "string"
+        },
+        "REDIS_URL": {
+          "type": "string"
+        },
+        "NODE_ENV": {
+          "type": "string",
+          "enum": [
+            "dev",
+            "prod",
+            "test"
+          ],
+          "default": "dev"
+        },
+        "DEX_REDIS_CHANNEL": {
+          "type": "string",
+          "default": "dex_prices"
+        },
+        "BATCHING_DURATION_MS": {
+          "type": "integer",
+          "default": 1000
+        },
+        "FILTER_MIN_SOURCES": {
+          "type": "integer",
+          "default": 2
+        },
+        "FILTER_MIN_SPREAD_PCT": {
+          "type": "number",
+          "default": 10
+        }
+      },
+      "required": [
+        "JWT_SECRET"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

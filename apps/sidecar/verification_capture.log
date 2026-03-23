@@ -1,0 +1,100 @@
+[2026-03-22T01:49:36Z INFO  sidecar] Loaded environment from /mnt/870-evo-1/server-dev/Javascript/bemodest.me/apps/sidecar/../api/.env
+[2026-03-22T01:49:36Z INFO  sidecar] Starting Sidecar on port 25834
+[2026-03-22T01:49:36Z INFO  sidecar::cache::token_cache] [TokenCache] Connected to MongoDB
+[2026-03-22T01:49:36Z INFO  sidecar] Updated sidecar excludelist from Redis on startup: {"EUR", "ETHBTC", "USDT", "BTC", "BTCDOM"}
+[2026-03-22T01:49:36Z INFO  sidecar] Updated sidecar pinlist from Redis on startup: {"PHA", "ORCA", "TRIA"}
+[2026-03-22T01:49:36Z INFO  sidecar] Subscribed to sidecar:config Redis stream
+[2026-03-22T01:49:36Z INFO  sidecar::cache::token_cache] [TokenCache] Preloaded 0 token mappings
+[2026-03-22T01:49:36Z INFO  sidecar] [Sidecar] Token cache initialized with 0 entries
+[2026-03-22T01:49:36Z INFO  sidecar] [Sidecar] Latest-Value Cache initialized
+[2026-03-22T01:49:36Z INFO  sidecar::cache::token_annotation] [TokenAnnotationCache] Connected to MongoDB for annotations
+[2026-03-22T01:49:36Z INFO  sidecar::cache::token_annotation] [TokenAnnotationCache] Preloaded 41 token annotations
+[2026-03-22T01:49:36Z INFO  sidecar] [Sidecar] Token Annotation Cache initialized
+[2026-03-22T01:49:36Z INFO  sidecar] [Sidecar] Forex Rate Cache initialized (polling every 60s)
+[MarketCache] DEBUG: initial_fetch called
+[2026-03-22T01:49:36Z INFO  sidecar::cache::market] [MarketCache] Initial fetch: 309 Upbit markets
+[2026-03-22T01:49:36Z INFO  sidecar::cache::market] [MarketCache] Initial fetch: 455 Bithumb markets
+[2026-03-22T01:49:36Z INFO  sidecar::cache::forex] [ForexCache] KRW/USD basePrice updated: 1506.5
+[2026-03-22T01:49:36Z INFO  sidecar::cache::forex] [ForexCache] BTC/KRW price updated: 103645000
+[2026-03-22T01:49:36Z INFO  sidecar::cache::forex] [ForexCache] Upbit USDT/KRW price updated: 1502
+[2026-03-22T01:49:36Z INFO  sidecar::cache::forex] [ForexCache] Bithumb USDT/KRW price updated: 1503
+[2026-03-22T01:49:36Z INFO  sidecar::cache::market] [MarketCache] Initial fetch: 467 Bybit USDT symbols
+[2026-03-22T01:49:37Z INFO  sidecar::cache::market] [MarketCache] Initial fetch: 548 Bybit Futures USDT symbols
+[2026-03-22T01:49:37Z INFO  sidecar::cache::market] [MarketCache] Initial fetch: 2207 Gateio currency pairs
+[2026-03-22T01:49:37Z INFO  sidecar::cache::market] [MarketCache] Initial fetch: 622 Bitget USDT symbols
+[2026-03-22T01:49:37Z INFO  sidecar::cache::market] [MarketCache] Initial fetch: 539 Bitget Futures base coins
+[2026-03-22T01:49:37Z INFO  sidecar::cache::market] [MarketCache] Initial fetch: 393 Coinbase online currencies
+[2026-03-22T01:49:38Z INFO  sidecar::cache::market] [MarketCache] Initial fetch: 652 Kraken USD pairs
+[2026-03-22T01:49:38Z INFO  sidecar::cache::market] [MarketCache] Initial fetch: 924 KuCoin USDT symbols
+[2026-03-22T01:49:38Z INFO  sidecar::cache::market] [MarketCache] Initial fetch: 293 OKX USDT-base instruments
+[2026-03-22T01:49:38Z INFO  sidecar::cache::market] [MarketCache] Initial fetch: 281 OKX Futures instruments
+[2026-03-22T01:49:38Z INFO  sidecar] [Sidecar] Market Cache initialized (polling every 1800s)
+[2026-03-22T01:49:38Z INFO  sidecar] [Sidecar] Price history sampler spawned (1 Hz)
+[2026-03-22T01:49:38Z INFO  sidecar::alert::engine] [AlertEngine] Loaded 0 alert rules from MongoDB
+[2026-03-22T01:49:38Z INFO  sidecar] [Sidecar] Loaded 0 alert rules on startup
+[2026-03-22T01:49:38Z INFO  sidecar] [Sidecar] Alert state store connected to Redis
+[2026-03-22T01:49:38Z INFO  sidecar] [Sidecar] Alert engine spawned (500 ms tick)
+[2026-03-22T01:49:38Z INFO  sidecar] [Sidecar] Webhook dispatcher spawned
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges] [ExchangeManager] ensure_connected called for: binance
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges] [ExchangeManager] binance is_connected: false
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges] [ExchangeManager] Calling connect() for binance
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::binance] [BinanceExchange] connect() called
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::binance] [BinanceExchange] Spawning connection task...
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::binance] [BinanceExchange] Task spawned successfully
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::base] [binance] Connecting to WebSocket: wss://stream.binance.com:9443/ws/!miniTicker@arr
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges] [ExchangeManager] ensure_connected called for: kucoin
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges] [ExchangeManager] kucoin is_connected: false
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges] [ExchangeManager] Calling connect() for kucoin
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::kucoin] [KucoinExchange] connect() called
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges] [ExchangeManager] ensure_connected called for: okx
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::kucoin] [KucoinExchange] Market cache ready with 924 symbols
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges] [ExchangeManager] okx is_connected: false
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges] [ExchangeManager] Calling connect() for okx
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::okx] [OkxExchange] connect() called
+[2026-03-22T01:49:38Z INFO  sidecar::redis_sub] [DexSub] Connecting to Redis at redis://:snWgGOYqNBrK@data.bemodest.me:6380 (channel=dex_prices)
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::okx] [OkxExchange] Market cache ready with 293 symbols
+[2026-03-22T01:49:38Z INFO  sidecar] [Sidecar] DEX Redis subscriber task spawned
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::base] [okx_shard_0] Connecting to WebSocket: wss://ws.okx.com:8443/ws/v5/public
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::base] [okx_shard_1] Connecting to WebSocket: wss://ws.okx.com:8443/ws/v5/public
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::base] [okx_shard_2] Connecting to WebSocket: wss://ws.okx.com:8443/ws/v5/public
+[2026-03-22T01:49:38Z INFO  sidecar] [Sidecar] Supervisor loop started monitoring tasks
+[2026-03-22T01:49:38Z INFO  sidecar::websocket] WebSocket server listening on (IPv4): 0.0.0.0:25834
+[2026-03-22T01:49:38Z INFO  sidecar::redis_sub] [DexSub] Subscribed to Redis channel 'dex_prices'
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::base] [kucoin_shard_0] Connecting to WebSocket: wss://ws-api-spot.kucoin.com/?token=2neAiuYvAU61ZDXANAGAsiL4-iAExhsBXZxftpOeh_55i3Ysy2q2LEsEWU64mdzUOPusi34M_wGoSf7iNyEWJ4tGxGYrEaI7nnjZI8g4NuBm51lGR35eONiYB9J6i9GjsxUuhPw3Blq6rhZlGykT3Vp1phUafnulOOpts-MEmEEnc8JA1hLQPj1KhBXaZlvjJBvJHl5Vs9Y=.77Ad7g80xQv3o5qXjsLR0Q==&connectId=f75d116e450a44cdbae2cc5418ec40b1
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::base] [kucoin_shard_3] Connecting to WebSocket: wss://ws-api-spot.kucoin.com/?token=2neAiuYvAU61ZDXANAGAsiL4-iAExhsBXZxftpOeh_55i3Ysy2q2LEsEWU64mdzUOPusi34M_wGoSf7iNyEWJ4tGxGYrEaI7eT0teOO_c1fgYSigkN1JqdiYB9J6i9GjsxUuhPw3Blq6rhZlGykT3Vp1phUafnulOOpts-MEmEEnc8JA1hLQPgekz7Grg4fdJBvJHl5Vs9Y=._lVPHwA8yLjCdRhqDRBwxA==&connectId=9cfb4fc27fb4419f9abc0c6df03ab531
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::base] [kucoin_shard_1] Connecting to WebSocket: wss://ws-api-spot.kucoin.com/?token=2neAiuYvAU61ZDXANAGAsiL4-iAExhsBXZxftpOeh_55i3Ysy2q2LEsEWU64mdzUOPusi34M_wGoSf7iNyEWJ4tGxGYrEaI7kNu929OegdmrZyzRe5UHS9iYB9J6i9GjsxUuhPw3Blq6rhZlGykT3Vp1phUafnulOOpts-MEmEEnc8JA1hLQPj7O3AspBurGJBvJHl5Vs9Y=.3YypH7HQtHw5OXmPULkQbQ==&connectId=1399f4f01202468680c6e5203946a53e
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::base] [kucoin_shard_2] Connecting to WebSocket: wss://ws-api-spot.kucoin.com/?token=2neAiuYvAU61ZDXANAGAsiL4-iAExhsBXZxftpOeh_55i3Ysy2q2LEsEWU64mdzUOPusi34M_wGoSf7iNyEWJ4tGxGYrEaI74I5ppxuFBDjcxgz2n1SQYdiYB9J6i9GjsxUuhPw3Blq6rhZlGykT3Vp1phUafnulOOpts-MEmEEnc8JA1hLQPp72Kpv1-VAzJBvJHl5Vs9Y=.S32D1FR_oU1A9uuuFaQIkg==&connectId=cceab449c8634374bf46da9efd39f55f
+[2026-03-22T01:49:38Z INFO  sidecar::exchanges::base] [binance] WebSocket connected.
+[2026-03-22T01:49:38Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"status","source":"binance","connected":true}
+[2026-03-22T01:49:39Z INFO  sidecar::exchanges::base] [kucoin_shard_1] WebSocket connected.
+[2026-03-22T01:49:39Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"status","source":"kucoin_shard_1","connected":true}
+[2026-03-22T01:49:39Z INFO  sidecar::exchanges::base] [kucoin_shard_2] WebSocket connected.
+[2026-03-22T01:49:39Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"status","source":"kucoin_shard_2","connected":true}
+[2026-03-22T01:49:39Z INFO  sidecar::exchanges::base] [kucoin_shard_3] WebSocket connected.
+[2026-03-22T01:49:39Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"status","source":"kucoin_shard_3","connected":true}
+[2026-03-22T01:49:39Z INFO  sidecar::exchanges::base] [kucoin_shard_0] WebSocket connected.
+[2026-03-22T01:49:39Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"status","source":"kucoin_shard_0","connected":true}
+[2026-03-22T01:49:39Z INFO  sidecar::exchanges::base] [okx_shard_1] WebSocket connected.
+[2026-03-22T01:49:39Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"status","source":"okx_shard_1","connected":true}
+[2026-03-22T01:49:39Z INFO  sidecar::exchanges::base] [okx_shard_2] WebSocket connected.
+[2026-03-22T01:49:39Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"status","source":"okx_shard_2","connected":true}
+[2026-03-22T01:49:39Z INFO  sidecar::exchanges::base] [okx_shard_0] WebSocket connected.
+[2026-03-22T01:49:39Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"status","source":"okx_shard_0","connected":true}
+[2026-03-22T01:49:40Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"kucoin_shard_1","data":[{"type":"normalized_ticker","source":"kucoin","data":{"base":"TRIA","c":0.037124,"exchange":"kucoin","h":0.037124,"ingest_time_us":1774144179595620,"l":0.037124,"o":0.037124,"quote":"USDT","timestamp_ms":1774144144983,"v_base":693.0,"v_quote":25.726931999999998}}]}
+[2026-03-22T01:49:40Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"okx_shard_1","data":[{"type":"normalized_ticker","source":"okx","data":{"base":"PHA","c":0.04034,"exchange":"okx","h":0.04367,"ingest_time_us":1774144179392594,"l":0.03793,"o":0.03846,"quote":"USDT","timestamp_ms":1774144151805,"v_base":20559320.575568,"v_quote":832319.0571074581}}]}
+[2026-03-22T01:49:41Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"kucoin_shard_1","data":[{"type":"normalized_ticker","source":"kucoin","data":{"base":"TRIA","c":0.037124,"exchange":"kucoin","h":0.037124,"ingest_time_us":1774144181077981,"l":0.037124,"o":0.037124,"quote":"USDT","timestamp_ms":1774144144983,"v_base":693.0,"v_quote":25.726931999999998}}]}
+[2026-03-22T01:49:42Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"kucoin_shard_1","data":[{"type":"normalized_ticker","source":"kucoin","data":{"base":"TRIA","c":0.037124,"exchange":"kucoin","h":0.037124,"ingest_time_us":1774144182028104,"l":0.037124,"o":0.037124,"quote":"USDT","timestamp_ms":1774144144983,"v_base":693.0,"v_quote":25.726931999999998}}]}
+[2026-03-22T01:49:43Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"kucoin_shard_1","data":[{"type":"normalized_ticker","source":"kucoin","data":{"base":"TRIA","c":0.037124,"exchange":"kucoin","h":0.037124,"ingest_time_us":1774144183044182,"l":0.037124,"o":0.037124,"quote":"USDT","timestamp_ms":1774144144983,"v_base":693.0,"v_quote":25.726931999999998}}]}
+[2026-03-22T01:49:44Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"kucoin_shard_1","data":[{"type":"normalized_ticker","source":"kucoin","data":{"base":"TRIA","c":0.037124,"exchange":"kucoin","h":0.037124,"ingest_time_us":1774144184008343,"l":0.037124,"o":0.037124,"quote":"USDT","timestamp_ms":1774144144983,"v_base":693.0,"v_quote":25.726931999999998}}]}
+[2026-03-22T01:49:45Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"kucoin_shard_1","data":[{"type":"normalized_ticker","source":"kucoin","data":{"base":"PHA","c":0.0402,"exchange":"kucoin","h":0.0402,"ingest_time_us":1774144185026056,"l":0.0402,"o":0.0402,"quote":"USDT","timestamp_ms":1774144184730,"v_base":13.4534,"v_quote":0.54082668}},{"type":"normalized_ticker","source":"kucoin","data":{"base":"TRIA","c":0.037124,"exchange":"kucoin","h":0.037124,"ingest_time_us":1774144185080136,"l":0.037124,"o":0.037124,"quote":"USDT","timestamp_ms":1774144144983,"v_base":693.0,"v_quote":25.726931999999998}}]}
+[2026-03-22T01:49:45Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"okx_shard_1","data":[{"type":"normalized_ticker","source":"okx","data":{"base":"PHA","c":0.04034,"exchange":"okx","h":0.04367,"ingest_time_us":1774144185053106,"l":0.03793,"o":0.03846,"quote":"USDT","timestamp_ms":1774144185004,"v_base":20559320.575568,"v_quote":832319.0571074581}}]}
+[2026-03-22T01:49:46Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"kucoin_shard_1","data":[{"type":"normalized_ticker","source":"kucoin","data":{"base":"PHA","c":0.0402,"exchange":"kucoin","h":0.0402,"ingest_time_us":1774144186056207,"l":0.0402,"o":0.0402,"quote":"USDT","timestamp_ms":1774144184730,"v_base":13.4534,"v_quote":0.54082668}},{"type":"normalized_ticker","source":"kucoin","data":{"base":"TRIA","c":0.037124,"exchange":"kucoin","h":0.037124,"ingest_time_us":1774144186029505,"l":0.037124,"o":0.037124,"quote":"USDT","timestamp_ms":1774144144983,"v_base":693.0,"v_quote":25.726931999999998}}]}
+[2026-03-22T01:49:46Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"okx_shard_1","data":[{"type":"normalized_ticker","source":"okx","data":{"base":"PHA","c":0.04034,"exchange":"okx","h":0.04367,"ingest_time_us":1774144185506227,"l":0.03793,"o":0.03846,"quote":"USDT","timestamp_ms":1774144185363,"v_base":20559320.575568,"v_quote":832319.0571074581}}]}
+[2026-03-22T01:49:46Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"binance","data":[{"type":"normalized_ticker","source":"binance","data":{"base":"PHA","c":0.0403,"exchange":"binance","h":0.0436,"ingest_time_us":1774144186018361,"l":0.0379,"market_state":"Active","o":0.0384,"quote":"USDT","timestamp_ms":1774144185543,"v_base":105672304.0,"v_quote":4247865.1213}}]}
+[2026-03-22T01:49:47Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"kucoin_shard_1","data":[{"type":"normalized_ticker","source":"kucoin","data":{"base":"PHA","c":0.0402,"exchange":"kucoin","h":0.0402,"ingest_time_us":1774144186172814,"l":0.0402,"o":0.0402,"quote":"USDT","timestamp_ms":1774144184730,"v_base":13.4534,"v_quote":0.54082668}},{"type":"normalized_ticker","source":"kucoin","data":{"base":"TRIA","c":0.037124,"exchange":"kucoin","h":0.037124,"ingest_time_us":1774144186989326,"l":0.037124,"o":0.037124,"quote":"USDT","timestamp_ms":1774144144983,"v_base":693.0,"v_quote":25.726931999999998}}]}
+[2026-03-22T01:49:47Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"okx_shard_1","data":[{"type":"normalized_ticker","source":"okx","data":{"base":"PHA","c":0.04034,"exchange":"okx","h":0.04367,"ingest_time_us":1774144186982743,"l":0.03793,"o":0.03846,"quote":"USDT","timestamp_ms":1774144186862,"v_base":20559320.575568,"v_quote":832319.0571074581}}]}
+[2026-03-22T01:49:48Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"kucoin_shard_1","data":[{"type":"normalized_ticker","source":"kucoin","data":{"base":"PHA","c":0.0402,"exchange":"kucoin","h":0.0402,"ingest_time_us":1774144188051038,"l":0.0402,"o":0.0402,"quote":"USDT","timestamp_ms":1774144184730,"v_base":13.4534,"v_quote":0.54082668}},{"type":"normalized_ticker","source":"kucoin","data":{"base":"TRIA","c":0.037018,"exchange":"kucoin","h":0.037018,"ingest_time_us":1774144188047348,"l":0.037018,"o":0.037018,"quote":"USDT","timestamp_ms":1774144187211,"v_base":139.0,"v_quote":5.1455020000000005}}]}
+[2026-03-22T01:49:48Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"okx_shard_1","data":[{"type":"normalized_ticker","source":"okx","data":{"base":"PHA","c":0.04034,"exchange":"okx","h":0.04367,"ingest_time_us":1774144187980590,"l":0.03793,"o":0.03846,"quote":"USDT","timestamp_ms":1774144187861,"v_base":20559320.575568,"v_quote":832319.0571074581}}]}
+[2026-03-22T01:49:49Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"kucoin_shard_1","data":[{"type":"normalized_ticker","source":"kucoin","data":{"base":"PHA","c":0.0402,"exchange":"kucoin","h":0.0402,"ingest_time_us":1774144188599641,"l":0.0402,"o":0.0402,"quote":"USDT","timestamp_ms":1774144184730,"v_base":13.4534,"v_quote":0.54082668}},{"type":"normalized_ticker","source":"kucoin","data":{"base":"TRIA","c":0.037018,"exchange":"kucoin","h":0.037018,"ingest_time_us":1774144188994224,"l":0.037018,"o":0.037018,"quote":"USDT","timestamp_ms":1774144187211,"v_base":139.0,"v_quote":5.1455020000000005}}]}
+[2026-03-22T01:49:50Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"kucoin_shard_1","data":[{"type":"normalized_ticker","source":"kucoin","data":{"base":"TRIA","c":0.037018,"exchange":"kucoin","h":0.037018,"ingest_time_us":1774144190075524,"l":0.037018,"o":0.037018,"quote":"USDT","timestamp_ms":1774144187211,"v_base":139.0,"v_quote":5.1455020000000005}}]}
+[2026-03-22T01:49:51Z INFO  sidecar] [DEBUG_BROADCAST] {"type":"batch","source":"kucoin_shard_1","data":[{"type":"normalized_ticker","source":"kucoin","data":{"base":"TRIA","c":0.037018,"exchange":"kucoin","h":0.037018,"ingest_time_us":1774144191029830,"l":0.037018,"o":0.037018,"quote":"USDT","timestamp_ms":1774144187211,"v_base":139.0,"v_quote":5.1455020000000005}}]}

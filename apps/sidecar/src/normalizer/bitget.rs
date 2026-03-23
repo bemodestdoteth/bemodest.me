@@ -60,7 +60,8 @@ pub fn normalize_bitget_ticker(raw: &Value) -> Option<NormalizedTicker> {
 
     Some(NormalizedTicker {
         exchange: Exchange::Bitget,
-        base,
+        base: base.clone(),
+        raw_base: base,
         quote: quote.to_string(),
         o: o.to_f64().unwrap_or(0.0),
         h: h.to_f64().unwrap_or(0.0),
@@ -116,6 +117,7 @@ pub fn normalize_bitget_f_ticker(raw: &Value) -> Option<NormalizedTicker> {
     Some(NormalizedTicker {
         exchange: Exchange::BitgetF,
         base,
+        raw_base,
         quote: quote.to_string(),
         o: (o / factor).to_f64().unwrap_or(0.0),
         h: (h / factor).to_f64().unwrap_or(0.0),

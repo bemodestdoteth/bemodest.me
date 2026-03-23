@@ -46,6 +46,7 @@ pub fn normalize_bybit_f_ticker(raw: &Value, existing: Option<NormalizedTicker>)
         Some(NormalizedTicker {
             exchange: Exchange::BybitF,
             base,
+            raw_base: raw_base.to_string(),
             quote,
             o,
             h,

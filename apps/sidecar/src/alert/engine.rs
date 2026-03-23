@@ -368,7 +368,7 @@ fn evaluate_condition(
         }
 
         // ── change_pct_5m ────────────────────────────────────────────────
-        AlertCondition::ChangePct5M => {
+        AlertCondition::ChangePct5m => {
             // Use first matching exchange in the whitelist (or first available)
             let (exchange, current_price, _) = entries.first()?;
             let hist_key =

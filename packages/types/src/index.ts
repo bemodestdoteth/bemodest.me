@@ -1,4 +1,5 @@
-export * from './generated.js';
+export * from './schemas/index.js';
+
 import { z } from 'zod';
 
 // ==========================================

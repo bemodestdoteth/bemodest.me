@@ -145,8 +145,9 @@ pub fn normalize_upbit_ticker(
 
     Some(NormalizedTicker {
         exchange,
-        base,
-        quote,
+        base: base.clone(),
+        raw_base: base,
+        quote: quote.to_string(),
         o: o.to_f64().unwrap_or(0.0),
         h: h.to_f64().unwrap_or(0.0),
         l: l.to_f64().unwrap_or(0.0),

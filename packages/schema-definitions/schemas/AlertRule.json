@@ -1,73 +1,79 @@
 {
-    "type": "object",
-    "properties": {
+  "$ref": "#/definitions/AlertRule",
+  "definitions": {
+    "AlertRule": {
+      "type": "object",
+      "properties": {
         "_id": {
-            "type": "string"
-        },
-        "enabled": {
-            "type": "boolean"
-        },
-        "label": {
-            "type": "string"
+          "type": "string"
         },
         "condition": {
-            "type": "string",
-            "enum": [
-                "spread_pct",
-                "price_above",
-                "price_below",
-                "change_pct_5m",
-                "volume_spike"
-            ]
-        },
-        "value": {
-            "type": "number"
-        },
-        "recovery_value": {
-            "type": "number"
-        },
-        "ticker": {
-            "type": "string"
-        },
-        "quote": {
-            "type": "string"
-        },
-        "exchanges": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
+          "type": "string",
+          "enum": [
+            "change_pct_5m",
+            "price_above",
+            "price_below",
+            "spread_pct",
+            "volume_spike"
+          ]
         },
         "cooldown_secs": {
-            "type": "integer"
-        },
-        "webhook_url": {
-            "type": "string"
-        },
-        "webhook_dead": {
-            "type": "boolean"
+          "type": "integer"
         },
         "created_at": {
-            "type": "string",
-            "format": "date-time"
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "exchanges": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "label": {
+          "type": "string"
+        },
+        "quote": {
+          "type": "string"
+        },
+        "recovery_value": {
+          "type": "number"
+        },
+        "ticker": {
+          "type": "string"
         },
         "updated_at": {
-            "type": "string",
-            "format": "date-time"
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        },
+        "webhook_dead": {
+          "type": "boolean",
+          "default": false
+        },
+        "webhook_url": {
+          "type": "string",
+          "format": "uri"
         }
-    },
-    "required": [
+      },
+      "required": [
         "_id",
-        "enabled",
-        "label",
         "condition",
-        "value",
+        "cooldown_secs",
+        "enabled",
+        "exchanges",
+        "label",
+        "quote",
         "recovery_value",
         "ticker",
-        "quote",
-        "exchanges",
-        "cooldown_secs",
-        "webhook_url",
-        "webhook_dead"
-    ]
+        "value",
+        "webhook_url"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
 }

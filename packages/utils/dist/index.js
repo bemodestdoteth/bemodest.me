@@ -22,3 +22,4 @@ __exportStar(require("./chains.js"), exports);
 __exportStar(require("./config"), exports);
 __exportStar(require("./blockchain"), exports);
 __exportStar(require("./rpc"), exports);
+//# sourceMappingURL=index.js.map

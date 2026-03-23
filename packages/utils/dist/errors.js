@@ -94,3 +94,4 @@ function formatErrorResponse(error) {
         },
     };
 }
+//# sourceMappingURL=errors.js.map

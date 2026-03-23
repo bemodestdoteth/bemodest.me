@@ -70,10 +70,21 @@ impl TokenAnnotationCache {
         Ok(())
     }
 
-    /// Retrieve the unified token name if it exists, otherwise return the original base\_symbol
+    /// Retrieve the unified token name if it exists, otherwise return the original base_symbol
     pub fn get_unified(&self, exchange: &ExchangeType, base_symbol: &str) -> Option<String> {
         let key = format!("{}:{}", exchange, base_symbol);
         let guard = self.inner.guard();
         self.inner.get(&key, &guard).cloned()
+    }
+
+    /// Resolve the unified ticker base name using prioritized mapping (raw first, then stripped).
+    pub fn resolve_ticker_base(&self, exchange: &ExchangeType, raw_base: &str, base: &str) -> String {
+        if let Some(unified) = self.get_unified(exchange, raw_base) {
+            unified
+        } else if let Some(unified) = self.get_unified(exchange, base) {
+            unified
+        } else {
+            base.to_string()
+        }
     }
 }
