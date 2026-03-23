@@ -1,6 +1,6 @@
 use crate::types::{
     Exchange, NormalizedTicker,
-    parse_decimal, parse_binance_symbol, now_micros,
+    parse_decimal, now_micros, ExchangeExt
 };
 use serde_json::Value;
 use rust_decimal::prelude::ToPrimitive;
@@ -32,7 +32,7 @@ pub fn normalize_bybit_ticker(raw: &Value) -> Option<NormalizedTicker> {
     let data = raw.get("data")?;
 
     let symbol = data.get("symbol")?.as_str()?;
-    let (base, quote) = parse_binance_symbol(symbol)?;
+    let (base, quote) = Exchange::Bybit.parse_symbol(symbol)?;
 
     let o = parse_decimal(data.get("prevPrice24h")?.as_str()?)?.to_f64().unwrap_or(0.0);
     let h = parse_decimal(data.get("highPrice24h")?.as_str()?)?.to_f64().unwrap_or(0.0);

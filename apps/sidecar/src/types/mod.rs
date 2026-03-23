@@ -11,6 +11,9 @@ pub use generated::{
     SidecarConfigPayloadType as Type,
 };
 
+pub mod exchange_ext;
+pub use exchange_ext::ExchangeExt;
+
 
 
 
@@ -24,28 +27,6 @@ pub fn parse_decimal(s: &str) -> Option<rust_decimal::Decimal> {
     rust_decimal::Decimal::from_str(s).ok()
 }
 
-pub fn parse_binance_symbol(symbol: &str) -> Option<(String, String)> {
-    const QUOTES: &[&str] = &[
-        "USDT", "BUSD", "USDC", "TUSD", "FDUSD",
-        "BTC", "ETH", "BNB", "EUR", "TRY", "GBP", "USD",
-    ];
-    for quote in QUOTES {
-        if symbol.ends_with(quote) && symbol.len() > quote.len() {
-            let base = &symbol[..symbol.len() - quote.len()];
-            return Some((base.to_string(), quote.to_string()));
-        }
-    }
-    None
-}
-
-pub fn parse_korean_symbol(code: &str) -> Option<(String, String)> {
-    let parts: Vec<&str> = code.split('-').collect();
-    if parts.len() == 2 {
-        Some((parts[1].to_string(), parts[0].to_string()))
-    } else {
-        None
-    }
-}
 
 pub fn now_micros() -> i64 {
     chrono::Utc::now().timestamp_micros()

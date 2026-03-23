@@ -1,6 +1,6 @@
 use crate::types::{
     Exchange, MarketState, NormalizedTicker,
-    parse_decimal, parse_korean_symbol, now_micros,
+    parse_decimal, now_micros, ExchangeExt
 };
 use serde_json::Value;
 use std::str::FromStr;
@@ -55,7 +55,7 @@ pub fn normalize_upbit_ticker(
     btc_krw: Option<f64>,
 ) -> Option<NormalizedTicker> {
     let code = raw.get("cd")?.as_str()?;
-    let (base, quote) = parse_korean_symbol(code)?;
+    let (base, quote) = exchange.parse_symbol(code)?;
 
     // Upbit uses numeric values, not strings
     let o_raw = extract_decimal(raw, "op")?;

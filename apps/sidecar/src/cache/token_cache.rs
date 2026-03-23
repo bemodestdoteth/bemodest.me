@@ -5,7 +5,7 @@ use std::time::Duration;
 use log::{info, warn, error};
 use futures_util::TryStreamExt;
 
-use crate::types::{parse_binance_symbol, parse_korean_symbol};
+use crate::types::ExchangeExt;
 
 /// High-performance token mapping cache using Moka
 /// Maps exchange symbols (e.g., "BTCUSDT") to (base, quote) pairs (e.g., ("BTC", "USDT"))
@@ -94,39 +94,8 @@ impl TokenCache {
         }
 
         // 3. Fall back to static parsing
-        use crate::types::Exchange as ticker;
-        let result = match exchange {
-            ticker::Binance | ticker::BinanceF | ticker::Bybit | ticker::BybitF | ticker::Bitget | ticker::BitgetF =>
-                parse_binance_symbol(symbol),
-            ticker::Upbit | ticker::Bithumb => parse_korean_symbol(symbol),
-            ticker::Gateio => {
-                let parts: Vec<&str> = symbol.split('_').collect();
-                if parts.len() == 2 {
-                    Some((parts[0].to_string(), parts[1].to_string()))
-                } else {
-                    None
-                }
-            },
-            ticker::Coinbase | ticker::Kucoin | ticker::Okx | ticker::OkxF => {
-                // Coinbase/KuCoin/OKX product_id format: "BTC-USDT" → ("BTC", "USDT")
-                let parts: Vec<&str> = symbol.splitn(2, '-').collect();
-                if parts.len() == 2 {
-                    Some((parts[0].to_string(), parts[1].to_string()))
-                } else {
-                    None
-                }
-            },
-            ticker::Kraken => {
-                // Kraken WS v2 symbol format: "XBT/USD" → ("XBT", "USD")
-                let parts: Vec<&str> = symbol.splitn(2, '/').collect();
-                if parts.len() == 2 {
-                    Some((parts[0].to_string(), parts[1].to_string()))
-                } else {
-                    None
-                }
-            },
-            ticker::Dex => None,
-        };
+        // 3. Fall back to static parsing
+        let result = exchange.parse_symbol(symbol);
 
         // Cache the result if found
         if let Some(mapping) = result.as_ref() {

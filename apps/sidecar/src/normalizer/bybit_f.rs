@@ -1,6 +1,6 @@
 use crate::types::{
     Exchange, NormalizedTicker,
-    parse_decimal, parse_binance_symbol, now_micros, strip_scale_factor,
+    parse_decimal, now_micros, strip_scale_factor, ExchangeExt
 };
 use serde_json::Value;
 use rust_decimal::prelude::ToPrimitive;
@@ -27,7 +27,7 @@ pub fn normalize_bybit_f_ticker(raw: &Value, existing: Option<NormalizedTicker>)
     let msg_type = raw.get("type")?.as_str()?;
     let topic = raw.get("topic")?.as_str()?;
     let symbol = topic.strip_prefix("tickers.")?;
-    let (raw_base, quote) = parse_binance_symbol(symbol)?;
+    let (raw_base, quote) = Exchange::BybitF.parse_symbol(symbol)?;
 
     // Strip 1000x-style scale factor (e.g. "1000SHIB" -> "SHIB", divisor=1000)
     let (base, scale) = strip_scale_factor(&raw_base);

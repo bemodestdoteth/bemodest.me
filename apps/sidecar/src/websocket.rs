@@ -70,242 +70,10 @@ async fn handle_connection(stream: TcpStream, secret: String, tx: tokio::sync::b
                                         // Push Initial State (LVC Snapshot)
                                         // This ensures the client starts with a ground truth for all tickers/sources
                                         let snapshot = api::handle_command(&serde_json::json!({"cmd": "snapshot"}), &lvc);
-                                        if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(snapshot.to_string().into())).await {
-                                            error!("Failed to send initial LVC snapshot: {}", e);
-                                        }
+                                        let _ = send_json(&mut write, &snapshot).await;
 
-                                        // Trigger Binance Connection (Lazy)
-                                        info!("Triggering lazy Binance connection for user: {}", user_id);
-                                        {
-                                            let mut mgr = manager.lock().await;
-                                            mgr.ensure_connected("binance").await;
-
-                                            // If already connected (e.g. second client), send status immediately
-                                            // because the broadcast logic in BinanceExchange only fires on *change*
-                                            if mgr.is_connected("binance") {
-                                                info!("Binance is already connected, sending initial status to client.");
-                                                let status = serde_json::json!({
-                                                    "type": "status",
-                                                    "source": "binance",
-                                                    "connected": true
-                                                });
-                                                if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(status.to_string().into())).await {
-                                                    error!("Failed to send initial Binance status: {}", e);
-                                                }
-                                            }
-
-                                            // Trigger Upbit Connection (Lazy)
-                                            info!("Triggering lazy Upbit connection for user: {}", user_id);
-                                            mgr.ensure_connected("upbit").await;
-
-                                            // If already connected, send status immediately
-                                            if mgr.is_connected("upbit") {
-                                                info!("Upbit is already connected, sending initial status to client.");
-                                                let status = serde_json::json!({
-                                                    "type": "status",
-                                                    "source": "upbit",
-                                                    "connected": true
-                                                });
-                                                if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(status.to_string().into())).await {
-                                                    error!("Failed to send initial Upbit status: {}", e);
-                                                }
-                                            }
-
-                                            // Trigger Bithumb Connection (Lazy)
-                                            info!("Triggering lazy Bithumb connection for user: {}", user_id);
-                                            mgr.ensure_connected("bithumb").await;
-
-                                            // If already connected, send status immediately
-                                            if mgr.is_connected("bithumb") {
-                                                info!("Bithumb is already connected, sending initial status to client.");
-                                                let status = serde_json::json!({
-                                                    "type": "status",
-                                                    "source": "bithumb",
-                                                    "connected": true
-                                                });
-                                                if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(status.to_string().into())).await {
-                                                    error!("Failed to send initial Bithumb status: {}", e);
-                                                }
-                                            }
-
-                                            // Trigger Binance Futures Connection (Lazy)
-                                            info!("Triggering lazy Binance Futures connection for user: {}", user_id);
-                                            mgr.ensure_connected("binance_f").await;
-
-                                            if mgr.is_connected("binance_f") {
-                                                info!("Binance Futures is already connected, sending initial status to client.");
-                                                let status = serde_json::json!({
-                                                    "type": "status",
-                                                    "source": "binance_f",
-                                                    "connected": true
-                                                });
-                                                if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(status.to_string().into())).await {
-                                                    error!("Failed to send initial Binance Futures status: {}", e);
-                                                }
-                                            }
-
-                                            // Trigger Bybit Spot Connection (Lazy)
-                                            info!("Triggering lazy Bybit connection for user: {}", user_id);
-                                            mgr.ensure_connected("bybit").await;
-
-                                            if mgr.is_connected("bybit") {
-                                                info!("Bybit is already connected, sending initial status to client.");
-                                                let status = serde_json::json!({
-                                                    "type": "status",
-                                                    "source": "bybit",
-                                                    "connected": true
-                                                });
-                                                if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(status.to_string().into())).await {
-                                                    error!("Failed to send initial Bybit status: {}", e);
-                                                }
-                                            }
-
-                                            // Trigger Bybit Futures Connection (Lazy)
-                                            info!("Triggering lazy Bybit Futures connection for user: {}", user_id);
-                                            mgr.ensure_connected("bybit_f").await;
-
-                                            if mgr.is_connected("bybit_f") {
-                                                info!("Bybit Futures is already connected, sending initial status to client.");
-                                                let status = serde_json::json!({
-                                                    "type": "status",
-                                                    "source": "bybit_f",
-                                                    "connected": true
-                                                });
-                                                if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(status.to_string().into())).await {
-                                                    error!("Failed to send initial Bybit Futures status: {}", e);
-                                                }
-                                            }
-
-                                            // Trigger Gate.io Connection (Lazy)
-                                            info!("Triggering lazy Gateio connection for user: {}", user_id);
-                                            mgr.ensure_connected("gateio").await;
-
-                                            if mgr.is_connected("gateio") {
-                                                info!("Gateio is already connected, sending initial status to client.");
-                                                let status = serde_json::json!({
-                                                    "type": "status",
-                                                    "source": "gateio",
-                                                    "connected": true
-                                                });
-                                                if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(status.to_string().into())).await {
-                                                    error!("Failed to send initial Gateio status: {}", e);
-                                                }
-                                            }
-
-                                            // Trigger Bitget Spot Connection (Lazy)
-                                            info!("Triggering lazy Bitget connection for user: {}", user_id);
-                                            mgr.ensure_connected("bitget").await;
-
-                                            if mgr.is_connected("bitget") {
-                                                info!("Bitget is already connected, sending initial status to client.");
-                                                let status = serde_json::json!({
-                                                    "type": "status",
-                                                    "source": "bitget",
-                                                    "connected": true
-                                                });
-                                                if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(status.to_string().into())).await {
-                                                    error!("Failed to send initial Bitget status: {}", e);
-                                                }
-                                            }
-
-                                            // Trigger Bitget Futures Connection (Lazy)
-                                            info!("Triggering lazy Bitget Futures connection for user: {}", user_id);
-                                            mgr.ensure_connected("bitget_f").await;
-
-                                            if mgr.is_connected("bitget_f") {
-                                                info!("Bitget Futures is already connected, sending initial status to client.");
-                                                let status = serde_json::json!({
-                                                    "type": "status",
-                                                    "source": "bitget_f",
-                                                    "connected": true
-                                                });
-                                                if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(status.to_string().into())).await {
-                                                    error!("Failed to send initial Bitget Futures status: {}", e);
-                                                }
-                                            }
-
-                                            // Trigger Coinbase Spot Connection (Lazy)
-                                            info!("Triggering lazy Coinbase connection for user: {}", user_id);
-                                            mgr.ensure_connected("coinbase").await;
-
-                                            if mgr.is_connected("coinbase") {
-                                                info!("Coinbase is already connected, sending initial status to client.");
-                                                let status = serde_json::json!({
-                                                    "type": "status",
-                                                    "source": "coinbase",
-                                                    "connected": true
-                                                });
-                                                if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(status.to_string().into())).await {
-                                                    error!("Failed to send initial Coinbase status: {}", e);
-                                                }
-                                            }
-
-                                            // Trigger Kraken Spot Connection (Lazy)
-                                            info!("Triggering lazy Kraken connection for user: {}", user_id);
-                                            mgr.ensure_connected("kraken").await;
-
-                                            if mgr.is_connected("kraken") {
-                                                info!("Kraken is already connected, sending initial status to client.");
-                                                let status = serde_json::json!({
-                                                    "type": "status",
-                                                    "source": "kraken",
-                                                    "connected": true
-                                                });
-                                                if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(status.to_string().into())).await {
-                                                    error!("Failed to send initial Kraken status: {}", e);
-                                                }
-                                            }
-
-                                            // Trigger KuCoin Spot Connection (Lazy)
-                                            info!("Triggering lazy KuCoin connection for user: {}", user_id);
-                                            mgr.ensure_connected("kucoin").await;
-
-                                            if mgr.is_connected("kucoin") {
-                                                info!("KuCoin is already connected, sending initial status to client.");
-                                                let status = serde_json::json!({
-                                                    "type": "status",
-                                                    "source": "kucoin",
-                                                    "connected": true
-                                                });
-                                                if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(status.to_string().into())).await {
-                                                    error!("Failed to send initial KuCoin status: {}", e);
-                                                }
-                                            }
-
-                                            // Trigger OKX Spot Connection (Lazy)
-                                            info!("Triggering lazy OKX connection for user: {}", user_id);
-                                            mgr.ensure_connected("okx").await;
-
-                                            if mgr.is_connected("okx") {
-                                                info!("OKX is already connected, sending initial status to client.");
-                                                let status = serde_json::json!({
-                                                    "type": "status",
-                                                    "source": "okx",
-                                                    "connected": true
-                                                });
-                                                if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(status.to_string().into())).await {
-                                                    error!("Failed to send initial OKX status: {}", e);
-                                                }
-                                            }
-
-                                            // Trigger OKX Futures Connection (Lazy)
-                                            info!("Triggering lazy OKX Futures connection for user: {}", user_id);
-                                            mgr.ensure_connected("okx_f").await;
-
-                                            if mgr.is_connected("okx_f") {
-                                                info!("OKX Futures is already connected, sending initial status to client.");
-                                                let status = serde_json::json!({
-                                                    "type": "status",
-                                                    "source": "okx_f",
-                                                    "connected": true
-                                                });
-                                                if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(status.to_string().into())).await {
-                                                    error!("Failed to send initial OKX Futures status: {}", e);
-                                                }
-                                            }
-
-                                        }
-                                        info!("Exchange connections trigger completed");
+                                        // Trigger Lazy Exchange Connections
+                                        trigger_lazy_connections(&manager, &mut write, &user_id).await;
                                     },
                                     Err(e) => {
                                         warn!("Authentication failed: {}", e);
@@ -362,4 +130,32 @@ async fn handle_connection(stream: TcpStream, secret: String, tx: tokio::sync::b
             }
         }
     }
+}
+
+const LAZY_EXCHANGES: &[&str] = &[
+    "binance", "upbit", "bithumb", "binance_f", "bybit", "bybit_f", 
+    "gateio", "bitget", "bitget_f", "coinbase", "kraken", "kucoin", "okx", "okx_f"
+];
+
+async fn trigger_lazy_connections(manager: &Arc<Mutex<ExchangeManager>>, write: &mut futures_util::stream::SplitSink<tokio_tungstenite::WebSocketStream<TcpStream>, tokio_tungstenite::tungstenite::Message>, user_id: &str) {
+    info!("Triggering lazy exchange connections for user: {}", user_id);
+    let mut mgr = manager.lock().await;
+    
+    for &exchange_name in LAZY_EXCHANGES {
+        mgr.ensure_connected(exchange_name).await;
+
+        if mgr.is_connected(exchange_name) {
+            let status = serde_json::json!({
+                "type": "status",
+                "source": exchange_name,
+                "connected": true
+            });
+            let _ = send_json(write, &status).await;
+        }
+    }
+    info!("Exchange connections trigger completed");
+}
+
+async fn send_json(write: &mut futures_util::stream::SplitSink<tokio_tungstenite::WebSocketStream<TcpStream>, tokio_tungstenite::tungstenite::Message>, value: &serde_json::Value) -> Result<(), tokio_tungstenite::tungstenite::Error> {
+    write.send(tokio_tungstenite::tungstenite::Message::Text(value.to_string().into())).await
 }

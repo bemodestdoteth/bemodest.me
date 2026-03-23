@@ -1,6 +1,6 @@
 use crate::types::{
     Exchange, NormalizedTicker, MarketState,
-    parse_decimal, parse_binance_symbol, now_micros, strip_scale_factor,
+    parse_decimal, now_micros, strip_scale_factor, ExchangeExt
 };
 use rust_decimal::prelude::ToPrimitive;
 use serde_json::Value;
@@ -21,7 +21,7 @@ use serde_json::Value;
 /// }
 pub fn normalize_binance_ticker(raw: &Value, exchange: Exchange) -> Option<NormalizedTicker> {
     let symbol = raw.get("s")?.as_str()?;
-    let (raw_base, quote) = parse_binance_symbol(symbol)?;
+    let (raw_base, quote) = exchange.parse_symbol(symbol)?;
 
     // For futures, strip any 1000x-style scale factor (e.g. "1000SHIB" -> "SHIB", divisor=1000)
     let (base, scale) = if exchange == Exchange::BinanceF {
