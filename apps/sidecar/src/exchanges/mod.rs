@@ -16,6 +16,7 @@ pub mod kucoin;
 pub mod okx;
 pub mod okx_f;
 pub mod geckoterminal;
+pub mod generic;
 
 #[async_trait]
 pub trait Exchange: Send + Sync {
@@ -38,6 +39,10 @@ impl ExchangeManager {
 
     pub fn register(&mut self, name: &str, exchange: Box<dyn Exchange>) {
         self.exchanges.insert(name.to_string(), exchange);
+    }
+
+    pub fn unregister(&mut self, name: &str) {
+        self.exchanges.remove(name);
     }
 
     pub async fn ensure_connected(&mut self, name: &str) {

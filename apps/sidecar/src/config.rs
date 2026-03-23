@@ -26,32 +26,39 @@ pub struct Config {
 
 impl Config {
     pub fn from_env() -> Self {
-        // Shared fields via generated SystemConfig
-        let port = env::var("SIDECAR_PORT")
-            .unwrap_or_else(|_| "25834".to_string())
-            .parse::<i64>().unwrap_or(25834);
-        let api_port = env::var("PORT")
-            .unwrap_or_else(|_| "3001".to_string())
-            .parse::<i64>().unwrap_or(3001);
+        // Core required fields
         let jwt_secret_raw = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
         let jwt_secret = SystemConfigJwtSecret::from_str(&jwt_secret_raw).expect("JWT_SECRET is too short");
-        
+
+        // Optional numeric fields with sane defaults
+        let port = env::var("SIDECAR_PORT")
+            .ok()
+            .and_then(|s| s.parse::<i64>().ok())
+            .unwrap_or(25834);
+        let api_port = env::var("PORT")
+            .ok()
+            .and_then(|s| s.parse::<i64>().ok())
+            .unwrap_or(3001);
         let batching_duration_ms = env::var("BATCHING_DURATION_MS")
-            .unwrap_or_else(|_| "1000".to_string())
-            .parse::<i64>().unwrap_or(1000);
+            .ok()
+            .and_then(|s| s.parse::<i64>().ok())
+            .unwrap_or(1000);
         let filter_min_sources = env::var("FILTER_MIN_SOURCES")
-            .unwrap_or_else(|_| "2".to_string())
-            .parse::<i64>().unwrap_or(2);
+            .ok()
+            .and_then(|s| s.parse::<i64>().ok())
+            .unwrap_or(2);
         let filter_min_spread_pct = env::var("FILTER_MIN_SPREAD_PCT")
-            .unwrap_or_else(|_| "10.0".to_string())
-            .parse::<f64>().ok();
+            .ok()
+            .and_then(|s| s.parse::<f64>().ok());
 
         // MongoDB URI logic
         let mongo_uri = env::var("MONGO_URI").ok().or_else(|| {
-            if let (Ok(h), Ok(p), Ok(db), Ok(u), Ok(pw), Ok(tls), Ok(asrc)) = (
+            if let (Ok(h), Ok(p), Ok(db), Ok(u), Ok(pw)) = (
                 env::var("MONGO_HOST"), env::var("MONGO_PORT"), env::var("MONGO_DB_NAME"),
-                env::var("MONGO_USER"), env::var("MONGO_PASSWORD"), env::var("MONGO_TLS"), env::var("MONGO_AUTH_SOURCE")
+                env::var("MONGO_USER"), env::var("MONGO_PASSWORD")
             ) {
+                let tls = env::var("MONGO_TLS").unwrap_or_else(|_| "false".to_string());
+                let asrc = env::var("MONGO_AUTH_SOURCE").unwrap_or_else(|_| "admin".to_string());
                 Some(format!("mongodb://{u}:{}@{h}:{p}/{db}?tls={tls}&authSource={asrc}", urlencoding::encode(&pw)))
             } else {
                 None
@@ -62,11 +69,15 @@ impl Config {
         let redis_url = env::var("REDIS_URL").ok().or_else(|| {
             let host = env::var("REDIS_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
             let port = env::var("REDIS_PORT").unwrap_or_else(|_| "6380".to_string());
-            env::var("REDIS_PASSWORD").ok().map(|pass| {
-                if !pass.is_empty() { format!("redis://:{pass}@{host}:{port}") }
-                else { format!("redis://{host}:{port}") }
+            env::var("REDIS_PASSWORD").ok().filter(|p| !p.is_empty()).map(|pass| {
+                format!("redis://:{pass}@{host}:{port}")
             }).or(Some(format!("redis://{host}:{port}")))
         });
+
+        let node_env = env::var("NODE_ENV")
+            .ok()
+            .and_then(|s| SystemConfigNodeEnv::from_str(&s).ok())
+            .unwrap_or(SystemConfigNodeEnv::Dev);
 
         let inner = SystemConfig {
             port,
@@ -75,7 +86,7 @@ impl Config {
             jwt_secret,
             snapper_api_secret: env::var("SNAPPER_API_SECRET").ok(),
             mongo_uri,
-            redis_url,
+            redis_url: redis_url.clone(),
             dex_redis_channel: env::var("DEX_REDIS_CHANNEL").unwrap_or_else(|_| "dex_prices".to_string()),
             batching_duration_ms,
             filter_min_sources,
@@ -88,16 +99,14 @@ impl Config {
             redis_host: env::var("REDIS_HOST").ok(),
             redis_port: env::var("REDIS_PORT").unwrap_or_else(|_| "6380".to_string()),
             redis_password: env::var("REDIS_PASSWORD").ok(),
-            node_env: SystemConfigNodeEnv::from_str(&env::var("NODE_ENV").unwrap_or_else(|_| "dev".to_string())).unwrap_or(SystemConfigNodeEnv::Dev),
+            node_env,
         };
 
         // App-specific overrides
         let forex_update_interval_sec = env::var("FOREX_UPDATE_INTERVAL_SEC")
-            .unwrap_or_else(|_| "60".to_string())
-            .parse().unwrap_or(60);
+            .ok().and_then(|s| s.parse().ok()).unwrap_or(60);
         let market_cache_update_interval_sec = env::var("MARKET_CACHE_UPDATE_INTERVAL_SEC")
-            .unwrap_or_else(|_| "1800".to_string())
-            .parse().unwrap_or(1800);
+            .ok().and_then(|s| s.parse().ok()).unwrap_or(1800);
 
         let excludelist_raw = env::var("EXCLUDELIST").unwrap_or_default();
         let excludelist_set = excludelist_raw.split(',').map(|s| s.trim().to_uppercase()).filter(|s| !s.is_empty()).collect();

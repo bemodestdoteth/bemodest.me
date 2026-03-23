@@ -24,7 +24,7 @@ pub struct WsSessionContext {
     pub ping_interval: Option<Duration>,
     pub ping_text: Option<String>,
     /// Optional closure to generate a dynamic ping message.
-    pub ping_factory: Option<Arc<dyn Fn() -> String + Send + Sync>>,
+    pub ping_factory: Option<Arc<dyn Fn() -> Option<serde_json::Value> + Send + Sync>>,
     /// Optional closure to generate a dynamic connection URL (e.g. for Kucoin tokens).
     /// If provided, this takes precedence over the fixed url field.
     pub url_factory: Option<Arc<dyn Fn() -> FutString + Send + Sync>>,
@@ -113,10 +113,11 @@ impl WsSession {
                                 }
                             } => {
                                 if let Some(ref factory) = ctx.ping_factory {
-                                    let text = factory();
-                                    if let Err(e) = write.send(Message::Text(text.into())).await {
-                                        error!("[{}] Failed to send factory ping: {}", ctx.source, e);
-                                        break;
+                                    if let Some(val) = factory() {
+                                        if let Err(e) = write.send(Message::Text(val.to_string().into())).await {
+                                            error!("[{}] Failed to send factory ping: {}", ctx.source, e);
+                                            break;
+                                        }
                                     }
                                 } else if let Some(ref text) = ctx.ping_text {
                                     if let Err(e) = write.send(Message::Text(text.clone().into())).await {
