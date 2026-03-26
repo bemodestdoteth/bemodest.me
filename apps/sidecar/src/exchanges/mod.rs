@@ -63,8 +63,32 @@ impl ExchangeManager {
         if let Some(exchange) = self.exchanges.get(name) {
             exchange.is_connected()
         } else {
+            // Check if it's a sharded exchange
+            let shards = self.get_shards_for(name);
+            if !shards.is_empty() {
+                return shards.iter().any(|&ex| ex.is_connected());
+            }
             false
         }
+    }
+
+    pub fn get_shard_stats(&self, base_name: &str) -> Option<(usize, usize)> {
+        let shards = self.get_shards_for(base_name);
+        if shards.is_empty() {
+            return None;
+        }
+        let total = shards.len();
+        let connected = shards.iter().filter(|&&ex| ex.is_connected()).count();
+        Some((connected, total))
+    }
+
+    fn get_shards_for(&self, base_name: &str) -> Vec<&Box<dyn Exchange>> {
+        let prefix = format!("{}_shard_", base_name);
+        self.exchanges
+            .iter()
+            .filter(|(name, _)| name.starts_with(&prefix))
+            .map(|(_, ex)| ex)
+            .collect()
     }
 
     pub async fn refresh_all_subscriptions(&self) {

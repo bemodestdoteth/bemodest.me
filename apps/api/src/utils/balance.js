@@ -70,9 +70,15 @@ export async function getHotWalletBalances(ticker, exchanges) {
         // For each exchange: prefer wallets labelled with (TICKER); fall back to all
         const tickerPattern = new RegExp(`\\(${upperTicker}\\)`, 'i');
         const filteredAddrs = [];
-        for (const [, addrs] of Object.entries(hotByExchange)) {
+        for (const [ex, addrs] of Object.entries(hotByExchange)) {
             const labelled = addrs.filter(d => tickerPattern.test(d.label || ''));
-            filteredAddrs.push(...(labelled.length > 0 ? labelled : addrs));
+            if (labelled.length > 0) {
+                logger.debug(`[Balance] ${upperTicker} ${ex} - using ${labelled.length} labelled wallets`);
+                filteredAddrs.push(...labelled);
+            } else {
+                logger.debug(`[Balance] ${upperTicker} ${ex} - using ALL ${addrs.length} hot wallets`);
+                filteredAddrs.push(...addrs);
+            }
         }
 
         // Log a single summary line: how many addresses per exchange were found
@@ -90,9 +96,20 @@ export async function getHotWalletBalances(ticker, exchanges) {
 
         for (const doc of filteredAddrs) {
             const exchange = doc.entity.replace(/\s*Hot$/i, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
             for (const caip2 of (doc.chains ?? [])) {
                 const gtNet = caip2ToGecko[caip2];
-                if (!gtNet) continue;
+                if (!gtNet) {
+                    if (caip2.includes('solana') || caip2.includes('sui') || caip2.includes('aptos')) {
+                        logger.debug(`[Balance] ${upperTicker} SKIP CAIP2 ${caip2}: Not found in caip2ToGecko mapping!`);
+                    }
+                    continue;
+                }
+
+                // Pre-filter: only process if the token exists on this chain according to Gecko mappings
+                if (!(gtNet in netToAddr)) {
+                    continue;
+                }
 
                 const contractAddr = netToAddr[gtNet] || null;
                 const key = `${exchange}:${caip2}`;
@@ -110,12 +127,19 @@ export async function getHotWalletBalances(ticker, exchanges) {
             const caip2Encoded = caip2.replace(':', '/');
             const dwKey = `dw:${exchange}:${caip2Encoded}:${upperTicker}`;
             const dwStatus = await redis.get(dwKey);
+            logger.debug(`[Balance] ${upperTicker} ${exchange}:${caip2} dwStatus: ${dwStatus}`);
 
             // Skip if no active deposit/withdrawal session
-            if (!dwStatus) return null;
+            if (!dwStatus) {
+                logger.debug(`[Balance] ${upperTicker} ${exchange}:${caip2} SKIP: dwStatus missing for key ${dwKey}`);
+                return null;
+            }
 
             const rpcUrl = getRpcUrl(caip2);
-            if (!rpcUrl) return null;
+            if (!rpcUrl) {
+                logger.debug(`[Balance] ${upperTicker} ${exchange}:${caip2} SKIP: rpcUrl is missing for caip2 ${caip2}`);
+                return null;
+            }
 
             // Fetch balance from ALL addresses on this chain in one call
             let usdBalance = await sharedGetBalanceOnChain(caip2, addrs, contractAddr, price, rpcUrl).catch(err => {

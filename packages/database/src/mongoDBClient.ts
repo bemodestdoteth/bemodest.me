@@ -220,6 +220,18 @@ export class MongoDBClient {
         }));
     }
 
+    async getCaip2ToGeckoTerminalMapping(collectionName: string): Promise<Record<string, string>> {
+        this._ensureConnected();
+        const chains = await this.readMany(collectionName, {});
+        const mapping: Record<string, string> = {};
+        for (const chain of chains) {
+            if (chain.caip2 && chain.annotation?.geckoterminal) {
+                mapping[chain.caip2] = chain.annotation.geckoterminal;
+            }
+        }
+        return mapping;
+    }
+
     // Higher-level helpers can be added here...
 }
 

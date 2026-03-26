@@ -144,7 +144,15 @@ async fn trigger_lazy_connections(manager: &Arc<Mutex<ExchangeManager>>, write: 
     for &exchange_name in LAZY_EXCHANGES {
         mgr.ensure_connected(exchange_name).await;
 
-        if mgr.is_connected(exchange_name) {
+        if let Some((connected, total)) = mgr.get_shard_stats(exchange_name) {
+             let status = serde_json::json!({
+                "type": "shard_status",
+                "source": exchange_name,
+                "connected": connected,
+                "total": total
+            });
+            let _ = send_json(write, &status).await;
+        } else if mgr.is_connected(exchange_name) {
             let status = serde_json::json!({
                 "type": "status",
                 "source": exchange_name,

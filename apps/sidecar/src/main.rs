@@ -22,7 +22,7 @@ use crate::cache::PriceHistoryCache;
 use crate::alert::engine::{load_alert_rules, run_history_sampler};
 use crate::alert::state::AlertStateStore;
 use crate::alert::types::AlertFiredEvent;
-use log::{info, error};
+use log::{info, error, warn};
 use tokio::sync::{broadcast, RwLock};
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -587,10 +587,53 @@ async fn main() -> crate::errors::Result<()> {
     info!("[Sidecar] DEX Redis subscriber task spawned");
 
     // Start WebSocket Server
+    let ws_tx = tx.clone();
+    let ws_manager = manager.clone();
     set.spawn(async move {
-        websocket::run_server(config.port, config.jwt_secret.clone(), tx, manager, lvc).await;
+        websocket::run_server(config.port, config.jwt_secret.clone(), ws_tx, ws_manager, lvc).await;
     });
     
+    // Start Shard Status Monitor task
+    // It listens for shard-level "status" messages and broadcasts aggregated "shard_status"
+    let monitor_mgr = manager.clone();
+    let monitor_tx = tx.clone();
+    let mut status_rx = tx.subscribe();
+    set.spawn(async move {
+        loop {
+            match status_rx.recv().await {
+                Ok(msg) => {
+                    if let Ok(val) = serde_json::from_str::<serde_json::Value>(&msg) {
+                        if val.get("type") == Some(&serde_json::json!("status")) {
+                            if let Some(source) = val.get("source").and_then(|s| s.as_str()) {
+                                if source.contains("_shard_") {
+                                    let base_name = source.split("_shard_").next().unwrap();
+                                    let mgr = monitor_mgr.lock().await;
+                                    if let Some((connected, total)) = mgr.get_shard_stats(base_name) {
+                                        let shard_status = serde_json::json!({
+                                            "type": "shard_status",
+                                            "source": base_name,
+                                            "connected": connected,
+                                            "total": total
+                                        });
+                                        let _ = monitor_tx.send(shard_status.to_string());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                Err(tokio::sync::broadcast::error::RecvError::Lagged(n)) => {
+                    warn!("[ShardMonitor] task lagged by {} messages", n);
+                }
+                Err(e) => {
+                    error!("[ShardMonitor] task encountered error: {}", e);
+                    break;
+                }
+            }
+        }
+    });
+    info!("[Sidecar] Shard status monitor task spawned");
+
     info!("[Sidecar] Supervisor loop started monitoring tasks");
     while let Some(res) = set.join_next().await {
         match res {
