@@ -82,6 +82,9 @@
         },
         "v_quote_krw": {
           "type": "number"
+        },
+        "change_24h": {
+          "type": "number"
         }
       },
       "required": [

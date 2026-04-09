@@ -26,6 +26,7 @@ const ApiConfigSchema = SystemConfigSchema.extend({
   COLLECTION_COINGECKO_RANK: z.string().default('coingeckoTop2000'),
   COLLECTION_COINGECKO_LIST: z.string().default('coingeckoCoinList'),
   COLLECTION_ALERT_RULES: z.string().default('alertRules'),
+  COLLECTION_ALERT_LOGS: z.string().default('alertLogs'),
   COLLECTION_CONTRACT_MAPPINGS: z.string().default('coingeckoContractMappings'),
   MONGODB_MAX_TIME_MS: z.string().default('30000'),
   ADMIN_USERNAME: z.string().optional(),

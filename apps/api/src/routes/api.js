@@ -711,3 +711,55 @@ export const markWebhookDead = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to mark webhook dead' });
     }
 };
+
+/**
+ * POST /api/alerts/fired
+ * Webhook receiver for fired alerts. Validates signature and logs to MongoDB.
+ */
+export const postAlertFired = async (req, res) => {
+    if (!validateSignature(req.header('X-Signature'), req.header('X-Timestamp'), SNAPPER_API_SECRET)) {
+        return res.status(401).json({ message: 'Invalid signature.' });
+    }
+
+    try {
+        const dbClient = await getDBClient();
+        const alertLog = {
+            ...req.body,
+            fired_at: new Date(),
+            received_at: new Date(),
+        };
+
+        await dbClient.insertOne(config.COLLECTION_ALERT_LOGS, alertLog);
+
+        // Optional: emit to socket.io so UI updates in real-time
+        const io = getIO();
+        if (io) {
+            io.emit('alertFired', alertLog);
+        }
+
+        res.status(200).json({ success: true });
+    } catch (err) {
+        logger.error(`postAlertFired Error: ${err.message}`);
+        res.status(500).json({ success: false, message: 'Failed to log alert' });
+    }
+};
+
+/**
+ * GET /api/alerts/logs
+ * Returns latest alert logs from MongoDB.
+ */
+export const getAlertLogs = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 100;
+        const dbClient = await getDBClient();
+        const logs = await dbClient.readMany(config.COLLECTION_ALERT_LOGS, {}, {
+            sort: { received_at: -1 },
+            limit
+        });
+
+        res.status(200).json({ success: true, data: logs });
+    } catch (err) {
+        logger.error(`getAlertLogs Error: ${err.message}`);
+        res.status(500).json({ success: false, message: 'Failed to fetch alert logs' });
+    }
+};

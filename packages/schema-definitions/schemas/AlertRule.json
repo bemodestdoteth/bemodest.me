@@ -14,7 +14,8 @@
             "price_above",
             "price_below",
             "spread_pct",
-            "volume_spike"
+            "volume_spike",
+            "change_pct_24h"
           ]
         },
         "cooldown_secs": {
@@ -57,6 +58,17 @@
         "webhook_url": {
           "type": "string",
           "format": "uri"
+        },
+        "target_type": {
+          "type": "string",
+          "enum": [
+            "specific",
+            "global"
+          ],
+          "default": "specific"
+        },
+        "min_volume_usd": {
+          "type": "number"
         }
       },
       "required": [

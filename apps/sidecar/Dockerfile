@@ -19,9 +19,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Copy the application source
-# We copy the subdir directly to the workdir for a clean build
-COPY apps/sidecar .
+# Copy shared schemas required by build.rs
+COPY packages/schema-definitions/schemas ./packages/schema-definitions/schemas
+
+# Copy the application source into its monorepo path
+COPY apps/sidecar ./apps/sidecar
+
+# Build from the app directory where build.rs expects ../../packages
+WORKDIR /app/apps/sidecar
 
 # Build the application in release mode
 RUN cargo build --release --bin sidecar
@@ -41,7 +46,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the compiled binary from the builder
-COPY --from=builder /app/target/release/sidecar /app/sidecar
+COPY --from=builder /app/apps/sidecar/target/release/sidecar /app/sidecar
 
 # Set ownership and permissions
 RUN chown sidecar:sidecar /app/sidecar && \

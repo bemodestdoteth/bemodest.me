@@ -110,6 +110,7 @@ declare const ApiConfigSchema: z.ZodObject<{
     COLLECTION_COINGECKO_RANK: z.ZodDefault<z.ZodString>;
     COLLECTION_COINGECKO_LIST: z.ZodDefault<z.ZodString>;
     COLLECTION_ALERT_RULES: z.ZodDefault<z.ZodString>;
+    COLLECTION_ALERT_LOGS: z.ZodDefault<z.ZodString>;
     COLLECTION_CONTRACT_MAPPINGS: z.ZodDefault<z.ZodString>;
     MONGODB_MAX_TIME_MS: z.ZodDefault<z.ZodString>;
     ADMIN_USERNAME: z.ZodOptional<z.ZodString>;
@@ -151,6 +152,7 @@ declare const ApiConfigSchema: z.ZodObject<{
     COLLECTION_COINGECKO_RANK: string;
     COLLECTION_COINGECKO_LIST: string;
     COLLECTION_ALERT_RULES: string;
+    COLLECTION_ALERT_LOGS: string;
     COLLECTION_CONTRACT_MAPPINGS: string;
     MONGODB_MAX_TIME_MS: string;
     JWT_EXPIRES_IN_WEB: string;
@@ -214,6 +216,7 @@ declare const ApiConfigSchema: z.ZodObject<{
     COLLECTION_COINGECKO_RANK?: string | undefined;
     COLLECTION_COINGECKO_LIST?: string | undefined;
     COLLECTION_ALERT_RULES?: string | undefined;
+    COLLECTION_ALERT_LOGS?: string | undefined;
     COLLECTION_CONTRACT_MAPPINGS?: string | undefined;
     MONGODB_MAX_TIME_MS?: string | undefined;
     JWT_EXPIRES_IN_WEB?: string | undefined;

@@ -63,6 +63,7 @@ fn normalize_ticker_item(item: &Value) -> Option<NormalizedTicker> {
     let base = normalize_base(&raw_base);
 
     let c = parse_f64_field(item, "last")?;
+    let change_24h = parse_f64_field(item, "change_pct");
     let h = parse_f64_field(item, "high")?;
     let l = parse_f64_field(item, "low")?;
     let v_base = parse_f64_field(item, "volume")?;
@@ -92,6 +93,7 @@ fn normalize_ticker_item(item: &Value) -> Option<NormalizedTicker> {
         l_krw: None,
         c_krw: None,
         v_quote_krw: None,
+        change_24h,
         liquidity: None,
     })
 }

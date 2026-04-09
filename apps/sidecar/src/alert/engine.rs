@@ -239,7 +239,7 @@ pub async fn run(
 
             // Cooldown lock — atomic, no Lua required
             let lock_acquired = state_store
-                .try_acquire_lock(&rule.id, rule.cooldown_secs as u64)
+                .try_acquire_lock(&rule.id, rule.cooldown_secs as u64, None)
                 .await;
             if !lock_acquired {
                 debug!("[AlertEngine] Rule {:?} still within cooldown", rule.label);
@@ -397,6 +397,12 @@ fn evaluate_condition(
             }
             let spike_ratio = *current_v_quote / avg_v;
             Some((spike_ratio, None, None, None, None))
+        }
+        // ── change_pct_24h ───────────────────────────────────────────────
+        AlertCondition::ChangePct24h => {
+             // For target-specific evaluation (if needed). 
+             // Global rules evaluate directly in the main loop structure.
+             None
         }
     }
 }

@@ -14,9 +14,11 @@
         "@bemodest/types": "workspace:*",
         "@bemodest/utils": "workspace:*",
         "mongodb": "^6.12.0",
-        "ioredis": "^5.4.1"
+        "ioredis": "^5.4.1",
+        "zod": "^3.22.4"
     },
     "devDependencies": {
+        "@bemodest/tsconfig": "workspace:*",
         "typescript": "^5.7.2",
         "@types/node": "^22.10.2"
     }

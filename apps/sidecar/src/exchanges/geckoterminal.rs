@@ -312,5 +312,6 @@ fn normalize_gt_token(
         l_krw: None,
         c_krw: None,
         v_quote_krw: None,
+        change_24h: None,
     })
 }

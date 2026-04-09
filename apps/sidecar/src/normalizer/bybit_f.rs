@@ -62,6 +62,7 @@ pub fn normalize_bybit_f_ticker(raw: &Value, existing: Option<NormalizedTicker>)
             l_krw: None,
             c_krw: None,
             v_quote_krw: None,
+            change_24h: None,
             liquidity: None,
         })
     } else if msg_type == "delta" {

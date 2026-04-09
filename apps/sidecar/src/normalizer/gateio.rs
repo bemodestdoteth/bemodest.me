@@ -20,6 +20,7 @@ pub fn normalize_gateio_ticker(raw: &Value) -> Option<NormalizedTicker> {
     let c = parse_decimal(result.get("last")?.as_str()?)?;
     let change_str = result.get("change_percentage")?.as_str()?;
     let change_pct = parse_decimal(change_str)?;
+    let change_24h = change_pct.to_f64();
     
     let one_hundred = Decimal::from(100);
     let denom = one_hundred + change_pct;
@@ -55,6 +56,7 @@ pub fn normalize_gateio_ticker(raw: &Value) -> Option<NormalizedTicker> {
         l_krw: None,
         c_krw: None,
         v_quote_krw: None,
+        change_24h,
         liquidity: None,
     })
 }

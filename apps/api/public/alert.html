@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Alert Management | Wallet Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <style>
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .tab-button.active {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .rule-form .form-group {
+            margin-bottom: 15px;
+        }
+
+        .rule-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .rule-form input,
+        .rule-form select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-enabled {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-disabled {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .status-dead {
+            background-color: #eeeeee;
+            color: #616161;
+            text-decoration: line-through;
+        }
+
+        .action-btn {
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 12px;
+        }
+
+        .edit-btn {
+            background-color: #FFC107;
+            color: #000;
+        }
+
+        .delete-btn {
+            background-color: #F44336;
+            color: #fff;
+        }
+
+        .reset-btn {
+            background-color: #2196F3;
+            color: #fff;
+        }
+
+        .nav-back {
+            margin-bottom: 20px;
+            display: inline-block;
+            text-decoration: none;
+            color: #2196F3;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="content">
+        <header style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <h1><a href="/" style="text-decoration: none; color: inherit;">Wallet Tracker</a></h1>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button id="logoutBtn">Logout</button>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <div class="tab-button active" onclick="switchTab('rules')">Alert Rules</div>
+            <div class="tab-button" onclick="switchTab('logs')">Alert Logs</div>
+        </div>
+
+        <div id="rules-tab" class="tab-content active">
+            <div class="table-container">
+                <div class="filter-container">
+                    <h2>Configured Rules</h2>
+                    <button id="addRuleBtn" class="btn-primary" style="margin-left: auto;">+ Add New Rule</button>
+                </div>
+                <table id="rulesTable" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Label</th>
+                            <th>Ticker</th>
+                            <th>Condition</th>
+                            <th>Value</th>
+                            <th>Exchanges</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="logs-tab" class="tab-content">
+            <div class="table-container">
+                <h2>Firing History</h2>
+                <table id="logsTable" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Alert</th>
+                            <th>Ticker</th>
+                            <th>Metric Value</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rule Modal -->
+    <div id="ruleModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h3 id="modalTitle">Add Alert Rule</h3>
+            <form id="ruleForm" class="rule-form">
+                <input type="hidden" id="ruleId">
+                <div class="form-group">
+                    <label>Label</label>
+                    <input type="text" id="ruleLabel" required placeholder="e.g. BTC Spread Alert">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Ticker</label>
+                        <input type="text" id="ruleTicker" required placeholder="BTC">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Quote</label>
+                        <input type="text" id="ruleQuote" required placeholder="USDT">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Condition</label>
+                    <select id="ruleCondition" required>
+                        <option value="spread_pct">Spread % (min vs max)</option>
+                        <option value="price_above">Price Above (average)</option>
+                        <option value="price_below">Price Below (average)</option>
+                        <option value="change_pct_5m">5m Change % (absolute)</option>
+                        <option value="volume_spike">Volume Spike (ratio vs avg)</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Threshold Value</label>
+                        <input type="number" id="ruleValue" step="0.0001" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Cooldown (secs)</label>
+                        <input type="number" id="ruleCooldown" value="300" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Exchanges (comma separated, empty = all)</label>
+                    <input type="text" id="ruleExchanges" placeholder="binance,upbit,bithumb">
+                </div>
+                <div class="form-group">
+                    <label>Webhook URL (Optional Override)</label>
+                    <input type="url" id="ruleWebhook" placeholder="http://127.0.0.1:3001/api/alerts/fired">
+                    <p style="font-size: 11px; color: #888;">Default: API internal logger if left empty.</p>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="ruleEnabled" checked style="width: auto;">
+                    <label for="ruleEnabled" style="margin-bottom: 0;">Enabled</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancelRule">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Rule</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="/js/alert.js"></script>
+</body>
+
+</html>

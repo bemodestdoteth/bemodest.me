@@ -103,6 +103,7 @@ pub fn normalize_okx_f_ticker(raw: &Value) -> Option<NormalizedTicker> {
         l_krw: None,
         c_krw: None,
         v_quote_krw: None,
+        change_24h: None,
         liquidity: None,
     })
 }

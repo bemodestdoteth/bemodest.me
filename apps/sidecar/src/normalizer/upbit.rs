@@ -62,6 +62,7 @@ pub fn normalize_upbit_ticker(
     let h_raw = extract_decimal(raw, "hp")?;
     let l_raw = extract_decimal(raw, "lp")?;
     let c_raw = extract_decimal(raw, "tp")?; // Trade price = close
+    let change_24h_raw = extract_decimal(raw, "scr");
     let v_base = extract_decimal(raw, "atv24h")?;
     let v_quote_raw = extract_decimal(raw, "atp24h")?;
     let timestamp_ms = raw.get("tms")?.as_i64()?;
@@ -162,6 +163,7 @@ pub fn normalize_upbit_ticker(
         l_krw: l_krw.and_then(|v| v.to_f64()),
         c_krw: c_krw.and_then(|v| v.to_f64()),
         v_quote_krw: v_quote_krw.and_then(|v| v.to_f64()),
+        change_24h: change_24h_raw.and_then(|v| v.to_f64()),
         liquidity: None,
     })
 }

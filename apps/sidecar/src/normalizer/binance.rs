@@ -57,6 +57,7 @@ pub fn normalize_binance_ticker(raw: &Value, exchange: Exchange) -> Option<Norma
         l_krw: None,
         c_krw: None,
         v_quote_krw: None,
+        change_24h: None,
         liquidity: None,
     })
 }

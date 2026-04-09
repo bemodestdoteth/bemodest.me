@@ -40,11 +40,13 @@ pub fn normalize_bitget_ticker(raw: &Value) -> Option<NormalizedTicker> {
 
     let c = parse_decimal(d.get("lastPr").or_else(|| d.get("lastPrice"))?.as_str()?)?;
 
+    let pct_str = d.get("change24h").or_else(|| d.get("price24hPcnt")).and_then(|v| v.as_str()).unwrap_or("0");
+    let change_24h = parse_decimal(pct_str).and_then(|v| v.to_f64());
+
     // open price: use open24h/openPrice24h if non-zero, otherwise derive from change pct
     let o_raw = d.get("open24h").or_else(|| d.get("openPrice24h")).and_then(|v| v.as_str()).unwrap_or("0");
     let o = parse_decimal(o_raw).filter(|v| !v.is_zero()).unwrap_or_else(|| {
         // derive: open = close / (1 + change_pct)
-        let pct_str = d.get("change24h").or_else(|| d.get("price24hPcnt")).and_then(|v| v.as_str()).unwrap_or("0");
         if let Some(pct) = parse_decimal(pct_str) {
             let denom = Decimal::ONE + pct;
             if !denom.is_zero() { c / denom } else { c }
@@ -77,6 +79,7 @@ pub fn normalize_bitget_ticker(raw: &Value) -> Option<NormalizedTicker> {
         l_krw: None,
         c_krw: None,
         v_quote_krw: None,
+        change_24h,
         liquidity: None,
     })
 }
@@ -96,11 +99,13 @@ pub fn normalize_bitget_f_ticker(raw: &Value) -> Option<NormalizedTicker> {
 
     let c = parse_decimal(d.get("lastPr").or_else(|| d.get("lastPrice"))?.as_str()?)?;
 
+    let pct_str = d.get("change24h").or_else(|| d.get("price24hPcnt")).and_then(|v| v.as_str()).unwrap_or("0");
+    let change_24h = parse_decimal(pct_str).and_then(|v| v.to_f64());
+
     // open price: use open24h/openPrice24h if non-zero, otherwise derive from change pct
     let o_raw = d.get("open24h").or_else(|| d.get("openPrice24h")).and_then(|v| v.as_str()).unwrap_or("0");
     let o = parse_decimal(o_raw).filter(|v| !v.is_zero()).unwrap_or_else(|| {
         // derive: open = close / (1 + change_pct)
-        let pct_str = d.get("change24h").or_else(|| d.get("price24hPcnt")).and_then(|v| v.as_str()).unwrap_or("0");
         if let Some(pct) = parse_decimal(pct_str) {
             let denom = Decimal::ONE + pct;
             if !denom.is_zero() { c / denom } else { c }
@@ -133,6 +138,7 @@ pub fn normalize_bitget_f_ticker(raw: &Value) -> Option<NormalizedTicker> {
         l_krw: None,
         c_krw: None,
         v_quote_krw: None,
+        change_24h,
         liquidity: None,
     })
 }

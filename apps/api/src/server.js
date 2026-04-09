@@ -39,6 +39,8 @@ import {
     deleteAlertRule,
     resetWebhookDead,
     markWebhookDead,
+    postAlertFired,
+    getAlertLogs,
     getExcludelist,
     updateExcludelist,
     getPinlist,
@@ -87,6 +89,7 @@ app.get('/', (req, res) => res.sendFile(path.join(publicDir, 'index.html')));
 app.get('/ping', (req, res) => res.status(200).send('{ "message": "pong", "timestamp": ' + Date.now() + ' }'));
 app.get('/status', (req, res) => res.sendFile(path.join(publicDir, 'status.html')));
 app.get('/tracking', (req, res) => res.sendFile(path.join(publicDir, 'tracking.html')));
+app.get('/alert', (req, res) => res.sendFile(path.join(publicDir, 'alert.html')));
 app.get('/events', (req, res) => sseConnect(req, res));
 app.get('/api/entityTotal', authMiddleware, entityTotal);
 app.get('/api/wallets', authMiddleware, walletList);
@@ -124,6 +127,8 @@ app.delete('/api/alert-rules/:id', authMiddleware, deleteAlertRule);
 app.patch('/api/alert-rules/:id/reset-webhook', authMiddleware, resetWebhookDead);
 // Internal — called by sidecar, not protected by user auth (signed by SNAPPER_API_SECRET)
 app.patch('/api/alert-rules/:id/mark-dead', markWebhookDead);
+app.post('/api/alerts/fired', express.json(), postAlertFired);
+app.get('/api/alerts/logs', authMiddleware, getAlertLogs);
 
 // Socket.IO Status (Optional)
 app.get('/api/socket-status', checkSocketIOStatus);

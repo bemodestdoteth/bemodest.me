@@ -39,8 +39,12 @@ impl AlertStateStore {
     /// Issues `SET alert:lock:{rule_id} 1 NX EX {cooldown_secs}`.
     /// Returns `true` if the lock was newly set (i.e. the alert may fire),
     /// or `false` if the key already existed (still within cooldown).
-    pub async fn try_acquire_lock(&mut self, rule_id: &str, cooldown_secs: u64) -> bool {
-        let key = format!("alert:lock:{}", rule_id);
+    pub async fn try_acquire_lock(&mut self, rule_id: &str, cooldown_secs: u64, suffix: Option<&str>) -> bool {
+        let key = if let Some(s) = suffix {
+            format!("alert:lock:{}:{}", rule_id, s)
+        } else {
+            format!("alert:lock:{}", rule_id)
+        };
         let result: redis::RedisResult<Option<String>> = redis::cmd("SET")
             .arg(&key)
             .arg(1)
