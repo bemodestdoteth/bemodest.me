@@ -78,7 +78,7 @@ app
         skip: () => config.NODE_ENV === 'dev'
     }))
     .use(cors({
-        origin: [...CORS_ORIGIN_ALLOWED, `chrome - extension://${CHROME_EXTENSION_ID}`],
+        origin: [...CORS_ORIGIN_ALLOWED, `chrome-extension://${CHROME_EXTENSION_ID}`],
         credentials: true
     }))
     .use(express.json({ limit: BODY_PARSER_LIMIT }))

@@ -15,16 +15,37 @@ import { UnauthorizedError, formatErrorResponse } from '@bemodest/utils';
  * });
  */
 export function authMiddleware(req, res, next) {
+  const config = validateApiConfig();
   const authHeader = req.headers.authorization;
+  let token;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (authHeader && authHeader.startsWith('Bearer ') && authHeader !== 'Bearer null') {
+    token = authHeader.substring(7);
+  } else if (req.cookies && req.cookies[config.COOKIE_NAME]) {
+    // CSRF Defense-in-depth when relying on cookies
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+      const origin = req.headers.origin;
+      const referer = req.headers.referer;
+      const allowedOrigin = config.CORS_ORIGIN;
+      const allowedExtension = `chrome-extension://${config.CHROME_EXTENSION_ID}`;
+
+      let isTrusted = false;
+      if (origin && (origin === allowedOrigin || origin === allowedExtension)) isTrusted = true;
+      if (referer && (referer.startsWith(allowedOrigin) || referer.startsWith(allowedExtension))) isTrusted = true;
+
+      if (!isTrusted) {
+        return res.status(403).json(formatErrorResponse(new UnauthorizedError('CSRF protection: untrusted origin')));
+      }
+    }
+
+    token = req.cookies[config.COOKIE_NAME];
+  }
+
+  if (!token) {
     return res.status(401).json(formatErrorResponse(new UnauthorizedError('No token provided')));
   }
 
-  const token = authHeader.substring(7);
-
   try {
-    const config = validateApiConfig();
     const decoded = jwt.verify(token, config.JWT_SECRET);
     const validated = AuthSessionSchema.parse(decoded);
 
@@ -43,14 +64,22 @@ export function authMiddleware(req, res, next) {
  * io.use(socketAuthMiddleware);
  */
 export function socketAuthMiddleware(socket, next) {
-  const token = socket.handshake.auth.token;
+  const config = validateApiConfig();
+  let token = socket.handshake.auth?.token;
+
+  if (!token || token === 'null') {
+    const cookieHeader = socket.handshake.headers?.cookie;
+    if (cookieHeader) {
+      const match = cookieHeader.match(new RegExp('(^| )' + config.COOKIE_NAME + '=([^;]+)'));
+      if (match) token = match[2];
+    }
+  }
 
   if (!token) {
     return next(new Error('Authentication required'));
   }
 
   try {
-    const config = validateApiConfig();
     const decoded = jwt.verify(token, config.JWT_SECRET);
     const validated = AuthSessionSchema.parse(decoded);
 

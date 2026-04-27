@@ -174,6 +174,11 @@ function initializeSocketConnection(token) {
         if (data.success && Array.isArray(data.data)) {
             availableChains = data.data;
             updateBulkAddChainDropdowns();
+
+            // Re-fetch wallets to apply newly loaded chain names to the table and filters
+            if (window.dataTable) {
+                socket.emit('walletsGet');
+            }
         }
     });
 
@@ -321,16 +326,21 @@ function updateWalletTable(labelledAddresses) {
     table.rows.add(tableData);
     table.draw();
 
-    // Update chain filter if new chains added
-    const existingChains = Array.from($('#chainFilter option').map((i, el) => el.value));
+    // Rebuild chain filter dropdown
+    $('#chainFilter').empty().append('<option value="">All</option>');
+
+    // Sort and append unique display chains
+    const uniqueDisplayChains = new Set();
     chains.forEach(chain => {
-        if (!existingChains.includes(chain)) {
-            const displayText = chainDisplayMap[chain] || chain;
-            $('#chainFilter').append($('<option>', {
-                value: chain,
-                text: displayText
-            }));
-        }
+        const displayText = chainDisplayMap[chain] || chain;
+        uniqueDisplayChains.add(displayText);
+    });
+
+    Array.from(uniqueDisplayChains).sort().forEach(displayText => {
+        $('#chainFilter').append($('<option>', {
+            value: displayText,
+            text: displayText
+        }));
     });
 }
 
@@ -426,12 +436,12 @@ function initializeDataTable() {
         };
 
         const token = sessionStorage.getItem('jwt_token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
         fetch('/api/removeFront', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            headers,
             body: JSON.stringify(requestBody)
         })
             .then(res => {
@@ -457,10 +467,11 @@ function initializeDataTable() {
     } else {
         // Fallback to REST API if socket not ready
         const token = sessionStorage.getItem('jwt_token');
+        const headers = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
         fetch('/api/wallets', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers
         })
             .then(res => {
                 if (!res.ok) {

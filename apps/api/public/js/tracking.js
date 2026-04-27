@@ -254,8 +254,10 @@
         try {
             const token = sessionStorage.getItem('jwt_token');
             const exchangesCsv = Array.from(exchanges).join(',');
+            const headers = {};
+            if (token) headers['Authorization'] = `Bearer ${token}`;
             const resp = await fetch(`/api/deep-dive/balance?ticker=${encodeURIComponent(ticker)}&exchanges=${encodeURIComponent(exchangesCsv)}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers
             });
             if (!resp.ok || !isDeepDiveActive) return;
             const json = await resp.json();
@@ -654,14 +656,13 @@
 
     async function sendDeepDiveTask(action, ticker, exchanges) {
         const token = sessionStorage.getItem('jwt_token');
-        if (!token || !ticker || exchanges.length === 0) return false;
+        if (!ticker || exchanges.length === 0) return false;
         try {
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
             const res = await fetch(`/api/deep-dive/${action}`, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
+                headers,
                 body: JSON.stringify({ ticker, exchanges })
             });
             return res.ok;
@@ -1016,11 +1017,6 @@
                         alert(`No connected exchanges to analyze for ${selectedSymbol}`);
                         return;
                     }
-                    if (!sessionStorage.getItem('jwt_token')) {
-                        alert('You must be logged in to use Deep Dive Analysis.');
-                        return;
-                    }
-
                     const ok = await sendDeepDiveTask('start', selectedSymbol, activeExchanges);
                     if (!ok) {
                         alert('Failed to start Deep Dive. Check your connection.');
@@ -1134,14 +1130,16 @@
             try {
                 excludelistTags.innerHTML = '<span style="color: var(--text-dim); font-size: 0.9rem; font-style: italic;">Loading...</span>';
                 const token = sessionStorage.getItem('jwt_token');
-                if (!token) {
+                const headers = {};
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                const res = await fetch('/api/config/excludelist', {
+                    headers
+                });
+                if (res.status === 401) {
                     excludelistTags.innerHTML = '<span style="color: var(--neon-red); font-size: 0.9rem;">Not authenticated.</span>';
                     return;
                 }
-
-                const res = await fetch('/api/config/excludelist', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
                 if (!res.ok) {
                     excludelistTags.innerHTML = `<span style="color: var(--neon-red); font-size: 0.9rem;">API error ${res.status}.</span>`;
                     return;
@@ -1162,14 +1160,12 @@
         const updateExcludelist = async (payload) => {
             try {
                 const token = sessionStorage.getItem('jwt_token');
-                if (!token) return;
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
 
                 const res = await fetch('/api/config/excludelist', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
+                    headers,
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
@@ -1256,14 +1252,16 @@
             try {
                 pinlistTags.innerHTML = '<span style="color: var(--text-dim); font-size: 0.9rem; font-style: italic;">Loading...</span>';
                 const token = sessionStorage.getItem('jwt_token');
-                if (!token) {
+                const headers = {};
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                const res = await fetch('/api/config/pinlist', {
+                    headers
+                });
+                if (res.status === 401) {
                     pinlistTags.innerHTML = '<span style="color: var(--neon-red); font-size: 0.9rem;">Not authenticated.</span>';
                     return;
                 }
-
-                const res = await fetch('/api/config/pinlist', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
                 if (!res.ok) {
                     pinlistTags.innerHTML = `<span style="color: var(--neon-red); font-size: 0.9rem;">API error ${res.status}.</span>`;
                     return;
@@ -1284,14 +1282,12 @@
         const updatePinlist = async (payload) => {
             try {
                 const token = sessionStorage.getItem('jwt_token');
-                if (!token) return;
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
 
                 const res = await fetch('/api/config/pinlist', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
+                    headers,
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
@@ -1338,7 +1334,7 @@
         if (!socket) {
             const token = sessionStorage.getItem('jwt_token');
             socket = io({
-                auth: { token }
+                auth: token ? { token } : {}
             });
 
             socket.on('dwStatusUpdate', (payload) => {

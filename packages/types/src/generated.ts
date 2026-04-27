@@ -17,6 +17,7 @@ export interface AlertRule {
 
 export enum Condition {
     ChangePct5M = "change_pct_5m",
+    ChangePct24h = "change_pct_24h",
     PriceAbove = "price_above",
     PriceBelow = "price_below",
     SpreadPct = "spread_pct",

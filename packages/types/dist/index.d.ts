@@ -7,7 +7,7 @@ export declare const CAIP2_RE: RegExp;
  */
 export declare const CAIP2_DB_RE: RegExp;
 export declare const DW_STATUS_VALUES: readonly ["both", "deposit_only", "withdraw_only", "suspended"];
-export declare const ALERT_CONDITIONS: readonly ["spread_pct", "price_above", "price_below", "change_pct_5m", "volume_spike"];
+export declare const ALERT_CONDITIONS: readonly ["spread_pct", "price_above", "price_below", "change_pct_5m", "change_pct_24h", "volume_spike"];
 export declare const Caip2Schema: z.ZodString;
 export declare const Caip2RedisSchema: z.ZodString;
 export declare const AliasSchema: z.ZodObject<{

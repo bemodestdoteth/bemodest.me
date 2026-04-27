@@ -2,7 +2,8 @@ import { Server } from 'socket.io';
 import { logger } from '@bemodest/utils';
 import { validateApiConfig } from '@bemodest/config';
 const config = validateApiConfig();
-const { CHROME_EXTENSION_ID, PORT, CORS_ORIGIN: CORS_ORIGIN_ALLOWED } = config;
+const { CHROME_EXTENSION_ID, PORT, CORS_ORIGIN } = config;
+const CORS_ORIGIN_ALLOWED = [CORS_ORIGIN];
 import { socketAuthMiddleware } from '../middleware/auth.js';
 import { setIO, getIO } from './state.js';
 import {

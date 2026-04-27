@@ -3,6 +3,7 @@ import { BaseMongoSchema } from './types.js';
 
 export const AlertConditionSchema = z.enum([
     'change_pct_5m',
+    'change_pct_24h',
     'price_above',
     'price_below',
     'spread_pct',

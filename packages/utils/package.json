@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "NODE_OPTIONS='--max-old-space-size=512' tsc --watch"
   },
   "dependencies": {
     "@cosmjs/stargate": "^0.33.0",

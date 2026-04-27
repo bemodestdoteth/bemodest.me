@@ -9,7 +9,7 @@ use crate::cache::TokenAnnotationCache;
 use crate::exchanges::batcher::TickerBatcher;
 use crate::config::Config;
 
-pub const TICKER_STREAM_URL: &str = "wss://fstream.binance.com/stream?streams=!miniTicker@arr";
+pub const TICKER_STREAM_URL: &str = "wss://fstream.binancefuture.com/stream?streams=!miniTicker@arr";
 
 pub fn handle_message(
     text: &str,

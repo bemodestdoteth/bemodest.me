@@ -114,6 +114,30 @@
             color: #2196F3;
             font-weight: bold;
         }
+
+        .exchange-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-height: 160px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        .exchange-grid label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: normal;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .exchange-grid input[type="checkbox"] {
+            width: auto;
+        }
     </style>
 </head>
 
@@ -186,15 +210,13 @@
                     <label>Label</label>
                     <input type="text" id="ruleLabel" required placeholder="e.g. BTC Spread Alert">
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Ticker</label>
-                        <input type="text" id="ruleTicker" required placeholder="BTC">
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Quote</label>
-                        <input type="text" id="ruleQuote" required placeholder="USDT">
-                    </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="ruleAllTickers" style="width: auto;">
+                    <label for="ruleAllTickers" style="margin-bottom: 0;">Monitor all tickers on selected exchanges</label>
+                </div>
+                <div id="tickerRow" class="form-group">
+                    <label>Ticker</label>
+                    <input type="text" id="ruleTicker" required placeholder="BTC">
                 </div>
                 <div class="form-group">
                     <label>Condition</label>
@@ -203,6 +225,7 @@
                         <option value="price_above">Price Above (average)</option>
                         <option value="price_below">Price Below (average)</option>
                         <option value="change_pct_5m">5m Change % (absolute)</option>
+                        <option value="change_pct_24h">24h Change % (absolute, native only)</option>
                         <option value="volume_spike">Volume Spike (ratio vs avg)</option>
                     </select>
                 </div>
@@ -217,8 +240,24 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Exchanges (comma separated, empty = all)</label>
-                    <input type="text" id="ruleExchanges" placeholder="binance,upbit,bithumb">
+                    <label>Exchanges (empty = all)</label>
+                    <div id="exchangeGrid" class="exchange-grid">
+                        <label><input type="checkbox" value="binance"> Binance</label>
+                        <label><input type="checkbox" value="binance_f"> BinanceF</label>
+                        <label><input type="checkbox" value="bitget"> Bitget</label>
+                        <label><input type="checkbox" value="bitget_f"> BitgetF</label>
+                        <label><input type="checkbox" value="bithumb"> Bithumb</label>
+                        <label><input type="checkbox" value="bybit"> Bybit</label>
+                        <label><input type="checkbox" value="bybit_f"> BybitF</label>
+                        <label><input type="checkbox" value="coinbase"> Coinbase</label>
+                        <label><input type="checkbox" value="dex"> Dex</label>
+                        <label><input type="checkbox" value="gateio"> Gate.io</label>
+                        <label><input type="checkbox" value="kraken"> Kraken</label>
+                        <label><input type="checkbox" value="kucoin"> Kucoin</label>
+                        <label><input type="checkbox" value="okx"> OKX</label>
+                        <label><input type="checkbox" value="okx_f"> OKXF</label>
+                        <label><input type="checkbox" value="upbit"> Upbit</label>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Webhook URL (Optional Override)</label>

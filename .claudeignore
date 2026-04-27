@@ -1,67 +1,112 @@
-# .gitignore - Files to exclude from Git
+# .claudeignore - Files to exclude from Claude context
+# This file reduces token usage by ignoring generated/irrelevant files
 
 # ============================================================================
-# DEPENDENCIES
+# PYTHON VIRTUAL ENVIRONMENTS (highest impact - thousands of files)
 # ============================================================================
-node_modules
-.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+.venv/
+venv/
+env/
+ENV/
+.venv-*/
 
 # ============================================================================
-# TESTING & COVERAGE
+# PYTHON CACHE & COMPILED FILES
 # ============================================================================
-/coverage
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
 
 # ============================================================================
-# NEXT.JS & BUILD OUTPUT
+# NODE.JS / JAVASCRIPT
 # ============================================================================
-.next/
-out/
-dist
-build
-packages/*/dist
-apps/*/dist
-
-# ============================================================================
-# TURBO REPO
-# ============================================================================
-.turbo
-
-# ============================================================================
-# SYSTEM & MISC
-# ============================================================================
-.DS_Store
-*.pem
-server.log
-cookies.txt
-
-# ============================================================================
-# DEBUG LOGS
-# ============================================================================
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+.npm/
+.yarn/
 
 # ============================================================================
-# ENVIRONMENT FILES
+# BUILD & DISTRIBUTION ARTIFACTS
 # ============================================================================
+dist/
+build/
+*.egg-info/
+.eggs/
+*.egg
+*.manifest
+*.spec
+*.lock
+
+# ============================================================================
+# LOG FILES
+# ============================================================================
+*.log
+*.log.*
+log/
+logs/
+
+# ============================================================================
+# COVERAGE & TEST REPORTS
+# ============================================================================
+htmlcov/
+.coverage
+.coverage.*
+.cache
+coverage.xml
+*.cover
+.hypothesis/
+.nox/
+
+# ============================================================================
+# IDE & EDITOR FILES
+# ============================================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-workspace
+*.sublime-project
+
+# ============================================================================
+# DOCUMENTATION BUILD
+# ============================================================================
+site/
+docs/_build/
+
+# ============================================================================
+# LARGE DATA FILES (optional - uncomment if data files shouldn't be in context)
+# ============================================================================
+# *.csv
+# *.parquet
+# *.json.gz
+# *.pkl
+# *.pickle
+
+# ============================================================================
+# PROJECT-SPECIFIC
+# ============================================================================
+.claude/skills/  # Claude skills directory if it contains large files
+.import_linter_cache/
+.codegraph/      # CodeGraph index files (regenerated as needed)
+
+# Environment files (may contain secrets)
 .env
-.env.*
-!.env.example
+.env.local
+.env.*.local
+test.env
 
-# ============================================================================
-# VERCEL
-# ============================================================================
-.vercel
-
-# ============================================================================
-# TYPESCRIPT
-# ============================================================================
-*.tsbuildinfo
-next-env.d.ts
+# Git
+.git/

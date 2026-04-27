@@ -5,7 +5,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "NODE_OPTIONS='--max-old-space-size=512' tsc --watch"
   },
   "dependencies": {
     "zod": "^3.22.4"

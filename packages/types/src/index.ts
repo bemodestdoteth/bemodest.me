@@ -20,6 +20,7 @@ export const ALERT_CONDITIONS = [
   'price_above',
   'price_below',
   'change_pct_5m',
+  'change_pct_24h',
   'volume_spike',
 ] as const;
 

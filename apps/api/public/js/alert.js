@@ -64,7 +64,7 @@ function initTables() {
 
 async function loadRules() {
     try {
-        const res = await fetch('/api/alert-rules');
+        const res = await fetch('/api/alert-rules', { credentials: 'same-origin' });
         const json = await res.json();
         if (json.success) {
             rulesTable.clear().rows.add(json.data).draw();
@@ -76,7 +76,7 @@ async function loadRules() {
 
 async function loadLogs() {
     try {
-        const res = await fetch('/api/alerts/logs?limit=200');
+        const res = await fetch('/api/alerts/logs?limit=200', { credentials: 'same-origin' });
         const json = await res.json();
         if (json.success) {
             logsTable.clear().rows.add(json.data).draw();
@@ -103,18 +103,29 @@ function initEventListeners() {
     $('#addRuleBtn').click(() => showModal());
     $('#cancelRule, #closeModal').click(() => hideModal());
 
+    $('#ruleAllTickers').change(function() {
+        if ($(this).is(':checked')) {
+            $('#tickerRow').hide();
+            $('#ruleTicker').prop('required', false);
+        } else {
+            $('#tickerRow').show();
+            $('#ruleTicker').prop('required', true);
+        }
+    });
+
     $('#ruleForm').submit(async (e) => {
         e.preventDefault();
         const id = $('#ruleId').val();
+        const allTickers = $('#ruleAllTickers').is(':checked');
         const data = {
             label: $('#ruleLabel').val(),
-            ticker: $('#ruleTicker').val().toUpperCase(),
-            quote: $('#ruleQuote').val().toUpperCase(),
+            ticker: allTickers ? '*' : $('#ruleTicker').val().toUpperCase(),
+            quote: allTickers ? '*' : deriveQuote(getSelectedExchanges()),
             condition: $('#ruleCondition').val(),
             value: parseFloat($('#ruleValue').val()),
             recovery_value: parseFloat($('#ruleValue').val()) * 0.95, // Simple recovery logic
             cooldown_secs: parseInt($('#ruleCooldown').val()),
-            exchanges: $('#ruleExchanges').val() ? $('#ruleExchanges').val().split(',').map(s => s.trim()) : [],
+            exchanges: getSelectedExchanges(),
             webhook_url: $('#ruleWebhook').val() || `${window.location.origin}/api/alerts/fired`,
             enabled: $('#ruleEnabled').is(':checked')
         };
@@ -125,6 +136,7 @@ function initEventListeners() {
         try {
             const res = await fetch(url, {
                 method,
+                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
@@ -148,6 +160,27 @@ function initEventListeners() {
     };
 }
 
+function getSelectedExchanges() {
+    return $('#exchangeGrid input[type="checkbox"]:checked').map(function() {
+        return $(this).val();
+    }).get();
+}
+
+function setSelectedExchanges(exchanges) {
+    $('#exchangeGrid input[type="checkbox"]').prop('checked', false);
+    exchanges.forEach(ex => {
+        $(`#exchangeGrid input[value="${ex}"]`).prop('checked', true);
+    });
+}
+
+function deriveQuote(exchanges) {
+    const exSet = new Set(exchanges.map(e => e.toLowerCase()));
+    const krwExchanges = new Set(['upbit', 'bithumb']);
+    const allKrw = [...exSet].every(e => krwExchanges.has(e));
+    if (allKrw && exSet.size > 0) return 'KRW';
+    return 'USDT';
+}
+
 function switchTab(tab) {
     $('.tab-button').removeClass('active');
     $('.tab-content').removeClass('active');
@@ -160,19 +193,25 @@ function showModal(rule = null) {
         $('#modalTitle').text('Edit Alert Rule');
         $('#ruleId').val(rule._id);
         $('#ruleLabel').val(rule.label);
-        $('#ruleTicker').val(rule.ticker);
-        $('#ruleQuote').val(rule.quote);
         $('#ruleCondition').val(rule.condition);
         $('#ruleValue').val(rule.value);
         $('#ruleCooldown').val(rule.cooldown_secs);
-        $('#ruleExchanges').val(rule.exchanges.join(', '));
+        setSelectedExchanges(rule.exchanges);
         $('#ruleWebhook').val(rule.webhook_url);
         $('#ruleEnabled').prop('checked', rule.enabled);
+
+        const isWildcard = rule.ticker === '*';
+        $('#ruleAllTickers').prop('checked', isWildcard).trigger('change');
+        if (!isWildcard) {
+            $('#ruleTicker').val(rule.ticker);
+        }
     } else {
         $('#modalTitle').text('Add Alert Rule');
         $('#ruleForm')[0].reset();
         $('#ruleId').val('');
         $('#ruleWebhook').val(`${window.location.origin}/api/alerts/fired`);
+        $('#ruleAllTickers').prop('checked', false).trigger('change');
+        setSelectedExchanges([]);
     }
     $('#ruleModal').show();
 }
@@ -189,7 +228,7 @@ function editRule(id) {
 async function deleteRule(id) {
     if (!confirm('Are you sure you want to delete this rule?')) return;
     try {
-        const res = await fetch(`/api/alert-rules/${id}`, { method: 'DELETE' });
+        const res = await fetch(`/api/alert-rules/${id}`, { method: 'DELETE', credentials: 'same-origin' });
         const json = await res.json();
         if (json.success) loadRules();
     } catch (err) {
@@ -199,7 +238,7 @@ async function deleteRule(id) {
 
 async function resetWebhook(id) {
     try {
-        const res = await fetch(`/api/alert-rules/${id}/reset-webhook`, { method: 'PATCH' });
+        const res = await fetch(`/api/alert-rules/${id}/reset-webhook`, { method: 'PATCH', credentials: 'same-origin' });
         const json = await res.json();
         if (json.success) loadRules();
     } catch (err) {

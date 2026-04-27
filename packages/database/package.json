@@ -6,7 +6,7 @@
     "type": "module",
     "scripts": {
         "build": "tsc",
-        "dev": "tsc -w",
+        "dev": "NODE_OPTIONS='--max-old-space-size=512' tsc -w",
         "lint": "eslint src/**/*.ts"
     },
     "dependencies": {
