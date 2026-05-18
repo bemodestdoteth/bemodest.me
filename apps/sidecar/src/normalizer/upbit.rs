@@ -1,11 +1,10 @@
 use crate::types::{
-    Exchange, MarketState, NormalizedTicker,
-    parse_decimal, now_micros, ExchangeExt
+    now_micros, parse_decimal, Exchange, ExchangeExt, MarketState, NormalizedTicker,
 };
+use rust_decimal::prelude::FromPrimitive;
+use rust_decimal::Decimal;
 use serde_json::Value;
 use std::str::FromStr;
-use rust_decimal::Decimal;
-use rust_decimal::prelude::FromPrimitive;
 
 /// Normalize a single Upbit/Bithumb ticker object into NormalizedTicker.
 ///
@@ -93,7 +92,11 @@ pub fn normalize_upbit_ticker(
             ),
             // Rate unavailable — keep KRW values in the primary fields
             _ => (
-                o_raw, h_raw, l_raw, c_raw, v_quote_raw,
+                o_raw,
+                h_raw,
+                l_raw,
+                c_raw,
+                v_quote_raw,
                 Some(o_raw),
                 Some(h_raw),
                 Some(l_raw),
@@ -125,7 +128,11 @@ pub fn normalize_upbit_ticker(
                     ),
                     // Forex unavailable — expose KRW values as primary
                     _ => (
-                        o_k, h_k, l_k, c_k, v_k,
+                        o_k,
+                        h_k,
+                        l_k,
+                        c_k,
+                        v_k,
                         Some(o_k),
                         Some(h_k),
                         Some(l_k),
@@ -135,11 +142,33 @@ pub fn normalize_upbit_ticker(
                 }
             }
             // BTC/KRW price unavailable — keep BTC-denominated values as-is, no KRW fields
-            _ => (o_raw, h_raw, l_raw, c_raw, v_quote_raw, None, None, None, None, None),
+            _ => (
+                o_raw,
+                h_raw,
+                l_raw,
+                c_raw,
+                v_quote_raw,
+                None,
+                None,
+                None,
+                None,
+                None,
+            ),
         }
     } else {
         // Non-KRW, non-BTC pair: no conversion, no KRW originals
-        (o_raw, h_raw, l_raw, c_raw, v_quote_raw, None, None, None, None, None)
+        (
+            o_raw,
+            h_raw,
+            l_raw,
+            c_raw,
+            v_quote_raw,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
     };
 
     use rust_decimal::prelude::ToPrimitive;

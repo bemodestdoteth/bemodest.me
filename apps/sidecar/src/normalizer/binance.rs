@@ -1,12 +1,12 @@
 use crate::types::{
-    Exchange, NormalizedTicker, MarketState,
-    parse_decimal, now_micros, strip_scale_factor, ExchangeExt
+    now_micros, parse_decimal, strip_scale_factor, Exchange, ExchangeExt, MarketState,
+    NormalizedTicker,
 };
 use rust_decimal::prelude::ToPrimitive;
 use serde_json::Value;
 
 /// Normalize a single Binance miniTicker object into NormalizedTicker
-/// 
+///
 /// Binance miniTicker format:
 /// {
 ///   "e": "24hrMiniTicker",

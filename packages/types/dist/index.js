@@ -199,10 +199,10 @@ exports.ChainInsertSchema = zod_1.z.object({
         memoRequired: zod_1.z.boolean().optional().default(false),
         memoRegexPatterns: zod_1.z.array(zod_1.z.string()).optional().default([]),
         block_time: zod_1.z.number().int().optional().default(30),
+        code: zod_1.z.string().regex(/^[A-Z0-9]+$/, 'Code must be uppercase alphanumeric').min(1, 'Code is required'),
         annotation: zod_1.z.object({
             geckoterminal: zod_1.z.string().optional(),
-            code: zod_1.z.string().min(1, 'Annotation code is required'),
-        }).passthrough(),
+        }).passthrough().optional(),
         status: zod_1.z.enum(['active', 'deprecated']).optional().default('active'),
         supersededBy: exports.Caip2Schema.optional(),
     })
@@ -248,8 +248,7 @@ exports.ChainUpdateSchema = zod_1.z.object({
         block_time: zod_1.z.number().int().optional().default(30),
         annotation: zod_1.z.object({
             geckoterminal: zod_1.z.string().optional(),
-            code: zod_1.z.string().min(1, 'Annotation code is required'),
-        }).passthrough(),
+        }).passthrough().optional(),
         status: zod_1.z.enum(['active', 'deprecated']).optional().default('active'),
         supersededBy: exports.Caip2Schema.optional(),
     })

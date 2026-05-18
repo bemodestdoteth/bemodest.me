@@ -1,8 +1,6 @@
 export * from './types.js';
-export * from './alertRule.js';
-export * from './chain.js';
-export * from './address.js';
-export * from './entity.js';
+// alertRule, chain, address, entity are excluded here — they depend on mongodb (BaseMongoSchema)
+// and are server-side only. Import them from @bemodest/database instead.
 export * from './ticker.js';
 export * from './sidecar.js';
 export * from './systemConfig.js';

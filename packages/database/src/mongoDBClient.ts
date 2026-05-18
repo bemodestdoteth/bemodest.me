@@ -215,7 +215,7 @@ export class MongoDBClient {
         return chains.map(chain => ({
             ...chain,
             _id: chain._id.toString(),
-            code: chain.annotation?.code || chain.chain,
+            code: chain.code || chain.chain,
             labelCount: countMap[chain.caip2] || 0
         }));
     }

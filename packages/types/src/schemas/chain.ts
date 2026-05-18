@@ -1,8 +1,10 @@
 import { z } from 'zod';
-import { BaseMongoSchema, Caip2Schema } from './types.js';
+import { BaseMongoSchema } from './mongo.js';
+import { Caip2Schema } from './types.js';
 
 export const ChainSchema = BaseMongoSchema.extend({
     caip2: Caip2Schema,
+    code: z.string().regex(/^[A-Z0-9]+$/, 'Code must be uppercase alphanumeric').optional(),
     chain: z.string(),
     name: z.string(),
     symbol: z.string().optional(),

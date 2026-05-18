@@ -110,11 +110,14 @@ export class ChainService {
         const directMatch = this.chains.get(code) || this.chains.get(code.toLowerCase());
         if (directMatch) return directMatch;
 
-        // Fallback for legacy codes (like 'ETH', 'BTC')
+        // Fallback for legacy codes stored on older labels (like 'ETH', 'BTC', 'CHZ')
         const upperCode = code.toUpperCase();
         for (const chain of this.chains.values()) {
-            if (chain.annotation?.code?.toUpperCase() === upperCode ||
-                chain.chain?.toUpperCase() === upperCode ||
+            const annotationValues = Object.values(chain.annotation ?? {})
+                .filter((value): value is string => typeof value === 'string');
+            if (chain.symbol?.toUpperCase() === upperCode ||
+                chain.annotation?.code?.toUpperCase() === upperCode ||
+                annotationValues.some(value => value.toUpperCase() === upperCode) ||
                 chain.caip2?.toUpperCase() === upperCode) {
                 return chain;
             }

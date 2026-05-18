@@ -1,10 +1,7 @@
-use crate::types::{
-    Exchange, NormalizedTicker,
-    parse_decimal, now_micros,
-};
-use serde_json::Value;
+use crate::types::{now_micros, parse_decimal, Exchange, NormalizedTicker};
 use rust_decimal::prelude::ToPrimitive;
 use rust_decimal::Decimal;
+use serde_json::Value;
 
 pub fn normalize_gateio_ticker(raw: &Value) -> Option<NormalizedTicker> {
     let result = raw.get("result")?;
@@ -21,7 +18,7 @@ pub fn normalize_gateio_ticker(raw: &Value) -> Option<NormalizedTicker> {
     let change_str = result.get("change_percentage")?.as_str()?;
     let change_pct = parse_decimal(change_str)?;
     let change_24h = change_pct.to_f64();
-    
+
     let one_hundred = Decimal::from(100);
     let denom = one_hundred + change_pct;
     let o = if !denom.is_zero() {

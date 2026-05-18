@@ -1,8 +1,8 @@
-use mongodb::{Client, bson::doc};
-use papaya::HashMap;
-use log::{info, error};
-use futures_util::TryStreamExt;
 use crate::types::Exchange as ExchangeType;
+use futures_util::TryStreamExt;
+use log::{error, info};
+use mongodb::{bson::doc, Client};
+use papaya::HashMap;
 
 /// Highly optimized token annotation cache.
 /// Maps "(exchange):(base_token)" -> "unified_token"
@@ -23,9 +23,9 @@ impl TokenAnnotationCache {
     /// Load from MongoDB (codys/tokenAnnotation collection)
     pub async fn init(mongo_uri: Option<&str>) -> Self {
         let cache = Self::new();
-        
+
         if let Some(uri) = mongo_uri {
-             match Client::with_uri_str(uri).await {
+            match Client::with_uri_str(uri).await {
                 Ok(client) => {
                     info!("[TokenAnnotationCache] Connected to MongoDB for annotations");
                     if let Err(e) = cache.preload(&client).await {
@@ -37,13 +37,16 @@ impl TokenAnnotationCache {
                 }
             }
         } else {
-             info!("[TokenAnnotationCache] No MongoDB URI provided, cache will be empty");
+            info!("[TokenAnnotationCache] No MongoDB URI provided, cache will be empty");
         }
-        
+
         cache
     }
 
-    async fn preload(&self, client: &Client) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    async fn preload(
+        &self,
+        client: &Client,
+    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let db = client.database("codys");
         let collection = db.collection::<mongodb::bson::Document>("tokenAnnotation");
 
@@ -65,8 +68,11 @@ impl TokenAnnotationCache {
                 }
             }
         }
-        
-        info!("[TokenAnnotationCache] Preloaded {} token annotations", count);
+
+        info!(
+            "[TokenAnnotationCache] Preloaded {} token annotations",
+            count
+        );
         Ok(())
     }
 
@@ -78,7 +84,12 @@ impl TokenAnnotationCache {
     }
 
     /// Resolve the unified ticker base name using prioritized mapping (raw first, then stripped).
-    pub fn resolve_ticker_base(&self, exchange: &ExchangeType, raw_base: &str, base: &str) -> String {
+    pub fn resolve_ticker_base(
+        &self,
+        exchange: &ExchangeType,
+        raw_base: &str,
+        base: &str,
+    ) -> String {
         if let Some(unified) = self.get_unified(exchange, raw_base) {
             unified
         } else if let Some(unified) = self.get_unified(exchange, base) {

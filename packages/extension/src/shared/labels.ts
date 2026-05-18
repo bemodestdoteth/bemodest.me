@@ -524,7 +524,6 @@ export class Labels {
         if (this.labelCache.length === 0) {
             await this.buildCache();
         }
-
         const q = query.toLowerCase();
         const filtered = q
             ? this.labelCache.filter((label: any) => {
@@ -607,32 +606,29 @@ export class Labels {
         }
 
         const chainManager = (window as any).chainManager;
-        if (!chainManager) {
-            console.warn('[Labels] chainManager not initialized');
-            return '';
-        }
 
         // Support both legacy `chain` (string) and new `chains` (string[])
         const chainCodes: string[] = Array.isArray(body.chains)
             ? body.chains
             : (body.chain ? [body.chain] : []);
 
-        const chains = chainCodes
-            .map((code: string) => chainManager.getChainByCode(code))
-            .filter(Boolean)
-            .slice(0, 4);
+        const chains = chainManager
+            ? chainCodes.map((code: string) => chainManager.getChainByCode(code)).filter(Boolean).slice(0, 4)
+            : [];
 
-        if (chains.length === 0) {
-            console.warn(`No valid chains found for: ${chainCodes.join(', ')}`);
-            return '';
+        if (!chainManager) {
+            console.warn('[Labels] chainManager not initialized, rendering without chain data');
         }
 
-        const gradientColors = chains.map((c: any) => c.bgColor);
-        const gradient = gradientColors.length === 1
-            ? gradientColors[0]
-            : `linear-gradient(var(--chain-angle, 135deg), ${gradientColors.join(', ')})`;
-        const fontColor = chains[0].fontColor;
-        const chainNames = chains.map((c: any) => c.annotation?.code || c.name).join(', ');
+        const gradient = chains.length > 0
+            ? (chains.length === 1
+                ? (chains[0] as any).bgColor
+                : `linear-gradient(var(--chain-angle, 135deg), ${chains.map((c: any) => c.bgColor).join(', ')})`)
+            : '#444';
+        const fontColor = chains.length > 0 ? (chains[0] as any).fontColor : '#fff';
+        const chainNames = chains.length > 0
+            ? chains.map((c: any) => c.annotation?.code || c.name).join(', ')
+            : chainCodes.join(', ');
 
         return `<div class="label-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; width: 100%;">
             <div style="display: flex; align-items: center; overflow: hidden; flex-grow: 1; margin-right: 10px;">
@@ -779,6 +775,7 @@ export class Labels {
                             await this.remove(editingAddr);
                         }
                         await this.add(body);
+                        await this.updateLabelsList();
                         this.updateStatus('Updating label...', 'pending');
                         this.resetFormState();
                     }
@@ -795,6 +792,7 @@ export class Labels {
                     if (response !== undefined) {
                         await chrome.storage.local.remove('extensionFormDraft');
                         await this.add(body);
+                        await this.updateLabelsList();
                         this.updateStatus('Adding label...', 'pending');
                         this.resetFormState();
                     }

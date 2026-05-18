@@ -1,11 +1,12 @@
 pub mod binance;
-pub mod upbit;
+pub mod bitget;
 pub mod bybit;
 pub mod bybit_f;
-pub mod gateio;
-pub mod bitget;
 pub mod coinbase;
+pub mod gateio;
+pub mod hyperliquid_f;
 pub mod kraken;
 pub mod kucoin;
 pub mod okx;
 pub mod okx_f;
+pub mod upbit;

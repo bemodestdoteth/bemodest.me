@@ -239,10 +239,10 @@ export const ChainInsertSchema = z.object({
     memoRequired: z.boolean().optional().default(false),
     memoRegexPatterns: z.array(z.string()).optional().default([]),
     block_time: z.number().int().optional().default(30),
+    code: z.string().regex(/^[A-Z0-9]+$/, 'Code must be uppercase alphanumeric').min(1, 'Code is required'),
     annotation: z.object({
       geckoterminal: z.string().optional(),
-      code: z.string().min(1, 'Annotation code is required'),
-    }).passthrough(),
+    }).passthrough().optional(),
     status: z.enum(['active', 'deprecated']).optional().default('active'),
     supersededBy: Caip2Schema.optional(),
   })
@@ -289,8 +289,7 @@ export const ChainUpdateSchema = z.object({
     block_time: z.number().int().optional().default(30),
     annotation: z.object({
       geckoterminal: z.string().optional(),
-      code: z.string().min(1, 'Annotation code is required'),
-    }).passthrough(),
+    }).passthrough().optional(),
     status: z.enum(['active', 'deprecated']).optional().default('active'),
     supersededBy: Caip2Schema.optional(),
   })

@@ -1,15 +1,15 @@
-use tokio::time::{sleep, Duration};
-use serde_json::Value;
-use log::info;
-use std::sync::Arc;
-use crate::normalizer::upbit::normalize_upbit_ticker;
-use crate::types::Exchange as ExchangeType;
 use crate::cache::lvc::LatestValueCache;
-use crate::cache::TokenAnnotationCache;
 use crate::cache::ForexCache;
 use crate::cache::MarketCache;
-use crate::exchanges::batcher::TickerBatcher;
+use crate::cache::TokenAnnotationCache;
 use crate::config::Config;
+use crate::exchanges::batcher::TickerBatcher;
+use crate::normalizer::upbit::normalize_upbit_ticker;
+use crate::types::Exchange as ExchangeType;
+use log::info;
+use serde_json::Value;
+use std::sync::Arc;
+use tokio::time::{sleep, Duration};
 
 pub const TICKER_STREAM_URL: &str = "wss://ws-api.bithumb.com/websocket/v1";
 const SUBSCRIBE_BATCH_SIZE: usize = 100;
@@ -19,7 +19,10 @@ pub async fn wait_for_market_cache(market_cache: &Arc<MarketCache>) {
     loop {
         let markets = market_cache.get_bithumb_markets().await;
         if !markets.is_empty() {
-            info!("[BithumbExchange] Market cache ready with {} symbols", markets.len());
+            info!(
+                "[BithumbExchange] Market cache ready with {} symbols",
+                markets.len()
+            );
             break;
         }
         if waited >= 30_000 {
@@ -44,7 +47,14 @@ pub fn handle_message(
     }
 }
 
-fn process_bithumb_tickers(raw: &Value, lvc: &LatestValueCache, tac: &TokenAnnotationCache, forex: &ForexCache, batcher: &mut TickerBatcher, config: &Config) {
+fn process_bithumb_tickers(
+    raw: &Value,
+    lvc: &LatestValueCache,
+    tac: &TokenAnnotationCache,
+    forex: &ForexCache,
+    batcher: &mut TickerBatcher,
+    config: &Config,
+) {
     let rate = forex.get_krw_per_usd();
 
     let btc_krw: Option<f64> = lvc
@@ -54,8 +64,16 @@ fn process_bithumb_tickers(raw: &Value, lvc: &LatestValueCache, tac: &TokenAnnot
 
     if let Some(arr) = raw.as_array() {
         for item in arr {
-            if let Some(mut normalized) = normalize_upbit_ticker(item, ExchangeType::Bithumb, rate, btc_krw) {
-                if config.excludelist.read().unwrap().iter().any(|ex| normalized.base.starts_with(ex)) {
+            if let Some(mut normalized) =
+                normalize_upbit_ticker(item, ExchangeType::Bithumb, rate, btc_krw)
+            {
+                if config
+                    .excludelist
+                    .read()
+                    .unwrap()
+                    .iter()
+                    .any(|ex| normalized.base.starts_with(ex))
+                {
                     continue;
                 }
                 if let Some(unified) = tac.get_unified(&normalized.exchange, &normalized.base) {
@@ -70,8 +88,16 @@ fn process_bithumb_tickers(raw: &Value, lvc: &LatestValueCache, tac: &TokenAnnot
                 lvc.upsert(normalized);
             }
         }
-    } else if let Some(mut normalized) = normalize_upbit_ticker(raw, ExchangeType::Bithumb, rate, btc_krw) {
-        if config.excludelist.read().unwrap().iter().any(|ex| normalized.base.contains(ex)) {
+    } else if let Some(mut normalized) =
+        normalize_upbit_ticker(raw, ExchangeType::Bithumb, rate, btc_krw)
+    {
+        if config
+            .excludelist
+            .read()
+            .unwrap()
+            .iter()
+            .any(|ex| normalized.base.contains(ex))
+        {
             return;
         }
         if let Some(unified) = tac.get_unified(&normalized.exchange, &normalized.base) {
@@ -87,7 +113,9 @@ fn process_bithumb_tickers(raw: &Value, lvc: &LatestValueCache, tac: &TokenAnnot
     }
 }
 
-pub async fn subscription_factory(market_cache: Arc<MarketCache>) -> Option<Vec<serde_json::Value>> {
+pub async fn subscription_factory(
+    market_cache: Arc<MarketCache>,
+) -> Option<Vec<serde_json::Value>> {
     let mut symbols = market_cache.get_bithumb_markets().await;
     if symbols.is_empty() {
         return None;
@@ -97,19 +125,16 @@ pub async fn subscription_factory(market_cache: Arc<MarketCache>) -> Option<Vec<
     }
 
     let ticket_id = uuid::Uuid::new_v4().to_string();
-    let mut payload_array = vec![
-        serde_json::json!({"ticket": ticket_id})
-    ];
-    
+    let mut payload_array = vec![serde_json::json!({"ticket": ticket_id})];
+
     for chunk in symbols.chunks(SUBSCRIBE_BATCH_SIZE) {
         payload_array.push(serde_json::json!({
             "type": "ticker",
             "codes": chunk
         }));
     }
-    
+
     payload_array.push(serde_json::json!({"format": "SIMPLE"}));
-    
+
     Some(vec![serde_json::Value::Array(payload_array)])
 }
-

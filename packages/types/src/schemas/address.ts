@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { BaseMongoSchema, Caip2Schema } from './types.js';
+import { BaseMongoSchema } from './mongo.js';
+import { Caip2Schema } from './types.js';
 
 export const AddressAliasSchema = z.object({
     name: z.string(),

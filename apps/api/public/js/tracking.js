@@ -11,6 +11,7 @@
     // D/W Server Status Tracker
     let dwStatusTimeout = null;
     let hotBalanceInterval = null;
+    let timelineInterval = null;
     let socket = null;
 
     // D/W Status cache: { 'exchange:network': status }
@@ -50,7 +51,8 @@
         'kraken': 'Kraken',
         'kucoin': 'KuCoin',
         'okx': 'OKX',
-        'okx_f': 'OKX Futures'
+        'okx_f': 'OKX Futures',
+        'hyperliquid_f': 'Hyperliquid Futures'
     };
 
     function getPrettyName(name) {
@@ -667,7 +669,7 @@
             });
             return res.ok;
         } catch (e) {
-            console.error(`[DeepDive] Failed to send ${action} task:`, e);
+            console.error('[DeepDive] Failed to send task:', { action, error: e });
             return false;
         }
     }
@@ -785,6 +787,10 @@
                     else if (data.type === 'normalized_ticker') {
                         processTickerPayload(data);
                     }
+                    else if (data.type === 'market_summary') {
+                        renderConstellation(selectedSymbol);
+                        updateListDisplay();
+                    }
                     else if (data.type === 'forex') {
                         const d = data.data;
                         if (d.usd_krw) {
@@ -803,6 +809,14 @@
                             if (premEl) {
                                 premEl.textContent = premium.toFixed(2) + '%';
                                 premEl.style.color = premium >= 0 ? 'var(--neon-green)' : 'var(--neon-red)';
+                            }
+                        }
+                    }
+                    else if (data.type === 'api' && data.cmd === 'snapshot') {
+                        const tickers = data.data?.tickers;
+                        if (Array.isArray(tickers)) {
+                            for (const ticker of tickers) {
+                                processTickerPayload({ source: ticker.exchange, data: ticker });
                             }
                         }
                     }
@@ -888,11 +902,6 @@
                                 change: change,
                                 name: data.source
                             };
-
-                            if (symbol === selectedSymbol) {
-                                renderConstellation(selectedSymbol);
-                            }
-                            updateListDisplay();
                         }
 
                         // Debug: Update Raw View (show normalized data)
@@ -932,6 +941,7 @@
                                     case 'kucoin': color = '#00c8aa'; break;
                                     case 'okx': color = '#0078ff'; break;
                                     case 'okx_f': color = '#5296ff'; break;
+                                    case 'hyperliquid_f': color = '#00d7ff'; break;
                                     default:
                                         if (data.source.startsWith('dex_')) color = 'var(--neon-cyan)';
                                         break;
@@ -1053,6 +1063,11 @@
 
         // Handle page close — send stop via beacon to ensure reliable delivery
         window.addEventListener('beforeunload', () => {
+            if (timelineInterval) {
+                clearInterval(timelineInterval);
+                timelineInterval = null;
+            }
+
             if (isDeepDiveActive) {
                 const token = sessionStorage.getItem('jwt_token');
                 const exchangesToStop = Array.from(activeDeepDiveExchanges);
@@ -1067,7 +1082,8 @@
 
         // Initial Render
         renderConstellation(selectedSymbol);
-        setInterval(renderTimeline, 2000); // Animate timeline slightly
+        if (timelineInterval) clearInterval(timelineInterval);
+        timelineInterval = setInterval(renderTimeline, 2000); // Animate timeline slightly
 
         // Debug Toggle
         const toggleDebugBtn = document.getElementById('toggleDebugBtn');
@@ -1297,7 +1313,7 @@
                     sortMarketWatch(); // Force immediate re-sort and re-render of pins
                     pinlistInput.value = '';
                 } else {
-                    alert('Failed to update pinlist: ' + (data.message || 'Unknown error'));
+                    alert('Failed to update pinlist: ' + (data.message || data.error?.message || 'Unknown error'));
                 }
             } catch (e) {
                 console.error('Failed to update pinlist:', e);
@@ -1332,11 +1348,11 @@
 
         // --- D/W Server Status Socket.IO Listener ---
         if (!socket) {
-            const token = sessionStorage.getItem('jwt_token');
-            socket = io({
-                auth: token ? { token } : {}
-            });
+            socket = window.apiSocket;
+        }
 
+        if (socket) {
+            socket.off('dwStatusUpdate');
             socket.on('dwStatusUpdate', (payload) => {
                 if (!isDeepDiveActive) return;
 

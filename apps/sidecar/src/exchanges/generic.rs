@@ -1,18 +1,27 @@
-use tokio::time::Duration;
-use tokio::sync::broadcast;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
-use async_trait::async_trait;
 use super::Exchange;
 use crate::cache::lvc::LatestValueCache;
 use crate::cache::TokenAnnotationCache;
-use crate::exchanges::batcher::TickerBatcher;
 use crate::config::Config;
 use crate::exchanges::base::{WsSession, WsSessionContext};
+use crate::exchanges::batcher::TickerBatcher;
+use async_trait::async_trait;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+use tokio::sync::broadcast;
+use tokio::time::Duration;
 
 pub type MessageHandler = Arc<dyn Fn(&str, &mut TickerBatcher) + Send + Sync>;
-pub type SubscriptionFactory = Arc<dyn Fn() -> std::pin::Pin<Box<dyn std::future::Future<Output = Option<Vec<serde_json::Value>>> + Send>> + Send + Sync>;
-pub type UrlFactory = Arc<dyn Fn() -> std::pin::Pin<Box<dyn std::future::Future<Output = Option<String>> + Send>> + Send + Sync>;
+pub type SubscriptionFactory = Arc<
+    dyn Fn() -> std::pin::Pin<
+            Box<dyn std::future::Future<Output = Option<Vec<serde_json::Value>>> + Send>,
+        > + Send
+        + Sync,
+>;
+pub type UrlFactory = Arc<
+    dyn Fn() -> std::pin::Pin<Box<dyn std::future::Future<Output = Option<String>> + Send>>
+        + Send
+        + Sync,
+>;
 pub type PingFactory = Arc<dyn Fn() -> Option<serde_json::Value> + Send + Sync>;
 
 pub struct GenericExchange {
@@ -28,7 +37,8 @@ pub struct GenericExchange {
     message_handler: MessageHandler,
     subscription_factory: Option<SubscriptionFactory>,
     refresh_tx: broadcast::Sender<()>,
-    
+    reconnect_on_refresh: bool,
+
     // Optional specialized fields
     ping_interval: Option<Duration>,
     ping_text: Option<String>,
@@ -62,6 +72,7 @@ impl GenericExchange {
             message_handler,
             subscription_factory,
             refresh_tx,
+            reconnect_on_refresh: false,
             ping_interval: None,
             ping_text: None,
             ping_factory: None,
@@ -88,6 +99,11 @@ impl GenericExchange {
         self.url_factory = Some(factory);
         self
     }
+
+    pub fn with_reconnect_on_refresh(mut self) -> Self {
+        self.reconnect_on_refresh = true;
+        self
+    }
 }
 
 #[async_trait]
@@ -109,6 +125,7 @@ impl Exchange for GenericExchange {
             lvc: self.lvc.clone(),
             config: self.config.clone(),
             refresh_tx: Some(self.refresh_tx.clone()),
+            reconnect_on_refresh: self.reconnect_on_refresh,
             ping_interval: self.ping_interval,
             ping_text: self.ping_text.clone(),
             ping_factory: self.ping_factory.clone(),
@@ -133,8 +150,9 @@ impl Exchange for GenericExchange {
                 },
                 move |text, batcher| {
                     handler(text, batcher);
-                }
-            ).await;
+                },
+            )
+            .await;
         });
     }
 

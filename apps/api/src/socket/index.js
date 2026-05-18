@@ -25,6 +25,8 @@ import {
     handleLabelInsertBulk
 } from './handlers.js';
 
+const activeSocketsBySession = new Map();
+
 export const initSocketIO = (server) => {
     const io = new Server(server, {
         cors: {
@@ -43,7 +45,17 @@ export const initSocketIO = (server) => {
     io.use(socketAuthMiddleware);
 
     io.on('connection', (socket) => {
-        logger.info(`[Socket.IO] Client connected: ${socket.id}. Total clients: ${io.engine.clientsCount}`);
+        const sessionKey = `${socket.user.type}:${socket.user.userId}`;
+        const existingSocketId = activeSocketsBySession.get(sessionKey);
+        if (existingSocketId && existingSocketId !== socket.id) {
+            const existingSocket = io.sockets.sockets.get(existingSocketId);
+            if (existingSocket) {
+                existingSocket.disconnect(true);
+            }
+        }
+        activeSocketsBySession.set(sessionKey, socket.id);
+
+        logger.info(`[Socket.IO] Client connected: ${socket.id}. Session: ${sessionKey}. Total clients: ${io.engine.clientsCount}`);
 
         socket.onAny((event, ...args) => {
             if (!['walletTrackingGet', 'walletTotalGet', 'entityTotalGet', 'walletsGet', 'entityGet', 'chainGet'].includes(event)) {
@@ -69,7 +81,10 @@ export const initSocketIO = (server) => {
         socket.on('entityTotalGet', () => handleEntityTotalGet(socket));
 
         socket.on('disconnect', (reason) => {
-            logger.warn(`[Socket.IO] Client disconnected: ${socket.id}. Reason: ${reason}`);
+            if (activeSocketsBySession.get(sessionKey) === socket.id) {
+                activeSocketsBySession.delete(sessionKey);
+            }
+            logger.warn(`[Socket.IO] Client disconnected: ${socket.id}. Session: ${sessionKey}. Reason: ${reason}`);
         });
 
         socket.on('error', (err) => {

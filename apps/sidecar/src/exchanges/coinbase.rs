@@ -1,13 +1,13 @@
-use tokio::time::{sleep, Duration};
-use serde_json::Value;
-use log::{info, warn};
-use std::sync::Arc;
-use crate::normalizer::coinbase::normalize_coinbase_ticker;
 use crate::cache::lvc::LatestValueCache;
-use crate::cache::TokenAnnotationCache;
 use crate::cache::MarketCache;
-use crate::exchanges::batcher::TickerBatcher;
+use crate::cache::TokenAnnotationCache;
 use crate::config::Config;
+use crate::exchanges::batcher::TickerBatcher;
+use crate::normalizer::coinbase::normalize_coinbase_ticker;
+use log::{info, warn};
+use serde_json::Value;
+use std::sync::Arc;
+use tokio::time::{sleep, Duration};
 
 pub const TICKER_STREAM_URL: &str = "wss://ws-feed.exchange.coinbase.com";
 const SUBSCRIBE_BATCH_SIZE: usize = 100;
@@ -17,7 +17,10 @@ pub async fn wait_for_market_cache(market_cache: &Arc<MarketCache>) {
     loop {
         let currencies = market_cache.get_coinbase_markets().await;
         if !currencies.is_empty() {
-            info!("[CoinbaseExchange] Market cache ready with {} currencies", currencies.len());
+            info!(
+                "[CoinbaseExchange] Market cache ready with {} currencies",
+                currencies.len()
+            );
             break;
         }
         if waited >= 30_000 {
@@ -43,7 +46,13 @@ pub fn handle_message(
         }
 
         if let Some(mut ticker) = normalize_coinbase_ticker(&raw) {
-            if config.excludelist.read().unwrap().iter().any(|ex| ticker.base.starts_with(ex)) {
+            if config
+                .excludelist
+                .read()
+                .unwrap()
+                .iter()
+                .any(|ex| ticker.base.starts_with(ex))
+            {
                 return;
             }
             ticker.base = tac.resolve_ticker_base(&ticker.exchange, &ticker.raw_base, &ticker.base);
@@ -58,7 +67,9 @@ pub fn handle_message(
     }
 }
 
-pub async fn subscription_factory(market_cache: Arc<MarketCache>) -> Option<Vec<serde_json::Value>> {
+pub async fn subscription_factory(
+    market_cache: Arc<MarketCache>,
+) -> Option<Vec<serde_json::Value>> {
     let currencies = market_cache.get_coinbase_markets().await;
     if currencies.is_empty() {
         return None;
@@ -79,4 +90,3 @@ pub async fn subscription_factory(market_cache: Arc<MarketCache>) -> Option<Vec<
     }
     Some(msgs)
 }
-

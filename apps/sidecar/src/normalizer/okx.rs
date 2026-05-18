@@ -1,7 +1,4 @@
-use crate::types::{
-    Exchange, NormalizedTicker,
-    parse_decimal, now_micros,
-};
+use crate::types::{now_micros, parse_decimal, Exchange, NormalizedTicker};
 use rust_decimal::prelude::ToPrimitive;
 use serde_json::Value;
 
@@ -52,34 +49,40 @@ pub fn normalize_okx_ticker(raw: &Value) -> Option<NormalizedTicker> {
 
     let c = parse_decimal(d.get("last")?.as_str()?)?;
 
-    let o = d.get("open24h")
+    let o = d
+        .get("open24h")
         .and_then(|v| v.as_str())
         .and_then(parse_decimal)
         .unwrap_or(c);
 
-    let h = d.get("high24h")
+    let h = d
+        .get("high24h")
         .and_then(|v| v.as_str())
         .and_then(parse_decimal)
         .unwrap_or(c);
 
-    let l = d.get("low24h")
+    let l = d
+        .get("low24h")
         .and_then(|v| v.as_str())
         .and_then(parse_decimal)
         .unwrap_or(c);
 
     // vol24h is base-currency volume
-    let v_base = d.get("vol24h")
+    let v_base = d
+        .get("vol24h")
         .and_then(|v| v.as_str())
         .and_then(parse_decimal)
         .unwrap_or_default();
 
     // volCcy24h is quote-currency volume
-    let v_quote = d.get("volCcy24h")
+    let v_quote = d
+        .get("volCcy24h")
         .and_then(|v| v.as_str())
         .and_then(parse_decimal)
         .unwrap_or(v_base * c);
 
-    let timestamp_ms = d.get("ts")
+    let timestamp_ms = d
+        .get("ts")
         .and_then(|v| v.as_str())
         .and_then(|s| s.parse::<i64>().ok())
         .unwrap_or_else(|| chrono::Utc::now().timestamp_millis());

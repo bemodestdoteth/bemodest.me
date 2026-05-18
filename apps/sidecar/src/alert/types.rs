@@ -1,4 +1,4 @@
-pub use crate::types::{Condition as AlertCondition, AlertRule as GeneratedAlertRule};
+pub use crate::types::{AlertRule as GeneratedAlertRule, Condition as AlertCondition};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

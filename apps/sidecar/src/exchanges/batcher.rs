@@ -1,9 +1,9 @@
+use crate::cache::eligibility::EligibilityFilter;
+use crate::cache::lvc::LatestValueCache;
+use serde_json::Value;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::broadcast;
-use serde_json::Value;
-use crate::cache::lvc::LatestValueCache;
-use crate::cache::eligibility::EligibilityFilter;
 
 /// Per-exchange ticker batcher.
 ///

@@ -1,7 +1,7 @@
 use crate::cache::lvc::LatestValueCache;
-use crate::types::{Exchange, now_micros};
-use serde::Serialize;
+use crate::types::{now_micros, Exchange};
 use log::debug;
+use serde::Serialize;
 
 /// Price entry for one exchange
 #[derive(Debug, Clone, Serialize)]
@@ -80,10 +80,7 @@ pub fn compare_pair(lvc: &LatestValueCache, base: &str, quote: &str) -> Option<T
 
     debug!(
         "[Comparison] {}/{}: spread={:?}% high={} low={}",
-        base, quote,
-        spread_pct,
-        highest,
-        lowest
+        base, quote, spread_pct, highest, lowest
     );
 
     Some(TickerComparison {

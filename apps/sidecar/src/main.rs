@@ -1,48 +1,49 @@
 #![allow(dead_code)]
-mod errors;
+mod alert;
+mod api;
 mod auth;
-mod config;
-mod websocket;
-mod exchanges;
-mod types;
-mod normalizer;
 mod cache;
 mod comparison;
-mod api;
+mod config;
+mod errors;
+mod exchanges;
+mod market_summary;
+mod normalizer;
 mod redis_sub;
-mod alert;
+mod types;
+mod websocket;
 
-use crate::config::Config;
-use crate::cache::TokenCache;
-use crate::cache::LatestValueCache;
-use crate::cache::TokenAnnotationCache;
-use crate::cache::ForexCache;
-use crate::cache::MarketCache;
-use crate::cache::PriceHistoryCache;
-use crate::alert::engine::{load_alert_rules, run_history_sampler};
+use crate::alert::engine::load_alert_rules;
 use crate::alert::state::AlertStateStore;
 use crate::alert::types::AlertFiredEvent;
-use log::{info, error, warn};
-use tokio::sync::{broadcast, RwLock};
-use std::sync::Arc;
-use tokio::sync::Mutex;
-use crate::exchanges::ExchangeManager;
+use crate::cache::ForexCache;
+use crate::cache::LatestValueCache;
+use crate::cache::MarketCache;
+use crate::cache::PriceHistoryCache;
+use crate::cache::TokenAnnotationCache;
+use crate::cache::TokenCache;
+use crate::config::Config;
 use crate::exchanges::generic::GenericExchange;
+use crate::exchanges::ExchangeManager;
+use crate::types::now_micros;
+use log::{error, info, warn};
 use redis::AsyncCommands;
+use std::sync::Arc;
 use std::time::Duration;
-
+use tokio::sync::Mutex;
+use tokio::sync::{broadcast, RwLock};
+use tokio::time::interval;
 
 #[tokio::main]
 async fn main() -> crate::errors::Result<()> {
     let mut set = tokio::task::JoinSet::new();
 
-
     // Initialize logger
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
-    
+
     // Load environment variables
     let node_env = std::env::var("NODE_ENV").unwrap_or_else(|_| "dev".to_string());
-    
+
     // Try .env.dev if in dev mode, otherwise fallback to .env
     if node_env == "dev" {
         if let Err(_) = dotenvy::from_filename(".env.dev") {
@@ -51,7 +52,7 @@ async fn main() -> crate::errors::Result<()> {
     } else {
         let _ = dotenvy::dotenv();
     }
-    
+
     if std::env::var("JWT_SECRET").is_err() {
         if node_env == "dev" {
             let _ = dotenvy::from_path("../api/.env.dev");
@@ -61,8 +62,11 @@ async fn main() -> crate::errors::Result<()> {
         }
     }
 
-    info!("Configuration environment initialized (NODE_ENV={})", node_env);
-    
+    info!(
+        "Configuration environment initialized (NODE_ENV={})",
+        node_env
+    );
+
     let config = Arc::new(Config::from_env());
 
     // Pre-declare alert rules Arc so the pubsub task can reload it on alertrules_updated
@@ -72,7 +76,6 @@ async fn main() -> crate::errors::Result<()> {
     // Initialize Exchange Manager
     let manager = ExchangeManager::new();
     let manager = Arc::new(Mutex::new(manager));
-
 
     // Start Redis configuration subscriber for dynamically updating excludelist
     let pubsub_client_res = redis::Client::open(config.redis_url.clone());
@@ -96,7 +99,7 @@ async fn main() -> crate::errors::Result<()> {
                             info!("Updated sidecar excludelist from Redis on startup: {:?}", *write_lock);
                         }
                     }
-                    
+
                     let new_pin_list: redis::RedisResult<Vec<String>> = cmd_conn.smembers("config:pinlist").await;
                     if let Ok(list) = new_pin_list {
                         if !list.is_empty() {
@@ -126,7 +129,7 @@ async fn main() -> crate::errors::Result<()> {
                                 .group("sidecar_group", "consumer-1")
                                 .block(5000)
                                 .count(10);
-                            
+
                             let results: redis::RedisResult<redis::streams::StreamReadReply> =
                                 conn.xread_options(&["sidecar:config"], &[">"], &opts).await;
 
@@ -163,7 +166,7 @@ async fn main() -> crate::errors::Result<()> {
                                                                              }
                                                                          }
                                                                          info!("Updated sidecar pinlist from Redis stream");
-                                                                         
+
                                                                          // Trigger dynamic subscription refresh for all exchanges
                                                                          manager_redis.lock().await.refresh_all_subscriptions().await;
                                                                      }
@@ -216,7 +219,10 @@ async fn main() -> crate::errors::Result<()> {
     // Initialize Token Cache
     let token_cache = TokenCache::new(config.mongo_uri.as_deref()).await;
     let token_cache = Arc::new(token_cache);
-    info!("[Sidecar] Token cache initialized with {} entries", token_cache.entry_count());
+    info!(
+        "[Sidecar] Token cache initialized with {} entries",
+        token_cache.entry_count()
+    );
 
     // Main broadcast channel for ticker data
     let (tx, _) = broadcast::channel(10000);
@@ -231,27 +237,78 @@ async fn main() -> crate::errors::Result<()> {
 
     // Initialize Forex Rate Cache
     let forex_cache = ForexCache::new();
-    ForexCache::start_poller(forex_cache.clone(), tx.clone(), std::time::Duration::from_secs(config.forex_update_interval_sec));
-    info!("[Sidecar] Forex Rate Cache initialized (polling every {}s)", config.forex_update_interval_sec);
+    ForexCache::start_poller(
+        forex_cache.clone(),
+        tx.clone(),
+        std::time::Duration::from_secs(config.forex_update_interval_sec),
+    );
+    info!(
+        "[Sidecar] Forex Rate Cache initialized (polling every {}s)",
+        config.forex_update_interval_sec
+    );
 
     // Initialize Market Cache
     let market_cache = MarketCache::new();
     MarketCache::initial_fetch(&market_cache).await;
+    let (market_refresh_tx, _) = tokio::sync::broadcast::channel::<()>(16);
+
+    {
+        let manager_refresh = manager.clone();
+        let mut market_refresh_rx = market_refresh_tx.subscribe();
+        set.spawn(async move {
+            while market_refresh_rx.recv().await.is_ok() {
+                info!("[Sidecar] local market cache update received; refreshing WebSocket subscriptions");
+                manager_refresh.lock().await.refresh_all_subscriptions().await;
+            }
+        });
+    }
+
     let mc_arc = market_cache.clone();
-    MarketCache::start_poller(mc_arc.clone(), std::time::Duration::from_secs(config.market_cache_update_interval_sec), config.redis_url.clone());
-    info!("[Sidecar] Market Cache initialized (polling every {}s)", config.market_cache_update_interval_sec);
+    MarketCache::start_poller(
+        mc_arc.clone(),
+        std::time::Duration::from_secs(config.market_cache_update_interval_sec),
+        config.redis_url.clone(),
+        Some(market_refresh_tx.clone()),
+    );
+    MarketCache::start_korean_poller(
+        mc_arc.clone(),
+        std::time::Duration::from_secs(config.korean_market_cache_update_interval_sec),
+        config.redis_url.clone(),
+        Some(market_refresh_tx.clone()),
+    );
+    info!(
+        "[Sidecar] Market Cache initialized (polling every {}s; Korean markets every {}s)",
+        config.market_cache_update_interval_sec, config.korean_market_cache_update_interval_sec
+    );
 
     // Alert System wiring
     let history_cache = Arc::new(PriceHistoryCache::new());
-    let lvc_sampler = lvc.clone();
-    let hist_sampler = history_cache.clone();
-    set.spawn(async move {
-        run_history_sampler(lvc_sampler, hist_sampler).await;
-    });
-    info!("[Sidecar] Price history sampler spawned (1 Hz)");
+
+    {
+        let lvc_pruner = lvc.clone();
+        let hist_pruner = history_cache.clone();
+        set.spawn(async move {
+            let mut tick = interval(Duration::from_secs(60));
+            loop {
+                tick.tick().await;
+                let removed_lvc = lvc_pruner.prune_stale();
+                let removed_history = hist_pruner.prune_stale(now_micros() / 1000);
+                if removed_lvc > 0 || removed_history > 0 {
+                    info!(
+                        "[Sidecar] Pruned stale cache entries: lvc={}, history={}",
+                        removed_lvc, removed_history
+                    );
+                }
+            }
+        });
+    }
+    info!("[Sidecar] Cache stale-entry pruner spawned (60s)");
 
     let initial_rules = load_alert_rules(&config).await;
-    info!("[Sidecar] Loaded {} alert rules on startup", initial_rules.len());
+    info!(
+        "[Sidecar] Loaded {} alert rules on startup",
+        initial_rules.len()
+    );
     {
         let mut guard = alert_rules.write().await;
         *guard = initial_rules;
@@ -262,18 +319,18 @@ async fn main() -> crate::errors::Result<()> {
     let (alert_tx, _) = broadcast::channel::<AlertFiredEvent>(1000);
 
     {
-        let lvc_e        = lvc.clone();
-        let hist_e       = history_cache.clone();
-        let rules_e      = alert_rules.clone();
-        let alert_tx_e   = alert_tx.clone();
+        let lvc_e = lvc.clone();
+        let hist_e = history_cache.clone();
+        let rules_e = alert_rules.clone();
+        let alert_tx_e = alert_tx.clone();
         set.spawn(async move {
             crate::alert::engine::run(lvc_e, hist_e, rules_e, alert_state_store, alert_tx_e).await;
         });
     }
-    info!("[Sidecar] Alert engine spawned (500 ms tick)");
+    info!("[Sidecar] Alert engine spawned (1000 ms tick)");
 
     {
-        let rx  = alert_tx.subscribe();
+        let rx = alert_tx.subscribe();
         let cfg = config.clone();
         set.spawn(async move {
             crate::alert::webhook::run(rx, cfg).await;
@@ -281,308 +338,635 @@ async fn main() -> crate::errors::Result<()> {
     }
     info!("[Sidecar] Webhook dispatcher spawned");
 
-    
+    {
+        let lvc_ms = lvc.clone();
+        let tx_ms = tx.clone();
+        set.spawn(async move {
+            crate::market_summary::run(lvc_ms, tx_ms).await;
+        });
+    }
+    info!("[Sidecar] Market summary task spawned (500 ms tick)");
+
     {
         let mut mg = manager.lock().await;
 
         // Register Binance
-        mg.register("binance", Box::new(GenericExchange::new(
-            "binance", crate::exchanges::binance::TICKER_STREAM_URL, tx.clone(), true, lvc.clone(), tac.clone(), config.clone(),
-            Arc::new({
-                let tac=tac.clone(); let cfg=config.clone(); let lvc=lvc.clone();
-                move |t, b| crate::exchanges::binance::handle_message(t, b, &tac, &cfg, &lvc)
-            }), None
-        )));
+        mg.register(
+            "binance",
+            Box::new(GenericExchange::new(
+                "binance",
+                crate::exchanges::binance::TICKER_STREAM_URL,
+                tx.clone(),
+                true,
+                lvc.clone(),
+                tac.clone(),
+                config.clone(),
+                Arc::new({
+                    let tac = tac.clone();
+                    let cfg = config.clone();
+                    let lvc = lvc.clone();
+                    move |t, b| crate::exchanges::binance::handle_message(t, b, &tac, &cfg, &lvc)
+                }),
+                None,
+            )),
+        );
 
         // Register Upbit
-        mg.register("upbit", Box::new(GenericExchange::new(
-            "upbit", crate::exchanges::upbit::TICKER_STREAM_URL, tx.clone(), true, lvc.clone(), tac.clone(), config.clone(),
-            Arc::new({
-                let lvc=lvc.clone(); let tac=tac.clone(); let forex=forex_cache.clone(); let cfg=config.clone();
-                move |t, b| crate::exchanges::upbit::handle_message(t, b, &lvc, &tac, &forex, &cfg)
-            }),
-            Some(Arc::new({
-                let mc = mc_arc.clone();
-                move || Box::pin({
-                    let mc = mc.clone();
-                    async move {
-                        crate::exchanges::upbit::wait_for_market_cache(&mc).await;
-                        crate::exchanges::upbit::subscription_factory(mc).await
-                    }
-                })
-            }))
-        )));
+        mg.register(
+            "upbit",
+            Box::new(
+                GenericExchange::new(
+                    "upbit",
+                    crate::exchanges::upbit::TICKER_STREAM_URL,
+                    tx.clone(),
+                    true,
+                    lvc.clone(),
+                    tac.clone(),
+                    config.clone(),
+                    Arc::new({
+                        let lvc = lvc.clone();
+                        let tac = tac.clone();
+                        let forex = forex_cache.clone();
+                        let cfg = config.clone();
+                        move |t, b| {
+                            crate::exchanges::upbit::handle_message(t, b, &lvc, &tac, &forex, &cfg)
+                        }
+                    }),
+                    Some(Arc::new({
+                        let mc = mc_arc.clone();
+                        move || {
+                            Box::pin({
+                                let mc = mc.clone();
+                                async move {
+                                    crate::exchanges::upbit::wait_for_market_cache(&mc).await;
+                                    crate::exchanges::upbit::subscription_factory(mc).await
+                                }
+                            })
+                        }
+                    })),
+                )
+                .with_reconnect_on_refresh(),
+            ),
+        );
 
         // Register Bithumb
-        mg.register("bithumb", Box::new(GenericExchange::new(
-            "bithumb", crate::exchanges::bithumb::TICKER_STREAM_URL, tx.clone(), true, lvc.clone(), tac.clone(), config.clone(),
-            Arc::new({
-                let lvc=lvc.clone(); let tac=tac.clone(); let forex=forex_cache.clone(); let cfg=config.clone();
-                move |t, b| crate::exchanges::bithumb::handle_message(t, b, &lvc, &tac, &forex, &cfg)
-            }),
-            Some(Arc::new({
-                let mc = mc_arc.clone();
-                move || Box::pin({
-                    let mc = mc.clone();
-                    async move {
-                        crate::exchanges::bithumb::wait_for_market_cache(&mc).await;
-                        crate::exchanges::bithumb::subscription_factory(mc).await
-                    }
-                })
-            }))
-        )));
+        mg.register(
+            "bithumb",
+            Box::new(
+                GenericExchange::new(
+                    "bithumb",
+                    crate::exchanges::bithumb::TICKER_STREAM_URL,
+                    tx.clone(),
+                    true,
+                    lvc.clone(),
+                    tac.clone(),
+                    config.clone(),
+                    Arc::new({
+                        let lvc = lvc.clone();
+                        let tac = tac.clone();
+                        let forex = forex_cache.clone();
+                        let cfg = config.clone();
+                        move |t, b| {
+                            crate::exchanges::bithumb::handle_message(
+                                t, b, &lvc, &tac, &forex, &cfg,
+                            )
+                        }
+                    }),
+                    Some(Arc::new({
+                        let mc = mc_arc.clone();
+                        move || {
+                            Box::pin({
+                                let mc = mc.clone();
+                                async move {
+                                    crate::exchanges::bithumb::wait_for_market_cache(&mc).await;
+                                    crate::exchanges::bithumb::subscription_factory(mc).await
+                                }
+                            })
+                        }
+                    })),
+                )
+                .with_reconnect_on_refresh(),
+            ),
+        );
 
         // Register Binance Futures
-        mg.register("binance_f", Box::new(GenericExchange::new(
-            "binance_f", crate::exchanges::binance_f::TICKER_STREAM_URL, tx.clone(), true, lvc.clone(), tac.clone(), config.clone(),
-            Arc::new({
-                let tac=tac.clone(); let cfg=config.clone(); let lvc=lvc.clone();
-                move |t, b| crate::exchanges::binance_f::handle_message(t, b, &tac, &cfg, &lvc)
-            }), None
-        )));
+        mg.register(
+            "binance_f",
+            Box::new(GenericExchange::new(
+                "binance_f",
+                crate::exchanges::binance_f::TICKER_STREAM_URL,
+                tx.clone(),
+                true,
+                lvc.clone(),
+                tac.clone(),
+                config.clone(),
+                Arc::new({
+                    let tac = tac.clone();
+                    let cfg = config.clone();
+                    let lvc = lvc.clone();
+                    move |t, b| crate::exchanges::binance_f::handle_message(t, b, &tac, &cfg, &lvc)
+                }),
+                None,
+            )),
+        );
 
         // Register Bybit Spot
-        mg.register("bybit", Box::new(GenericExchange::new(
-            "bybit", crate::exchanges::bybit::TICKER_STREAM_URL, tx.clone(), true, lvc.clone(), tac.clone(), config.clone(),
-            Arc::new({
-                let tac=tac.clone(); let cfg=config.clone(); let lvc=lvc.clone();
-                move |t, b| crate::exchanges::bybit::handle_message(t, b, &tac, &cfg, &lvc)
-            }),
-            Some(Arc::new({
-                let mc = mc_arc.clone();
-                move || Box::pin({
-                    let mc = mc.clone();
-                    async move {
-                        crate::exchanges::bybit::wait_for_market_cache(&mc).await;
-                        crate::exchanges::bybit::subscription_factory(mc).await
+        mg.register(
+            "bybit",
+            Box::new(GenericExchange::new(
+                "bybit",
+                crate::exchanges::bybit::TICKER_STREAM_URL,
+                tx.clone(),
+                true,
+                lvc.clone(),
+                tac.clone(),
+                config.clone(),
+                Arc::new({
+                    let tac = tac.clone();
+                    let cfg = config.clone();
+                    let lvc = lvc.clone();
+                    move |t, b| crate::exchanges::bybit::handle_message(t, b, &tac, &cfg, &lvc)
+                }),
+                Some(Arc::new({
+                    let mc = mc_arc.clone();
+                    move || {
+                        Box::pin({
+                            let mc = mc.clone();
+                            async move {
+                                crate::exchanges::bybit::wait_for_market_cache(&mc).await;
+                                crate::exchanges::bybit::subscription_factory(mc).await
+                            }
+                        })
                     }
-                })
-            }))
-        )));
+                })),
+            )),
+        );
 
         // Register Bybit Futures
-        mg.register("bybit_f", Box::new(GenericExchange::new(
-            "bybit_f", crate::exchanges::bybit_f::FUTURES_STREAM_URL, tx.clone(), true, lvc.clone(), tac.clone(), config.clone(),
-            Arc::new({
-                let tac=tac.clone(); let cfg=config.clone(); let lvc=lvc.clone();
-                move |t, b| crate::exchanges::bybit_f::handle_message(t, b, &tac, &cfg, &lvc)
-            }),
-            Some(Arc::new({
-                let mc = mc_arc.clone();
-                move || Box::pin({
-                    let mc = mc.clone();
-                    async move {
-                        crate::exchanges::bybit_f::wait_for_market_cache(&mc).await;
-                        crate::exchanges::bybit_f::subscription_factory(mc).await
+        mg.register(
+            "bybit_f",
+            Box::new(GenericExchange::new(
+                "bybit_f",
+                crate::exchanges::bybit_f::FUTURES_STREAM_URL,
+                tx.clone(),
+                true,
+                lvc.clone(),
+                tac.clone(),
+                config.clone(),
+                Arc::new({
+                    let tac = tac.clone();
+                    let cfg = config.clone();
+                    let lvc = lvc.clone();
+                    move |t, b| crate::exchanges::bybit_f::handle_message(t, b, &tac, &cfg, &lvc)
+                }),
+                Some(Arc::new({
+                    let mc = mc_arc.clone();
+                    move || {
+                        Box::pin({
+                            let mc = mc.clone();
+                            async move {
+                                crate::exchanges::bybit_f::wait_for_market_cache(&mc).await;
+                                crate::exchanges::bybit_f::subscription_factory(mc).await
+                            }
+                        })
                     }
-                })
-            }))
-        )));
+                })),
+            )),
+        );
 
-        mg.register("gateio", Box::new(GenericExchange::new(
-            "gateio", crate::exchanges::gateio::TICKER_STREAM_URL, tx.clone(), true, lvc.clone(), tac.clone(), config.clone(),
-            Arc::new({
-                let tac=tac.clone(); let cfg=config.clone(); let lvc=lvc.clone();
-                move |t, b| crate::exchanges::gateio::handle_message(t, b, &tac, &cfg, &lvc)
-            }),
-            Some(Arc::new({
-                let mc = mc_arc.clone();
-                move || Box::pin({
-                    let mc = mc.clone();
-                    async move {
-                        crate::exchanges::gateio::wait_for_market_cache(&mc).await;
-                        crate::exchanges::gateio::subscription_factory(mc).await
-                    }
-                })
-            }))
-        ).with_ping_factory(Arc::new(crate::exchanges::gateio::ping_factory))));
+        mg.register(
+            "gateio",
+            Box::new(
+                GenericExchange::new(
+                    "gateio",
+                    crate::exchanges::gateio::TICKER_STREAM_URL,
+                    tx.clone(),
+                    true,
+                    lvc.clone(),
+                    tac.clone(),
+                    config.clone(),
+                    Arc::new({
+                        let tac = tac.clone();
+                        let cfg = config.clone();
+                        let lvc = lvc.clone();
+                        move |t, b| crate::exchanges::gateio::handle_message(t, b, &tac, &cfg, &lvc)
+                    }),
+                    Some(Arc::new({
+                        let mc = mc_arc.clone();
+                        move || {
+                            Box::pin({
+                                let mc = mc.clone();
+                                async move {
+                                    crate::exchanges::gateio::wait_for_market_cache(&mc).await;
+                                    crate::exchanges::gateio::subscription_factory(mc).await
+                                }
+                            })
+                        }
+                    })),
+                )
+                .with_ping_factory(Arc::new(crate::exchanges::gateio::ping_factory)),
+            ),
+        );
 
         // Register Bitget Spot
-        mg.register("bitget", Box::new(GenericExchange::new(
-            "bitget", crate::exchanges::bitget::TICKER_STREAM_URL, tx.clone(), true, lvc.clone(), tac.clone(), config.clone(),
-            Arc::new({
-                let tac=tac.clone(); let cfg=config.clone(); let lvc=lvc.clone();
-                move |t, b| crate::exchanges::bitget::handle_message(t, b, &tac, &cfg, &lvc)
-            }),
-            Some(Arc::new({
-                let mc = mc_arc.clone();
-                move || Box::pin({
-                    let mc = mc.clone();
-                    async move {
-                        crate::exchanges::bitget::wait_for_market_cache(&mc).await;
-                        crate::exchanges::bitget::subscription_factory(mc).await
+        mg.register(
+            "bitget",
+            Box::new(GenericExchange::new(
+                "bitget",
+                crate::exchanges::bitget::TICKER_STREAM_URL,
+                tx.clone(),
+                true,
+                lvc.clone(),
+                tac.clone(),
+                config.clone(),
+                Arc::new({
+                    let tac = tac.clone();
+                    let cfg = config.clone();
+                    let lvc = lvc.clone();
+                    move |t, b| crate::exchanges::bitget::handle_message(t, b, &tac, &cfg, &lvc)
+                }),
+                Some(Arc::new({
+                    let mc = mc_arc.clone();
+                    move || {
+                        Box::pin({
+                            let mc = mc.clone();
+                            async move {
+                                crate::exchanges::bitget::wait_for_market_cache(&mc).await;
+                                crate::exchanges::bitget::subscription_factory(mc).await
+                            }
+                        })
                     }
-                })
-            }))
-        )));
+                })),
+            )),
+        );
 
         // Register Bitget Futures
-        mg.register("bitget_f", Box::new(GenericExchange::new(
-            "bitget_f", crate::exchanges::bitget_f::TICKER_STREAM_URL, tx.clone(), true, lvc.clone(), tac.clone(), config.clone(),
-            Arc::new({
-                let tac=tac.clone(); let cfg=config.clone(); let lvc=lvc.clone();
-                move |t, b| crate::exchanges::bitget_f::handle_message(t, b, &tac, &cfg, &lvc)
-            }),
-            Some(Arc::new({
-                let mc = mc_arc.clone();
-                move || Box::pin({
-                    let mc = mc.clone();
-                    async move {
-                        crate::exchanges::bitget_f::wait_for_market_cache(&mc).await;
-                        crate::exchanges::bitget_f::subscription_factory(mc).await
+        mg.register(
+            "bitget_f",
+            Box::new(GenericExchange::new(
+                "bitget_f",
+                crate::exchanges::bitget_f::TICKER_STREAM_URL,
+                tx.clone(),
+                true,
+                lvc.clone(),
+                tac.clone(),
+                config.clone(),
+                Arc::new({
+                    let tac = tac.clone();
+                    let cfg = config.clone();
+                    let lvc = lvc.clone();
+                    move |t, b| crate::exchanges::bitget_f::handle_message(t, b, &tac, &cfg, &lvc)
+                }),
+                Some(Arc::new({
+                    let mc = mc_arc.clone();
+                    move || {
+                        Box::pin({
+                            let mc = mc.clone();
+                            async move {
+                                crate::exchanges::bitget_f::wait_for_market_cache(&mc).await;
+                                crate::exchanges::bitget_f::subscription_factory(mc).await
+                            }
+                        })
                     }
-                })
-            }))
-        )));
+                })),
+            )),
+        );
+
+        // Register Hyperliquid Futures
+        mg.register(
+            "hyperliquid_f",
+            Box::new(GenericExchange::new(
+                "hyperliquid_f",
+                crate::exchanges::hyperliquid_f::WS_URL,
+                tx.clone(),
+                true,
+                lvc.clone(),
+                tac.clone(),
+                config.clone(),
+                Arc::new({
+                    let tac = tac.clone();
+                    let cfg = config.clone();
+                    let lvc = lvc.clone();
+                    move |t, b| {
+                        crate::exchanges::hyperliquid_f::handle_message(t, b, &tac, &cfg, &lvc)
+                    }
+                }),
+                Some(Arc::new({
+                    let mc = mc_arc.clone();
+                    move || {
+                        Box::pin({
+                            let mc = mc.clone();
+                            async move {
+                                crate::exchanges::hyperliquid_f::wait_for_market_cache(&mc).await;
+                                crate::exchanges::hyperliquid_f::subscription_factory(mc).await
+                            }
+                        })
+                    }
+                })),
+            )),
+        );
 
         // Register Coinbase
-        mg.register("coinbase", Box::new(GenericExchange::new(
-            "coinbase", crate::exchanges::coinbase::TICKER_STREAM_URL, tx.clone(), true, lvc.clone(), tac.clone(), config.clone(),
-            Arc::new({
-                let tac=tac.clone(); let cfg=config.clone(); let lvc=lvc.clone();
-                move |t, b| crate::exchanges::coinbase::handle_message(t, b, &tac, &cfg, &lvc)
-            }),
-            Some(Arc::new({
-                let mc = mc_arc.clone();
-                move || Box::pin({
-                    let mc = mc.clone();
-                    async move {
-                        crate::exchanges::coinbase::wait_for_market_cache(&mc).await;
-                        crate::exchanges::coinbase::subscription_factory(mc).await
+        mg.register(
+            "coinbase",
+            Box::new(GenericExchange::new(
+                "coinbase",
+                crate::exchanges::coinbase::TICKER_STREAM_URL,
+                tx.clone(),
+                true,
+                lvc.clone(),
+                tac.clone(),
+                config.clone(),
+                Arc::new({
+                    let tac = tac.clone();
+                    let cfg = config.clone();
+                    let lvc = lvc.clone();
+                    move |t, b| crate::exchanges::coinbase::handle_message(t, b, &tac, &cfg, &lvc)
+                }),
+                Some(Arc::new({
+                    let mc = mc_arc.clone();
+                    move || {
+                        Box::pin({
+                            let mc = mc.clone();
+                            async move {
+                                crate::exchanges::coinbase::wait_for_market_cache(&mc).await;
+                                crate::exchanges::coinbase::subscription_factory(mc).await
+                            }
+                        })
                     }
-                })
-            }))
-        )));
+                })),
+            )),
+        );
 
         // Register Kraken
-        mg.register("kraken", Box::new(GenericExchange::new(
-            "kraken", crate::exchanges::kraken::TICKER_STREAM_URL, tx.clone(), true, lvc.clone(), tac.clone(), config.clone(),
-            Arc::new({
-                let tac=tac.clone(); let cfg=config.clone(); let lvc=lvc.clone();
-                move |t, b| crate::exchanges::kraken::handle_message(t, b, &tac, &cfg, &lvc)
-            }),
-            Some(Arc::new({
-                let mc = mc_arc.clone();
-                move || Box::pin({
-                    let mc = mc.clone();
-                    async move {
-                        crate::exchanges::kraken::wait_for_market_cache(&mc).await;
-                        crate::exchanges::kraken::subscription_factory(mc).await
+        mg.register(
+            "kraken",
+            Box::new(GenericExchange::new(
+                "kraken",
+                crate::exchanges::kraken::TICKER_STREAM_URL,
+                tx.clone(),
+                true,
+                lvc.clone(),
+                tac.clone(),
+                config.clone(),
+                Arc::new({
+                    let tac = tac.clone();
+                    let cfg = config.clone();
+                    let lvc = lvc.clone();
+                    move |t, b| crate::exchanges::kraken::handle_message(t, b, &tac, &cfg, &lvc)
+                }),
+                Some(Arc::new({
+                    let mc = mc_arc.clone();
+                    move || {
+                        Box::pin({
+                            let mc = mc.clone();
+                            async move {
+                                crate::exchanges::kraken::wait_for_market_cache(&mc).await;
+                                crate::exchanges::kraken::subscription_factory(mc).await
+                            }
+                        })
                     }
-                })
-            }))
-        )));
+                })),
+            )),
+        );
 
         // Register Kucoin (Sharded)
-        let (kc_tx, kc_lvc, kc_tac, kc_cfg, kc_mc) = (tx.clone(), lvc.clone(), tac.clone(), config.clone(), mc_arc.clone());
+        let (kc_tx, kc_lvc, kc_tac, kc_cfg, kc_mc) = (
+            tx.clone(),
+            lvc.clone(),
+            tac.clone(),
+            config.clone(),
+            mc_arc.clone(),
+        );
         let kc_manager = manager.clone();
         tokio::spawn(async move {
             let symbols = crate::exchanges::kucoin::wait_for_market_cache(&kc_mc).await;
-            for (shard_idx, chunk) in symbols.chunks(crate::exchanges::kucoin::MAX_SYMBOLS_PER_CONN).enumerate() {
+            for (shard_idx, chunk) in symbols
+                .chunks(crate::exchanges::kucoin::MAX_SYMBOLS_PER_CONN)
+                .enumerate()
+            {
                 let shard_name = format!("kucoin_shard_{}", shard_idx);
-                let (s_tx, s_lvc, s_tac, s_cfg, s_chunk) = (kc_tx.clone(), kc_lvc.clone(), kc_tac.clone(), kc_cfg.clone(), chunk.to_vec());
-                let exchange = Box::new(GenericExchange::new(
-                    &shard_name, "", s_tx.clone(), true, s_lvc.clone(), s_tac.clone(), s_cfg.clone(),
-                    Arc::new({
-                        let s_tac=s_tac.clone(); let s_cfg=s_cfg.clone(); let s_lvc=s_lvc.clone();
-                        move |t, b| crate::exchanges::kucoin::handle_message(t, b, &s_tac, &s_cfg, &s_lvc)
-                    }),
-                    Some(Arc::new({
-                        let inner_chunk = s_chunk.clone();
-                        move || Box::pin({
-                            let chunk = inner_chunk.clone();
-                            async move { crate::exchanges::kucoin::subscription_factory(chunk).await }
+                let (s_tx, s_lvc, s_tac, s_cfg, s_chunk) = (
+                    kc_tx.clone(),
+                    kc_lvc.clone(),
+                    kc_tac.clone(),
+                    kc_cfg.clone(),
+                    chunk.to_vec(),
+                );
+                let exchange = Box::new(
+                    GenericExchange::new(
+                        &shard_name,
+                        "",
+                        s_tx.clone(),
+                        true,
+                        s_lvc.clone(),
+                        s_tac.clone(),
+                        s_cfg.clone(),
+                        Arc::new({
+                            let s_tac = s_tac.clone();
+                            let s_cfg = s_cfg.clone();
+                            let s_lvc = s_lvc.clone();
+                            move |t, b| {
+                                crate::exchanges::kucoin::handle_message(
+                                    t, b, &s_tac, &s_cfg, &s_lvc,
+                                )
+                            }
+                        }),
+                        Some(Arc::new({
+                            let inner_chunk = s_chunk.clone();
+                            move || {
+                                Box::pin({
+                                    let chunk = inner_chunk.clone();
+                                    async move {
+                                        crate::exchanges::kucoin::subscription_factory(chunk).await
+                                    }
+                                })
+                            }
+                        })),
+                    )
+                    .with_url_factory(Arc::new(|| {
+                        Box::pin(async move {
+                            crate::exchanges::kucoin::get_ws_token()
+                                .await
+                                .map(|(e, t, _)| {
+                                    let cid = uuid::Uuid::new_v4().to_string().replace('-', "");
+                                    format!("{}?token={}&connectId={}", e, t, cid)
+                                })
                         })
                     }))
-                ).with_url_factory(Arc::new(|| {
-                    Box::pin(async move {
-                        crate::exchanges::kucoin::get_ws_token().await.map(|(e, t, _)| {
-                            let cid = uuid::Uuid::new_v4().to_string().replace('-', "");
-                            format!("{}?token={}&connectId={}", e, t, cid)
-                        })
-                    })
-                })).with_ping_factory(Arc::new(crate::exchanges::kucoin::ping_factory))
-                .with_ping_interval(Duration::from_millis(crate::exchanges::kucoin::DEFAULT_PING_INTERVAL_MS)));
-                
+                    .with_ping_factory(Arc::new(crate::exchanges::kucoin::ping_factory))
+                    .with_ping_interval(Duration::from_millis(
+                        crate::exchanges::kucoin::DEFAULT_PING_INTERVAL_MS,
+                    )),
+                );
+
                 kc_manager.lock().await.register(&shard_name, exchange);
                 let _ = kc_manager.lock().await.ensure_connected(&shard_name).await;
             }
         });
 
         // Register OKX (Sharded)
-        let (ok_tx, ok_lvc, ok_tac, ok_cfg, ok_mc) = (tx.clone(), lvc.clone(), tac.clone(), config.clone(), mc_arc.clone());
+        let (ok_tx, ok_lvc, ok_tac, ok_cfg, ok_mc) = (
+            tx.clone(),
+            lvc.clone(),
+            tac.clone(),
+            config.clone(),
+            mc_arc.clone(),
+        );
         let ok_manager = manager.clone();
         tokio::spawn(async move {
             let symbols = crate::exchanges::okx::wait_for_market_cache(&ok_mc).await;
-            for (shard_idx, chunk) in symbols.chunks(crate::exchanges::okx::MAX_SYMBOLS_PER_CONN).enumerate() {
+            for (shard_idx, chunk) in symbols
+                .chunks(crate::exchanges::okx::MAX_SYMBOLS_PER_CONN)
+                .enumerate()
+            {
                 let shard_name = format!("okx_shard_{}", shard_idx);
-                let (s_tx, s_lvc, s_tac, s_cfg, s_chunk) = (ok_tx.clone(), ok_lvc.clone(), ok_tac.clone(), ok_cfg.clone(), chunk.to_vec());
-                let exchange = Box::new(GenericExchange::new(
-                    &shard_name, crate::exchanges::okx::WS_URL, s_tx.clone(), true, s_lvc.clone(), s_tac.clone(), s_cfg.clone(),
-                    Arc::new({
-                        let s_tac=s_tac.clone(); let s_cfg=s_cfg.clone(); let s_lvc=s_lvc.clone();
-                        move |t, b| crate::exchanges::okx::handle_message(t, b, &s_tac, &s_cfg, &s_lvc)
-                    }),
-                    Some(Arc::new({
-                        let inner_chunk = s_chunk.clone();
-                        move || Box::pin({
-                            let chunk = inner_chunk.clone();
-                            async move { crate::exchanges::okx::subscription_factory(chunk, shard_idx).await }
-                        })
-                    }))
-                ).with_ping_interval(Duration::from_secs(crate::exchanges::okx::PING_INTERVAL_SECS))
-                .with_ping_text("ping".to_string()));
-                
+                let (s_tx, s_lvc, s_tac, s_cfg, s_chunk) = (
+                    ok_tx.clone(),
+                    ok_lvc.clone(),
+                    ok_tac.clone(),
+                    ok_cfg.clone(),
+                    chunk.to_vec(),
+                );
+                let exchange = Box::new(
+                    GenericExchange::new(
+                        &shard_name,
+                        crate::exchanges::okx::WS_URL,
+                        s_tx.clone(),
+                        true,
+                        s_lvc.clone(),
+                        s_tac.clone(),
+                        s_cfg.clone(),
+                        Arc::new({
+                            let s_tac = s_tac.clone();
+                            let s_cfg = s_cfg.clone();
+                            let s_lvc = s_lvc.clone();
+                            move |t, b| {
+                                crate::exchanges::okx::handle_message(t, b, &s_tac, &s_cfg, &s_lvc)
+                            }
+                        }),
+                        Some(Arc::new({
+                            let inner_chunk = s_chunk.clone();
+                            move || {
+                                Box::pin({
+                                    let chunk = inner_chunk.clone();
+                                    async move {
+                                        crate::exchanges::okx::subscription_factory(
+                                            chunk, shard_idx,
+                                        )
+                                        .await
+                                    }
+                                })
+                            }
+                        })),
+                    )
+                    .with_ping_interval(Duration::from_secs(
+                        crate::exchanges::okx::PING_INTERVAL_SECS,
+                    ))
+                    .with_ping_text("ping".to_string()),
+                );
+
                 ok_manager.lock().await.register(&shard_name, exchange);
                 let _ = ok_manager.lock().await.ensure_connected(&shard_name).await;
             }
         });
 
         // Register OKX Futures (Sharded)
-        let (okf_tx, okf_lvc, okf_tac, okf_cfg, okf_mc) = (tx.clone(), lvc.clone(), tac.clone(), config.clone(), mc_arc.clone());
+        let (okf_tx, okf_lvc, okf_tac, okf_cfg, okf_mc) = (
+            tx.clone(),
+            lvc.clone(),
+            tac.clone(),
+            config.clone(),
+            mc_arc.clone(),
+        );
         let okf_manager = manager.clone();
         tokio::spawn(async move {
             let symbols = crate::exchanges::okx_f::wait_for_market_cache(&okf_mc).await;
-            for (shard_idx, chunk) in symbols.chunks(crate::exchanges::okx_f::MAX_SYMBOLS_PER_CONN).enumerate() {
+            for (shard_idx, chunk) in symbols
+                .chunks(crate::exchanges::okx_f::MAX_SYMBOLS_PER_CONN)
+                .enumerate()
+            {
                 let shard_name = format!("okx_f_shard_{}", shard_idx);
-                let (s_tx, s_lvc, s_tac, s_cfg, s_chunk) = (okf_tx.clone(), okf_lvc.clone(), okf_tac.clone(), okf_cfg.clone(), chunk.to_vec());
-                let exchange = Box::new(GenericExchange::new(
-                    &shard_name, crate::exchanges::okx_f::WS_URL, s_tx.clone(), true, s_lvc.clone(), s_tac.clone(), s_cfg.clone(),
-                    Arc::new({
-                        let s_tac=s_tac.clone(); let s_cfg=s_cfg.clone(); let s_lvc=s_lvc.clone();
-                        move |t, b| crate::exchanges::okx_f::handle_message(t, b, &s_tac, &s_cfg, &s_lvc)
-                    }),
-                    Some(Arc::new({
-                        let inner_chunk = s_chunk.clone();
-                        move || Box::pin({
-                            let chunk = inner_chunk.clone();
-                            async move { crate::exchanges::okx_f::subscription_factory(chunk, shard_idx).await }
-                        })
-                    }))
-                ).with_ping_interval(Duration::from_secs(crate::exchanges::okx_f::PING_INTERVAL_SECS))
-                .with_ping_text("ping".to_string()));
-                
+                let (s_tx, s_lvc, s_tac, s_cfg, s_chunk) = (
+                    okf_tx.clone(),
+                    okf_lvc.clone(),
+                    okf_tac.clone(),
+                    okf_cfg.clone(),
+                    chunk.to_vec(),
+                );
+                let exchange = Box::new(
+                    GenericExchange::new(
+                        &shard_name,
+                        crate::exchanges::okx_f::WS_URL,
+                        s_tx.clone(),
+                        true,
+                        s_lvc.clone(),
+                        s_tac.clone(),
+                        s_cfg.clone(),
+                        Arc::new({
+                            let s_tac = s_tac.clone();
+                            let s_cfg = s_cfg.clone();
+                            let s_lvc = s_lvc.clone();
+                            move |t, b| {
+                                crate::exchanges::okx_f::handle_message(
+                                    t, b, &s_tac, &s_cfg, &s_lvc,
+                                )
+                            }
+                        }),
+                        Some(Arc::new({
+                            let inner_chunk = s_chunk.clone();
+                            move || {
+                                Box::pin({
+                                    let chunk = inner_chunk.clone();
+                                    async move {
+                                        crate::exchanges::okx_f::subscription_factory(
+                                            chunk, shard_idx,
+                                        )
+                                        .await
+                                    }
+                                })
+                            }
+                        })),
+                    )
+                    .with_ping_interval(Duration::from_secs(
+                        crate::exchanges::okx_f::PING_INTERVAL_SECS,
+                    ))
+                    .with_ping_text("ping".to_string()),
+                );
+
                 okf_manager.lock().await.register(&shard_name, exchange);
                 let _ = okf_manager.lock().await.ensure_connected(&shard_name).await;
             }
         });
 
         // Register Geckoterminal
-        mg.register("geckoterminal", Box::new(crate::exchanges::geckoterminal::GeckoterminalExchange::new(tx.clone(), lvc.clone(), tac.clone(), config.clone())));
+        mg.register(
+            "geckoterminal",
+            Box::new(crate::exchanges::geckoterminal::GeckoterminalExchange::new(
+                tx.clone(),
+                lvc.clone(),
+                tac.clone(),
+                config.clone(),
+            )),
+        );
 
         let _ = mg.ensure_connected("binance").await;
     }
 
-    
     // Start DEX Redis subscriber (forwards dex_prices channel into broadcast tx)
     let dex_tx = tx.clone();
     let dex_redis_url = config.redis_url.clone();
     let dex_channel = config.dex_redis_channel.clone();
     let dex_lvc = lvc.clone();
-    let dex_filter = crate::cache::EligibilityFilter::new(config.filter_min_sources, config.filter_min_spread_pct, config.pinlist.clone());
+    let dex_filter = crate::cache::EligibilityFilter::new(
+        config.filter_min_sources,
+        config.filter_min_spread_pct,
+        config.pinlist.clone(),
+    );
 
     set.spawn(async move {
-        redis_sub::run_dex_subscriber(dex_redis_url, dex_channel, dex_tx, dex_lvc, dex_filter).await;
+        redis_sub::run_dex_subscriber(dex_redis_url, dex_channel, dex_tx, dex_lvc, dex_filter)
+            .await;
     });
     info!("[Sidecar] DEX Redis subscriber task spawned");
 
@@ -590,9 +974,16 @@ async fn main() -> crate::errors::Result<()> {
     let ws_tx = tx.clone();
     let ws_manager = manager.clone();
     set.spawn(async move {
-        websocket::run_server(config.port, config.jwt_secret.clone(), ws_tx, ws_manager, lvc).await;
+        websocket::run_server(
+            config.port,
+            config.jwt_secret.clone(),
+            ws_tx,
+            ws_manager,
+            lvc,
+        )
+        .await;
     });
-    
+
     // Start Shard Status Monitor task
     // It listens for shard-level "status" messages and broadcasts aggregated "shard_status"
     let monitor_mgr = manager.clone();
@@ -608,7 +999,8 @@ async fn main() -> crate::errors::Result<()> {
                                 if source.contains("_shard_") {
                                     let base_name = source.split("_shard_").next().unwrap();
                                     let mgr = monitor_mgr.lock().await;
-                                    if let Some((connected, total)) = mgr.get_shard_stats(base_name) {
+                                    if let Some((connected, total)) = mgr.get_shard_stats(base_name)
+                                    {
                                         let shard_status = serde_json::json!({
                                             "type": "shard_status",
                                             "source": base_name,
@@ -648,6 +1040,6 @@ async fn main() -> crate::errors::Result<()> {
         }
         std::process::exit(1);
     }
-    
+
     Ok(())
 }

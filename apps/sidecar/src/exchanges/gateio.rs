@@ -1,13 +1,13 @@
-use tokio::time::{sleep, Duration};
-use serde_json::Value;
-use log::{info, warn};
-use std::sync::Arc;
-use crate::normalizer::gateio::normalize_gateio_ticker;
 use crate::cache::lvc::LatestValueCache;
-use crate::cache::TokenAnnotationCache;
 use crate::cache::MarketCache;
-use crate::exchanges::batcher::TickerBatcher;
+use crate::cache::TokenAnnotationCache;
 use crate::config::Config;
+use crate::exchanges::batcher::TickerBatcher;
+use crate::normalizer::gateio::normalize_gateio_ticker;
+use log::{info, warn};
+use serde_json::Value;
+use std::sync::Arc;
+use tokio::time::{sleep, Duration};
 
 pub const TICKER_STREAM_URL: &str = "wss://api.gateio.ws/ws/v4/";
 const SUBSCRIBE_BATCH_SIZE: usize = 100;
@@ -17,7 +17,10 @@ pub async fn wait_for_market_cache(market_cache: &Arc<MarketCache>) {
     loop {
         let markets = market_cache.get_gateio_markets().await;
         if !markets.is_empty() {
-            info!("[GateioExchange] Market cache ready with {} currencies", markets.len());
+            info!(
+                "[GateioExchange] Market cache ready with {} currencies",
+                markets.len()
+            );
             break;
         }
         if waited >= 30_000 {
@@ -40,13 +43,20 @@ pub fn handle_message(
         if raw.get("channel").and_then(|v| v.as_str()) == Some("spot.ping") {
             return;
         }
-        if raw.get("channel").and_then(|v| v.as_str()) != Some("spot.tickers") 
-            || raw.get("event").and_then(|v| v.as_str()) != Some("update") {
+        if raw.get("channel").and_then(|v| v.as_str()) != Some("spot.tickers")
+            || raw.get("event").and_then(|v| v.as_str()) != Some("update")
+        {
             return;
         }
 
         if let Some(mut ticker) = normalize_gateio_ticker(&raw) {
-            if config.excludelist.read().unwrap().iter().any(|ex| ticker.base.starts_with(ex)) {
+            if config
+                .excludelist
+                .read()
+                .unwrap()
+                .iter()
+                .any(|ex| ticker.base.starts_with(ex))
+            {
                 return;
             }
             ticker.base = tac.resolve_ticker_base(&ticker.exchange, &ticker.raw_base, &ticker.base);
@@ -61,15 +71,20 @@ pub fn handle_message(
     }
 }
 
-pub async fn subscription_factory(market_cache: Arc<MarketCache>) -> Option<Vec<serde_json::Value>> {
+pub async fn subscription_factory(
+    market_cache: Arc<MarketCache>,
+) -> Option<Vec<serde_json::Value>> {
     let symbols = market_cache.get_gateio_markets().await;
     if symbols.is_empty() {
         return None;
     }
-    
+
     let mut msgs = Vec::new();
     for chunk in symbols.chunks(SUBSCRIBE_BATCH_SIZE) {
-        let time = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
+        let time = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
         msgs.push(serde_json::json!({
             "time": time,
             "channel": "spot.tickers",
@@ -81,10 +96,12 @@ pub async fn subscription_factory(market_cache: Arc<MarketCache>) -> Option<Vec<
 }
 
 pub fn ping_factory() -> Option<serde_json::Value> {
-    let time = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
+    let time = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
     Some(serde_json::json!({
         "time": time,
         "channel": "spot.ping"
     }))
 }
-

@@ -3,6 +3,18 @@
   "version": "0.1.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./server": {
+      "require": "./dist/server.js",
+      "import": "./dist/server.js",
+      "types": "./dist/server.d.ts"
+    }
+  },
   "scripts": {
     "build": "tsc",
     "dev": "NODE_OPTIONS='--max-old-space-size=512' tsc --watch"

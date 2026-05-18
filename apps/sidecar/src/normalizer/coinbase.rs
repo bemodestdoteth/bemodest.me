@@ -1,9 +1,6 @@
-use crate::types::{
-    Exchange, NormalizedTicker,
-    parse_decimal, now_micros,
-};
-use serde_json::Value;
+use crate::types::{now_micros, parse_decimal, Exchange, NormalizedTicker};
 use rust_decimal::prelude::ToPrimitive;
+use serde_json::Value;
 
 /// Normalize a single Coinbase Exchange WebSocket ticker message into [`NormalizedTicker`].
 ///

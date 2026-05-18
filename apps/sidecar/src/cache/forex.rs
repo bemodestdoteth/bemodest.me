@@ -1,8 +1,8 @@
+use log::{info, warn};
+use serde::Deserialize;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
-use log::{info, warn};
-use serde::Deserialize;
 
 /// Atomic f64 wrapper (serialized as IEEE-754 bits)
 #[derive(Default)]
@@ -86,12 +86,17 @@ impl ForexCache {
     }
 
     fn set_bithumb_usdt_krw(&self, rate: f64) {
-        self.bithumb_usdt_krw.store(rate.to_bits(), Ordering::Relaxed);
+        self.bithumb_usdt_krw
+            .store(rate.to_bits(), Ordering::Relaxed);
     }
 
     /// Spawn a background task that refreshes the rate every `interval`.
     /// Reads the URL from the `UPBIT_FOREX_URL` environment variable.
-    pub fn start_poller(cache: Arc<Self>, tx: tokio::sync::broadcast::Sender<String>, interval: Duration) {
+    pub fn start_poller(
+        cache: Arc<Self>,
+        tx: tokio::sync::broadcast::Sender<String>,
+        interval: Duration,
+    ) {
         let url = match std::env::var("UPBIT_FOREX_URL") {
             Ok(u) => u,
             Err(_) => {
@@ -135,16 +140,26 @@ impl ForexCache {
                         if let Ok(json) = resp.json::<serde_json::Value>().await {
                             if let Some(tickers) = json.as_array() {
                                 for ticker in tickers {
-                                    if let Some(market) = ticker.get("market").and_then(|v| v.as_str()) {
-                                        if let Some(price) = ticker.get("trade_price").and_then(|v| v.as_f64()) {
+                                    if let Some(market) =
+                                        ticker.get("market").and_then(|v| v.as_str())
+                                    {
+                                        if let Some(price) =
+                                            ticker.get("trade_price").and_then(|v| v.as_f64())
+                                        {
                                             if market == "KRW-BTC" {
                                                 cache.set_btc_krw(price);
                                                 btc_krw = Some(price);
-                                                info!("[ForexCache] BTC/KRW price updated: {}", price);
+                                                info!(
+                                                    "[ForexCache] BTC/KRW price updated: {}",
+                                                    price
+                                                );
                                             } else if market == "KRW-USDT" {
                                                 cache.set_upbit_usdt_krw(price);
                                                 upbit_usdt_krw = Some(price);
-                                                info!("[ForexCache] Upbit USDT/KRW price updated: {}", price);
+                                                info!(
+                                                    "[ForexCache] Upbit USDT/KRW price updated: {}",
+                                                    price
+                                                );
                                             }
                                         }
                                     }
@@ -160,11 +175,16 @@ impl ForexCache {
                     Ok(resp) => {
                         if let Ok(json) = resp.json::<serde_json::Value>().await {
                             if let Some(data) = json.get("data") {
-                                if let Some(price_str) = data.get("closing_price").and_then(|v| v.as_str()) {
+                                if let Some(price_str) =
+                                    data.get("closing_price").and_then(|v| v.as_str())
+                                {
                                     if let Ok(price) = price_str.parse::<f64>() {
                                         cache.set_bithumb_usdt_krw(price);
                                         bithumb_usdt_krw = Some(price);
-                                        info!("[ForexCache] Bithumb USDT/KRW price updated: {}", price);
+                                        info!(
+                                            "[ForexCache] Bithumb USDT/KRW price updated: {}",
+                                            price
+                                        );
                                     }
                                 }
                             }

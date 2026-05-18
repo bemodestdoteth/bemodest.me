@@ -1,13 +1,13 @@
-use tokio::time::{sleep, Duration};
-use serde_json::Value;
-use log::{info, warn};
-use std::sync::Arc;
-use crate::normalizer::okx::normalize_okx_ticker;
 use crate::cache::lvc::LatestValueCache;
-use crate::cache::TokenAnnotationCache;
 use crate::cache::MarketCache;
-use crate::exchanges::batcher::TickerBatcher;
+use crate::cache::TokenAnnotationCache;
 use crate::config::Config;
+use crate::exchanges::batcher::TickerBatcher;
+use crate::normalizer::okx::normalize_okx_ticker;
+use log::{info, warn};
+use serde_json::Value;
+use std::sync::Arc;
+use tokio::time::{sleep, Duration};
 
 pub const WS_URL: &str = "wss://ws.okx.com:8443/ws/v5/public";
 pub const MAX_SYMBOLS_PER_CONN: usize = 100;
@@ -19,7 +19,10 @@ pub async fn wait_for_market_cache(market_cache: &Arc<MarketCache>) -> Vec<Strin
     loop {
         let markets = market_cache.get_okx_markets().await;
         if !markets.is_empty() {
-            info!("[OkxExchange] Market cache ready with {} symbols", markets.len());
+            info!(
+                "[OkxExchange] Market cache ready with {} symbols",
+                markets.len()
+            );
             return markets;
         }
         if waited >= 30_000 {
@@ -46,7 +49,13 @@ pub fn handle_message(
             return;
         }
         if let Some(mut ticker) = normalize_okx_ticker(&raw) {
-            if config.excludelist.read().unwrap().iter().any(|ex| ticker.base.starts_with(ex)) {
+            if config
+                .excludelist
+                .read()
+                .unwrap()
+                .iter()
+                .any(|ex| ticker.base.starts_with(ex))
+            {
                 return;
             }
             ticker.base = tac.resolve_ticker_base(&ticker.exchange, &ticker.raw_base, &ticker.base);
@@ -63,7 +72,10 @@ pub fn handle_message(
     }
 }
 
-pub async fn subscription_factory(symbols: Vec<String>, shard_idx: usize) -> Option<Vec<serde_json::Value>> {
+pub async fn subscription_factory(
+    symbols: Vec<String>,
+    shard_idx: usize,
+) -> Option<Vec<serde_json::Value>> {
     if symbols.is_empty() {
         return None;
     }
@@ -74,7 +86,7 @@ pub async fn subscription_factory(symbols: Vec<String>, shard_idx: usize) -> Opt
             .map(|inst_id| serde_json::json!({"channel": "tickers", "instId": inst_id}))
             .collect();
         msgs.push(serde_json::json!({
-            "id": format!("{}", shard_idx * 1000), 
+            "id": format!("{}", shard_idx * 1000),
             "op": "subscribe",
             "args": args
         }));

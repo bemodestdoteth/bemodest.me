@@ -75,9 +75,14 @@ function handleLogout() {
 
 // Socket.IO connection initialization
 function initializeSocketConnection(token) {
-    if (socket && socket.connected) {
-        console.log('[WebApp] Socket already connected');
-        return;
+    if (socket) {
+        socket.auth = { token };
+        window.apiSocket = socket;
+
+        if (socket.connected || socket.active) {
+            console.log('[WebApp] Socket already connected');
+            return;
+        }
     }
 
     // Initialize socket.io with JWT auth
@@ -86,6 +91,7 @@ function initializeSocketConnection(token) {
         reconnectionDelayMax: 10000,
         transports: ['websocket', 'polling']
     });
+    window.apiSocket = socket;
 
     socket.on('connect', () => {
         console.log('[WebApp] Socket.IO connected:', socket.id);
@@ -296,7 +302,7 @@ function updateWalletTable(labelledAddresses) {
     // Create a map for display names
     const chainDisplayMap = {};
     availableChains.forEach(c => {
-        chainDisplayMap[c.caip2] = c.annotation?.code || c.code || c.caip2;
+        chainDisplayMap[c.caip2] = c.code || c.caip2;
     });
 
     Object.entries(labelledAddresses).forEach(([address, wallet]) => {
@@ -495,21 +501,29 @@ function initializeApp() {
 }
 
 // Extension token modal
-function showExtensionModal() {
+async function showExtensionModal() {
     const modal = document.getElementById('extensionModal');
     const closeBtn = modal.querySelector('.close');
 
     modal.style.display = 'block';
 
-    // Broadcast token to extension via postMessage
-    const token = sessionStorage.getItem('jwt_token');
-    if (token) {
-        window.postMessage({
-            type: 'WEB_APP_TOKEN',
-            token: token,
-            source: 'bemodest-web'
-        }, '*');
-        console.log('[WebApp] Token broadcasted to extension');
+    // Fetch a dedicated extension token from the server (uses httpOnly session
+    // cookie — works after page refresh, survives sessionStorage wipe).
+    try {
+        const res = await fetch('/api/extension/token', { credentials: 'same-origin' });
+        const data = await res.json();
+        if (data.success && data.data && data.data.token) {
+            window.postMessage({
+                type: 'WEB_APP_TOKEN',
+                token: data.data.token,
+                source: 'bemodest-web'
+            }, window.location.origin);
+            console.log('[WebApp] Extension token broadcasted to extension');
+        } else {
+            console.error('[WebApp] Failed to obtain extension token:', data.message);
+        }
+    } catch (err) {
+        console.error('[WebApp] Error fetching extension token:', err);
     }
 
     closeBtn.onclick = function () {
@@ -602,7 +616,7 @@ function addBulkRow(data = null) {
         chainOptions = availableChains
             .sort((a, b) => a.name.localeCompare(b.name))
             .map(c => {
-                const code = c.annotation?.code || c.code || c.caip2;
+                const code = c.code || c.caip2;
                 let displayText = `${c.name} (${code})`;
                 if (c.status === 'deprecated') {
                     displayText += ' ⚠️ (DEPRECATED)';
@@ -701,7 +715,7 @@ function updateBulkAddChainDropdowns() {
         if (availableChains.length > 0) {
             const sortedChains = [...availableChains].sort((a, b) => a.name.localeCompare(b.name));
             sortedChains.forEach(c => {
-                const code = c.annotation?.code || c.code || c.caip2;
+                const code = c.code || c.caip2;
                 const displayText = `${c.name} (${code})`;
                 optionsHtml += `<option value="${c.caip2}" ${currentValue === c.caip2 ? 'selected' : ''}>${displayText}</option>`;
             });

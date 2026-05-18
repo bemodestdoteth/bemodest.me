@@ -1,6 +1,8 @@
-use papaya::HashMap;
-use crate::types::{NormalizedTicker, Exchange};
+use crate::types::{now_micros, Exchange, NormalizedTicker};
 use log::trace;
+use papaya::HashMap;
+
+const STALE_ENTRY_US: i64 = 60_000_000;
 
 /// Lock-free Latest-Value Cache using Papaya
 /// Stores one NormalizedTicker per (exchange, base, quote) key
@@ -66,7 +68,29 @@ impl LatestValueCache {
     /// Return a full snapshot of all cached tickers
     pub fn snapshot(&self) -> Vec<NormalizedTicker> {
         let guard = self.inner.guard();
-        self.inner.iter(&guard).map(|(_, v): (&String, &NormalizedTicker)| v.clone()).collect()
+        self.inner
+            .iter(&guard)
+            .map(|(_, v): (&String, &NormalizedTicker)| v.clone())
+            .collect()
+    }
+
+    /// Remove tickers that have not been updated recently.
+    pub fn prune_stale(&self) -> usize {
+        let cutoff_us = now_micros() - STALE_ENTRY_US;
+        let guard = self.inner.guard();
+        let stale_keys: Vec<String> = self
+            .inner
+            .iter(&guard)
+            .filter(|(_, ticker): &(&String, &NormalizedTicker)| ticker.ingest_time_us < cutoff_us)
+            .map(|(key, _): (&String, &NormalizedTicker)| key.clone())
+            .collect();
+        let removed = stale_keys.len();
+
+        for key in stale_keys {
+            self.inner.remove(&key, &guard);
+        }
+
+        removed
     }
 
     /// Number of entries in the cache

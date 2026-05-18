@@ -1,15 +1,15 @@
-use tokio::time::{sleep, Duration};
-use serde_json::Value;
-use log::{info, trace};
-use std::sync::Arc;
-use crate::normalizer::upbit::normalize_upbit_ticker;
-use crate::types::Exchange as ExchangeType;
 use crate::cache::lvc::LatestValueCache;
-use crate::cache::TokenAnnotationCache;
 use crate::cache::ForexCache;
 use crate::cache::MarketCache;
-use crate::exchanges::batcher::TickerBatcher;
+use crate::cache::TokenAnnotationCache;
 use crate::config::Config;
+use crate::exchanges::batcher::TickerBatcher;
+use crate::normalizer::upbit::normalize_upbit_ticker;
+use crate::types::Exchange as ExchangeType;
+use log::{info, trace};
+use serde_json::Value;
+use std::sync::Arc;
+use tokio::time::{sleep, Duration};
 
 pub const TICKER_STREAM_URL: &str = "wss://api.upbit.com/websocket/v1";
 const SUBSCRIBE_BATCH_SIZE: usize = 100;
@@ -19,7 +19,10 @@ pub async fn wait_for_market_cache(market_cache: &Arc<MarketCache>) {
     loop {
         let markets = market_cache.get_upbit_markets().await;
         if !markets.is_empty() {
-            info!("[UpbitExchange] Market cache ready with {} symbols", markets.len());
+            info!(
+                "[UpbitExchange] Market cache ready with {} symbols",
+                markets.len()
+            );
             break;
         }
         if waited >= 30_000 {
@@ -44,7 +47,14 @@ pub fn handle_message(
     }
 }
 
-fn process_upbit_tickers(raw: &Value, lvc: &LatestValueCache, tac: &TokenAnnotationCache, forex: &ForexCache, batcher: &mut TickerBatcher, config: &Config) {
+fn process_upbit_tickers(
+    raw: &Value,
+    lvc: &LatestValueCache,
+    tac: &TokenAnnotationCache,
+    forex: &ForexCache,
+    batcher: &mut TickerBatcher,
+    config: &Config,
+) {
     let rate = forex.get_krw_per_usd();
 
     let btc_krw: Option<f64> = lvc
@@ -54,13 +64,31 @@ fn process_upbit_tickers(raw: &Value, lvc: &LatestValueCache, tac: &TokenAnnotat
 
     if let Some(arr) = raw.as_array() {
         for item in arr {
-            if let Some(mut normalized) = normalize_upbit_ticker(item, ExchangeType::Upbit, rate, btc_krw) {
-                if config.excludelist.read().unwrap().iter().any(|ex| normalized.base.starts_with(ex)) {
+            if let Some(mut normalized) =
+                normalize_upbit_ticker(item, ExchangeType::Upbit, rate, btc_krw)
+            {
+                if config
+                    .excludelist
+                    .read()
+                    .unwrap()
+                    .iter()
+                    .any(|ex| normalized.base.starts_with(ex))
+                {
                     continue;
                 }
-                normalized.base = tac.resolve_ticker_base(&normalized.exchange, &normalized.raw_base, &normalized.base);
-                trace!("[Upbit] Normalized: {}/{} c={} (c_krw={:?})", normalized.base, normalized.quote, normalized.c, normalized.c_krw);
-                
+                normalized.base = tac.resolve_ticker_base(
+                    &normalized.exchange,
+                    &normalized.raw_base,
+                    &normalized.base,
+                );
+                trace!(
+                    "[Upbit] Normalized: {}/{} c={} (c_krw={:?})",
+                    normalized.base,
+                    normalized.quote,
+                    normalized.c,
+                    normalized.c_krw
+                );
+
                 let payload = serde_json::json!({
                     "type": "normalized_ticker",
                     "source": normalized.exchange.to_string(),
@@ -70,15 +98,29 @@ fn process_upbit_tickers(raw: &Value, lvc: &LatestValueCache, tac: &TokenAnnotat
                 lvc.upsert(normalized);
             }
         }
-    } else if let Some(mut normalized) = normalize_upbit_ticker(raw, ExchangeType::Upbit, rate, btc_krw) {
-        if config.excludelist.read().unwrap().iter().any(|ex| normalized.base.contains(ex)) {
+    } else if let Some(mut normalized) =
+        normalize_upbit_ticker(raw, ExchangeType::Upbit, rate, btc_krw)
+    {
+        if config
+            .excludelist
+            .read()
+            .unwrap()
+            .iter()
+            .any(|ex| normalized.base.contains(ex))
+        {
             return;
         }
         if let Some(unified) = tac.get_unified(&normalized.exchange, &normalized.base) {
             normalized.base = unified;
         }
-        trace!("[Upbit] Normalized: {}/{} c={} (c_krw={:?})", normalized.base, normalized.quote, normalized.c, normalized.c_krw);
-        
+        trace!(
+            "[Upbit] Normalized: {}/{} c={} (c_krw={:?})",
+            normalized.base,
+            normalized.quote,
+            normalized.c,
+            normalized.c_krw
+        );
+
         let payload = serde_json::json!({
             "type": "normalized_ticker",
             "source": normalized.exchange.to_string(),
@@ -89,7 +131,9 @@ fn process_upbit_tickers(raw: &Value, lvc: &LatestValueCache, tac: &TokenAnnotat
     }
 }
 
-pub async fn subscription_factory(market_cache: Arc<MarketCache>) -> Option<Vec<serde_json::Value>> {
+pub async fn subscription_factory(
+    market_cache: Arc<MarketCache>,
+) -> Option<Vec<serde_json::Value>> {
     let mut symbols = market_cache.get_upbit_markets().await;
     if symbols.is_empty() {
         return None;
@@ -105,4 +149,3 @@ pub async fn subscription_factory(market_cache: Arc<MarketCache>) -> Option<Vec<
     payload_array.push(serde_json::json!({"format": "SIMPLE_LIST"}));
     Some(vec![serde_json::Value::Array(payload_array)])
 }
-

@@ -1,22 +1,25 @@
-use std::collections::HashMap;
 use async_trait::async_trait;
+use std::collections::HashMap;
+
+const SHARDED_EXCHANGES: &[&str] = &["kucoin", "okx", "okx_f"];
 
 pub mod binance;
-pub mod upbit;
-pub mod bithumb;
 pub mod binance_f;
-pub mod bybit;
-pub mod bybit_f;
-pub mod gateio;
 pub mod bitget;
 pub mod bitget_f;
+pub mod bithumb;
+pub mod bybit;
+pub mod bybit_f;
 pub mod coinbase;
+pub mod gateio;
+pub mod geckoterminal;
+pub mod generic;
+pub mod hyperliquid_f;
 pub mod kraken;
 pub mod kucoin;
 pub mod okx;
 pub mod okx_f;
-pub mod geckoterminal;
-pub mod generic;
+pub mod upbit;
 
 #[async_trait]
 pub trait Exchange: Send + Sync {
@@ -54,9 +57,33 @@ impl ExchangeManager {
                 log::info!("[ExchangeManager] Calling connect() for {}", name);
                 exchange.connect().await;
             }
-        } else {
-            log::warn!("[ExchangeManager] Exchange '{}' not found", name);
+            return;
         }
+
+        let shard_names = self.get_shard_names_for(name);
+        if !shard_names.is_empty() {
+            for shard_name in shard_names {
+                if let Some(exchange) = self.exchanges.get_mut(&shard_name) {
+                    let is_conn = exchange.is_connected();
+                    log::info!("[ExchangeManager] {} is_connected: {}", shard_name, is_conn);
+                    if !is_conn {
+                        log::info!("[ExchangeManager] Calling connect() for {}", shard_name);
+                        exchange.connect().await;
+                    }
+                }
+            }
+            return;
+        }
+
+        if SHARDED_EXCHANGES.contains(&name) {
+            log::info!(
+                "[ExchangeManager] Sharded exchange '{}' pending shard registration",
+                name
+            );
+            return;
+        }
+
+        log::warn!("[ExchangeManager] Exchange '{}' not found", name);
     }
 
     pub fn is_connected(&self, name: &str) -> bool {
@@ -91,15 +118,26 @@ impl ExchangeManager {
             .collect()
     }
 
+    fn get_shard_names_for(&self, base_name: &str) -> Vec<String> {
+        let prefix = format!("{}_shard_", base_name);
+        self.exchanges
+            .keys()
+            .filter(|name| name.starts_with(&prefix))
+            .cloned()
+            .collect()
+    }
+
     pub async fn refresh_all_subscriptions(&self) {
         log::info!("[ExchangeManager] refreshing subscriptions for all exchanges");
         for (name, exchange) in &self.exchanges {
-            if exchange.is_connected() {
-                log::info!("[ExchangeManager] refreshing {}", name);
-                exchange.refresh_subscriptions().await;
-            }
+            log::info!(
+                "[ExchangeManager] refreshing {} (connected={})",
+                name,
+                exchange.is_connected()
+            );
+            exchange.refresh_subscriptions().await;
         }
     }
 }
-pub mod batcher;
 pub mod base;
+pub mod batcher;

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { BaseMongoSchema } from './types.js';
+import { BaseMongoSchema } from './mongo.js';
 
 export const AlertConditionSchema = z.enum([
     'change_pct_5m',

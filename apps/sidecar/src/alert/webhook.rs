@@ -1,9 +1,9 @@
+use hmac::{Hmac, Mac};
+use log::{error, info, warn};
+use sha2::Sha256;
 use std::sync::Arc;
 use tokio::sync::broadcast;
 use tokio::time::{sleep, Duration};
-use hmac::{Hmac, Mac};
-use sha2::Sha256;
-use log::{error, info, warn};
 
 type HmacSha256 = Hmac<Sha256>;
 
@@ -35,17 +35,15 @@ const DEAD_AFTER_FAILURES: u32 = 3;
 /// Headers sent:
 ///   `X-Timestamp: <unix_ms>`
 ///   `X-Signature: <hex>`
-pub async fn run(
-    mut rx: broadcast::Receiver<AlertFiredEvent>,
-    config: Arc<Config>,
-) {
+pub async fn run(mut rx: broadcast::Receiver<AlertFiredEvent>, config: Arc<Config>) {
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(10))
         .build()
         .expect("[Webhook] Failed to build HTTP client");
 
     // Per-rule failure counter — persists across events for the same rule_id
-    let mut failure_counts: std::collections::HashMap<String, u32> = std::collections::HashMap::new();
+    let mut failure_counts: std::collections::HashMap<String, u32> =
+        std::collections::HashMap::new();
 
     loop {
         let event = match rx.recv().await {
@@ -134,20 +132,28 @@ async fn deliver_with_retry(
             Ok(resp) if resp.status().is_success() => {
                 info!(
                     "[Webhook] Rule {:?} delivered (attempt {}/{})",
-                    event.rule_id, attempt + 1, RETRY_DELAYS_SECS.len()
+                    event.rule_id,
+                    attempt + 1,
+                    RETRY_DELAYS_SECS.len()
                 );
                 return true;
             }
             Ok(resp) => {
                 warn!(
                     "[Webhook] Rule {:?} attempt {}/{} — HTTP {}",
-                    event.rule_id, attempt + 1, RETRY_DELAYS_SECS.len(), resp.status()
+                    event.rule_id,
+                    attempt + 1,
+                    RETRY_DELAYS_SECS.len(),
+                    resp.status()
                 );
             }
             Err(e) => {
                 warn!(
                     "[Webhook] Rule {:?} attempt {}/{} — error: {}",
-                    event.rule_id, attempt + 1, RETRY_DELAYS_SECS.len(), e
+                    event.rule_id,
+                    attempt + 1,
+                    RETRY_DELAYS_SECS.len(),
+                    e
                 );
             }
         }
@@ -167,13 +173,13 @@ async fn deliver_with_retry(
 fn sign_payload(payload: &[u8], timestamp_ms: i64, secret: &str) -> String {
     let mut mac = HmacSha256::new_from_slice(secret.as_bytes())
         .expect("[Webhook] HMAC initialization failed");
-    
+
     mac.update(payload);
     mac.update(timestamp_ms.to_string().as_bytes());
-    
+
     let result = mac.finalize();
     let code_bytes = result.into_bytes();
-    
+
     hex::encode(code_bytes)
 }
 

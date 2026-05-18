@@ -1,12 +1,12 @@
 use futures_util::StreamExt;
+use log::{error, info, warn};
 use tokio::sync::broadcast;
-use log::{info, warn, error};
 
 use crate::cache::lvc::LatestValueCache;
 use crate::cache::EligibilityFilter;
 use crate::types::NormalizedTicker;
-use std::sync::Arc;
 use serde_json::Value;
+use std::sync::Arc;
 
 /// Subscribes to `channel` on Redis and forwards eligible messages into `tx`.
 /// Reconnects automatically with exponential backoff on failure.
@@ -24,7 +24,10 @@ pub async fn run_dex_subscriber(
     let mut backoff_ms = INITIAL_BACKOFF_MS;
 
     loop {
-        info!("[DexSub] Connecting to Redis at {} (channel={})", redis_url, channel);
+        info!(
+            "[DexSub] Connecting to Redis at {} (channel={})",
+            redis_url, channel
+        );
 
         let client = match redis::Client::open(redis_url.clone()) {
             Ok(c) => c,
@@ -81,11 +84,13 @@ pub async fn run_dex_subscriber(
                                     // Inject enum variant so NormalizedTicker deserializes
                                     obj.insert("exchange".to_string(), serde_json::json!("Dex"));
                                 }
-                                
-                                if let Ok(ticker) = serde_json::from_value::<NormalizedTicker>(data.clone()) {
+
+                                if let Ok(ticker) =
+                                    serde_json::from_value::<NormalizedTicker>(data.clone())
+                                {
                                     let base = ticker.base.clone();
                                     let quote = ticker.quote.clone();
-                                    
+
                                     lvc.upsert(ticker);
 
                                     if filter.is_eligible(&base, &quote, &lvc) {

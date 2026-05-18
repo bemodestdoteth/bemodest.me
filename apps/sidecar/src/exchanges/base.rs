@@ -1,14 +1,14 @@
-use futures_util::{StreamExt, SinkExt};
-use tokio::time::{sleep, Duration, interval};
-use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
-use log::{info, error};
-use tokio::sync::broadcast;
+use crate::cache::lvc::LatestValueCache;
+use crate::cache::EligibilityFilter;
+use crate::config::Config;
+use crate::exchanges::batcher::TickerBatcher;
+use futures_util::{SinkExt, StreamExt};
+use log::{error, info};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use crate::config::Config;
-use crate::cache::lvc::LatestValueCache;
-use crate::exchanges::batcher::TickerBatcher;
-use crate::cache::EligibilityFilter;
+use tokio::sync::broadcast;
+use tokio::time::{interval, sleep, Duration};
+use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
 
 pub struct WsSessionContext {
     pub source: String,
@@ -21,6 +21,7 @@ pub struct WsSessionContext {
     pub lvc: Arc<LatestValueCache>,
     pub config: Arc<Config>,
     pub refresh_tx: Option<broadcast::Sender<()>>,
+    pub reconnect_on_refresh: bool,
     pub ping_interval: Option<Duration>,
     pub ping_text: Option<String>,
     /// Optional closure to generate a dynamic ping message.
@@ -49,7 +50,10 @@ impl WsSession {
                 match factory().await {
                     Some(u) => u,
                     None => {
-                        error!("[{}] url_factory failed, retrying connection in {:?}", ctx.source, ctx.reconnect_delay);
+                        error!(
+                            "[{}] url_factory failed, retrying connection in {:?}",
+                            ctx.source, ctx.reconnect_delay
+                        );
                         sleep(ctx.reconnect_delay).await;
                         continue;
                     }
@@ -81,7 +85,9 @@ impl WsSession {
                     // Handle subscription if factory provided
                     if let Some(sub_msgs) = subscription_factory().await {
                         for sub_msg in sub_msgs {
-                            if let Err(e) = write.send(Message::Text(sub_msg.to_string().into())).await {
+                            if let Err(e) =
+                                write.send(Message::Text(sub_msg.to_string().into())).await
+                            {
                                 error!("[{}] Failed to send subscription: {}", ctx.source, e);
                                 ctx.connected.store(false, Ordering::SeqCst);
                                 sleep(ctx.reconnect_delay).await;
@@ -95,8 +101,14 @@ impl WsSession {
                         ctx.config.filter_min_spread_pct,
                         ctx.config.pinlist.clone(),
                     );
-                    let mut batcher = TickerBatcher::new(ctx.tx.clone(), ctx.source.clone(), ctx.lvc.clone(), filter);
-                    let mut flush_interval = interval(Duration::from_millis(ctx.config.batch_duration_ms));
+                    let mut batcher = TickerBatcher::new(
+                        ctx.tx.clone(),
+                        ctx.source.clone(),
+                        ctx.lvc.clone(),
+                        filter,
+                    );
+                    let mut flush_interval =
+                        interval(Duration::from_millis(ctx.config.batch_duration_ms));
 
                     let mut refresh_rx = ctx.refresh_tx.as_ref().map(|tx| tx.subscribe());
                     let mut ping_interval = ctx.ping_interval.map(tokio::time::interval);
@@ -141,6 +153,11 @@ impl WsSession {
                                     false
                                 }
                             } => {
+                                if ctx.reconnect_on_refresh {
+                                    info!("[{}] Subscription refresh requested; reconnecting WebSocket.", ctx.source);
+                                    break;
+                                }
+
                                 if let Some(sub_msgs) = subscription_factory().await {
                                     for sub_msg in sub_msgs {
                                         if let Err(e) = write.send(Message::Text(sub_msg.to_string().into())).await {

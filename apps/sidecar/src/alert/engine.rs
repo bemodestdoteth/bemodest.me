@@ -1,28 +1,28 @@
-use std::sync::Arc;
+use futures_util::TryStreamExt;
+use mongodb::{bson::doc, Client};
 use std::collections::HashMap;
+use std::sync::Arc;
 use tokio::sync::{broadcast, RwLock};
 use tokio::time::{interval, Duration};
-use mongodb::{Client, bson::doc};
-use futures_util::TryStreamExt;
 // use rust_decimal::Decimal; // Pruned by SENTINEL
 // use rust_decimal::prelude::ToPrimitive; // Pruned by SENTINEL
 use chrono::Utc;
-use log::{info, warn, error, debug};
+use log::{debug, error, info, warn};
 
+use crate::alert::state::AlertStateStore;
+use crate::alert::types::{AlertCondition, AlertFiredEvent, AlertRule, AlertState, AlertStatus};
 use crate::cache::{LatestValueCache, PriceHistoryCache, PriceSample};
 use crate::config::Config;
-use crate::types::now_micros;
-use crate::alert::types::{AlertCondition, AlertFiredEvent, AlertRule, AlertState, AlertStatus};
-use crate::alert::state::AlertStateStore;
+use crate::types::{now_micros, NormalizedTicker};
 
 // ============================================================================
 // Constants
 // ============================================================================
 
-const STALE_THRESHOLD_US: i64 = 10_000_000; // 10 seconds
-const VOLUME_FLOOR_USD: f64 = 30_000.0;
+pub const STALE_THRESHOLD_US: i64 = 10_000_000; // 10 seconds
+pub const VOLUME_FLOOR_USD: f64 = 30_000.0;
 const QUORUM_MIN: usize = 2;
-const ENGINE_TICK_MS: u64 = 500;
+const ENGINE_TICK_MS: u64 = 1000;
 
 // ============================================================================
 // Rule Loader
@@ -81,7 +81,10 @@ pub async fn load_alert_rules(config: &Config) -> Vec<AlertRule> {
     // different canonical tokens surface a warning (plan decision Q1).
     detect_conflicts(&rules);
 
-    info!("[AlertEngine] Loaded {} alert rules from MongoDB", rules.len());
+    info!(
+        "[AlertEngine] Loaded {} alert rules from MongoDB",
+        rules.len()
+    );
     rules
 }
 
@@ -90,62 +93,78 @@ fn detect_conflicts(rules: &[AlertRule]) {
     // group rule labels by ticker for simple conflict detection
     let mut seen: HashMap<String, Vec<String>> = HashMap::new();
     for r in rules {
-        seen.entry(r.ticker.clone()).or_default().push(r.label.clone());
+        seen.entry(r.ticker.clone())
+            .or_default()
+            .push(r.label.clone());
     }
     for (ticker, labels) in &seen {
         if labels.len() > 1 {
             warn!(
                 "[AlertEngine] Ticker symbol {:?} appears in {} rules — \
                  verify tokenAnnotation mapping is unambiguous. Rules: {:?}",
-                ticker, labels.len(), labels
+                ticker,
+                labels.len(),
+                labels
             );
         }
     }
 }
 
 // ============================================================================
-// History Sampler  (1 Hz — feeds PriceHistoryCache)
+// Live Ticker Snapshot
 // ============================================================================
 
-/// Spawned as a separate 1-second task.
-/// Snapshots the LVC and appends one `PriceSample` per live ticker to the
-/// history cache. Live = not stale (< 10 s) AND passes volume floor.
-pub async fn run_history_sampler(
-    lvc: Arc<LatestValueCache>,
-    history: Arc<PriceHistoryCache>,
-) {
-    let mut tick = interval(Duration::from_secs(1));
-    loop {
-        tick.tick().await;
-        let now_us = now_micros();
-        for ticker in lvc.snapshot() {
-            if now_us - ticker.ingest_time_us >= STALE_THRESHOLD_US {
-                continue;
-            }
-            if ticker.v_quote < VOLUME_FLOOR_USD {
-                continue;
-            }
-            history.push(
-                &ticker.exchange.to_string(),
-                &ticker.base,
-                &ticker.quote,
-                PriceSample {
-                    timestamp_ms: ticker.timestamp_ms,
-                    price: ticker.c,
-                    v_quote: ticker.v_quote,
-                },
-            );
+pub type LiveTickerEntry = (String, f64, f64, Option<f64>);
+pub type LiveTickerGroups = HashMap<String, Vec<LiveTickerEntry>>;
+
+pub fn group_live_tickers(snapshot: &[NormalizedTicker], now_us: i64) -> LiveTickerGroups {
+    let mut groups: LiveTickerGroups = HashMap::new();
+    for ticker in snapshot {
+        if now_us - ticker.ingest_time_us >= STALE_THRESHOLD_US {
+            continue;
         }
+        if ticker.v_quote < VOLUME_FLOOR_USD {
+            continue;
+        }
+        let key = format!("{}:{}", ticker.base, ticker.quote);
+        groups.entry(key).or_default().push((
+            ticker.exchange.to_string(),
+            ticker.c,
+            ticker.v_quote,
+            ticker.change_24h,
+        ));
+    }
+    groups
+}
+
+fn sample_history(snapshot: &[NormalizedTicker], now_us: i64, history: &PriceHistoryCache) {
+    for ticker in snapshot {
+        if now_us - ticker.ingest_time_us >= STALE_THRESHOLD_US {
+            continue;
+        }
+        if ticker.v_quote < VOLUME_FLOOR_USD {
+            continue;
+        }
+        history.push(
+            &ticker.exchange.to_string(),
+            &ticker.base,
+            &ticker.quote,
+            PriceSample {
+                timestamp_ms: ticker.timestamp_ms,
+                price: ticker.c,
+                v_quote: ticker.v_quote,
+            },
+        );
     }
 }
 
 // ============================================================================
-// Alert Engine  (500 ms tick)
+// Alert Engine  (1000 ms tick)
 // ============================================================================
 
 /// Main alert evaluation loop.
 ///
-/// - Every 500 ms: snapshot LVC, group by `(base, quote)`, evaluate each rule.
+/// - Every 1000 ms: snapshot LVC, group by `(base, quote)`, evaluate each rule.
 /// - Fires on threshold crossing + hysteresis + cooldown lock acquired.
 /// - Sends `AlertFiredEvent` on `alert_tx` for the webhook dispatcher.
 pub async fn run(
@@ -159,28 +178,14 @@ pub async fn run(
     loop {
         tick.tick().await;
 
-        // ── 1. Snapshot LVC ──────────────────────────────────────────────
+        // ── 1. Snapshot LVC once, then reuse it for history + alerts ─────
         let snapshot = lvc.snapshot();
         let now_us = now_micros();
+        sample_history(&snapshot, now_us, &history);
 
         // ── 2. Group live tickers by (base, quote) ───────────────────────
         // Key: "BASE:QUOTE", Value: list of (exchange_id, close_price, v_quote)
-        let mut groups: HashMap<String, Vec<(String, f64, f64, Option<f64>)>> = HashMap::new();
-        for ticker in &snapshot {
-            if now_us - ticker.ingest_time_us >= STALE_THRESHOLD_US {
-                continue;
-            }
-            if ticker.v_quote < VOLUME_FLOOR_USD {
-                continue;
-            }
-            let key = format!("{}:{}", ticker.base, ticker.quote);
-            groups.entry(key).or_default().push((
-                ticker.exchange.to_string(),
-                ticker.c,
-                ticker.v_quote,
-                ticker.change_24h,
-            ));
-        }
+        let groups = group_live_tickers(&snapshot, now_us);
 
         // ── 3. Evaluate each rule ─────────────────────────────────────────
         let rules_snap = {
@@ -199,9 +204,16 @@ pub async fn run(
                     let (base, quote) = group_key.split_once(':').unwrap_or((group_key, ""));
                     let synthetic_id = format!("{}:{}", rule.id, group_key);
                     try_fire(
-                        rule, base, quote, all_entries, &history,
-                        &mut state_store, &alert_tx, &synthetic_id,
-                    ).await;
+                        rule,
+                        base,
+                        quote,
+                        all_entries,
+                        &history,
+                        &mut state_store,
+                        &alert_tx,
+                        &synthetic_id,
+                    )
+                    .await;
                 }
             } else {
                 // ── Single-ticker mode ─────────────────────────────────────────
@@ -211,14 +223,21 @@ pub async fn run(
                     None => continue,
                 };
                 try_fire(
-                    rule, &rule.ticker, &rule.quote, all_entries, &history,
-                    &mut state_store, &alert_tx, &rule.id,
-                ).await;
+                    rule,
+                    &rule.ticker,
+                    &rule.quote,
+                    all_entries,
+                    &history,
+                    &mut state_store,
+                    &alert_tx,
+                    &rule.id,
+                )
+                .await;
             }
         }
 
         // ── 4. Publish Price Leaders to Redis ────────────────────────────
-        // We select the leader (max volume) rejecting Upbit/Bithumb/Futures/DEX 
+        // We select the leader (max volume) rejecting Upbit/Bithumb/Futures/DEX
         // to match the "Deep Dive" logic in the frontend/API.
         let mut leader_prices: Vec<(String, String)> = Vec::new();
 
@@ -226,14 +245,17 @@ pub async fn run(
             // Reject non-leader-eligible sources
             entries.retain(|(ex, _, _, _)| {
                 let lower = ex.to_lowercase();
-                !lower.ends_with("_f") && 
-                !lower.ends_with("_futures") && 
-                lower != "upbit" && 
-                lower != "bithumb" && 
-                !lower.starts_with("dex_")
+                !lower.ends_with("_f")
+                    && !lower.ends_with("_futures")
+                    && lower != "upbit"
+                    && lower != "bithumb"
+                    && !lower.starts_with("dex_")
             });
 
-            if let Some((_, price, _, _)) = entries.into_iter().max_by(|(_, _, v1, _), (_, _, v2, _)| v1.partial_cmp(v2).unwrap()) {
+            if let Some((_, price, _, _)) = entries
+                .into_iter()
+                .max_by(|(_, _, v1, _), (_, _, v2, _)| v1.partial_cmp(v2).unwrap())
+            {
                 // Key: BASE, Field: USD Price
                 // We use only the Base symbol as the key for lvc:prices hash
                 if let Some(base) = pair.split(':').next() {
@@ -283,18 +305,20 @@ async fn try_fire(
     if entries.len() < QUORUM_MIN {
         debug!(
             "[AlertEngine] Rule {:?}: quorum not met ({}/{})",
-            rule.label, entries.len(), QUORUM_MIN
+            rule.label,
+            entries.len(),
+            QUORUM_MIN
         );
         return false;
     }
 
     // Evaluate condition
     let eval_result = evaluate_condition(rule, base, quote, &entries, history);
-    let (metric_value, highest_exchange, lowest_exchange, price_high, price_low) =
-        match eval_result {
-            Some(r) => r,
-            None => return false,
-        };
+    let (metric_value, highest_exchange, lowest_exchange, price_high, price_low) = match eval_result
+    {
+        Some(r) => r,
+        None => return false,
+    };
 
     // Threshold check
     if metric_value <= rule.value {
@@ -375,12 +399,22 @@ fn evaluate_condition(
     quote: &str,
     entries: &[(String, f64, f64, Option<f64>)],
     history: &PriceHistoryCache,
-) -> Option<(f64, Option<String>, Option<String>, Option<f64>, Option<f64>)> {
+) -> Option<(
+    f64,
+    Option<String>,
+    Option<String>,
+    Option<f64>,
+    Option<f64>,
+)> {
     match rule.condition {
         // ── spread_pct ───────────────────────────────────────────────────
         AlertCondition::SpreadPct => {
-            let min = entries.iter().min_by(|(_, p1, _, _), (_, p2, _, _)| p1.partial_cmp(p2).unwrap())?;
-            let max = entries.iter().max_by(|(_, p1, _, _), (_, p2, _, _)| p1.partial_cmp(p2).unwrap())?;
+            let min = entries
+                .iter()
+                .min_by(|(_, p1, _, _), (_, p2, _, _)| p1.partial_cmp(p2).unwrap())?;
+            let max = entries
+                .iter()
+                .max_by(|(_, p1, _, _), (_, p2, _, _)| p1.partial_cmp(p2).unwrap())?;
             if min.1 <= 0.0 {
                 return None;
             }
@@ -416,8 +450,7 @@ fn evaluate_condition(
         AlertCondition::ChangePct5m => {
             // Use first matching exchange in the whitelist (or first available)
             let (exchange, current_price, _, _) = entries.first()?;
-            let hist_key =
-                PriceHistoryCache::make_key(exchange, base, quote);
+            let hist_key = PriceHistoryCache::make_key(exchange, base, quote);
             let samples = history.get_last_n(&hist_key, 300); // up to 5 min
             let oldest = samples.first()?;
             if oldest.price <= 0.0 {
@@ -430,13 +463,13 @@ fn evaluate_condition(
         // ── volume_spike ─────────────────────────────────────────────────
         AlertCondition::VolumeSpike => {
             let (exchange, _, current_v_quote, _) = entries.first()?;
-            let hist_key =
-                PriceHistoryCache::make_key(exchange, base, quote);
+            let hist_key = PriceHistoryCache::make_key(exchange, base, quote);
             let samples = history.get_last_n(&hist_key, 300);
             if samples.is_empty() {
                 return None;
             }
-            let avg_v: f64 = samples.iter().map(|s| s.v_quote).sum::<f64>() / (samples.len() as f64);
+            let avg_v: f64 =
+                samples.iter().map(|s| s.v_quote).sum::<f64>() / (samples.len() as f64);
             if avg_v <= 0.0 {
                 return None;
             }
@@ -454,12 +487,14 @@ fn evaluate_condition(
                 return None;
             }
 
-            let avg_change = with_change.iter().map(|(_, v)| *v).sum::<f64>()
-                / with_change.len() as f64;
+            let avg_change =
+                with_change.iter().map(|(_, v)| *v).sum::<f64>() / with_change.len() as f64;
 
-            let max = with_change.iter()
+            let max = with_change
+                .iter()
                 .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())?;
-            let min = with_change.iter()
+            let min = with_change
+                .iter()
                 .min_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())?;
 
             Some((

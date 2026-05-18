@@ -26,7 +26,20 @@ export const sseConnect = (req, res) => {
 
 export const updateClients = () => {
     const data = JSON.stringify(calculateStats());
-    clients.forEach(client => client.write(`data: ${data}\n\n`));
+    for (let i = clients.length - 1; i >= 0; i -= 1) {
+        const client = clients[i];
+        if (client.writableEnded || client.destroyed) {
+            clients.splice(i, 1);
+            continue;
+        }
+
+        try {
+            client.write(`data: ${data}\n\n`);
+        } catch (err) {
+            clients.splice(i, 1);
+            logger.warn(`[SSE] Removed failed client: ${err.message}`);
+        }
+    }
 };
 
 const calculateStats = () => {
@@ -36,6 +49,7 @@ const calculateStats = () => {
 
     for (const target in reports) {
         const recentReports = reports[target].filter(report => report.timestamp >= cutoff);
+        reports[target] = recentReports;
         const successes = recentReports.filter(r => r.status === 'success').length;
         const failures = recentReports.filter(r => r.status === 'failure').length;
         const total = successes + failures;

@@ -1,10 +1,7 @@
-use crate::types::{
-    Exchange, NormalizedTicker,
-    parse_decimal, now_micros, strip_scale_factor,
-};
-use serde_json::Value;
-use rust_decimal::Decimal;
+use crate::types::{now_micros, parse_decimal, strip_scale_factor, Exchange, NormalizedTicker};
 use rust_decimal::prelude::ToPrimitive;
+use rust_decimal::Decimal;
+use serde_json::Value;
 
 /// Normalise a Bitget spot ticker message.
 ///
@@ -40,23 +37,51 @@ pub fn normalize_bitget_ticker(raw: &Value) -> Option<NormalizedTicker> {
 
     let c = parse_decimal(d.get("lastPr").or_else(|| d.get("lastPrice"))?.as_str()?)?;
 
-    let pct_str = d.get("change24h").or_else(|| d.get("price24hPcnt")).and_then(|v| v.as_str()).unwrap_or("0");
+    let pct_str = d
+        .get("change24h")
+        .or_else(|| d.get("price24hPcnt"))
+        .and_then(|v| v.as_str())
+        .unwrap_or("0");
     let change_24h = parse_decimal(pct_str).and_then(|v| v.to_f64());
 
     // open price: use open24h/openPrice24h if non-zero, otherwise derive from change pct
-    let o_raw = d.get("open24h").or_else(|| d.get("openPrice24h")).and_then(|v| v.as_str()).unwrap_or("0");
-    let o = parse_decimal(o_raw).filter(|v| !v.is_zero()).unwrap_or_else(|| {
-        // derive: open = close / (1 + change_pct)
-        if let Some(pct) = parse_decimal(pct_str) {
-            let denom = Decimal::ONE + pct;
-            if !denom.is_zero() { c / denom } else { c }
-        } else { c }
-    });
+    let o_raw = d
+        .get("open24h")
+        .or_else(|| d.get("openPrice24h"))
+        .and_then(|v| v.as_str())
+        .unwrap_or("0");
+    let o = parse_decimal(o_raw)
+        .filter(|v| !v.is_zero())
+        .unwrap_or_else(|| {
+            // derive: open = close / (1 + change_pct)
+            if let Some(pct) = parse_decimal(pct_str) {
+                let denom = Decimal::ONE + pct;
+                if !denom.is_zero() {
+                    c / denom
+                } else {
+                    c
+                }
+            } else {
+                c
+            }
+        });
 
-    let h = parse_decimal(d.get("high24h").or_else(|| d.get("highPrice24h"))?.as_str()?)?;
+    let h = parse_decimal(
+        d.get("high24h")
+            .or_else(|| d.get("highPrice24h"))?
+            .as_str()?,
+    )?;
     let l = parse_decimal(d.get("low24h").or_else(|| d.get("lowPrice24h"))?.as_str()?)?;
-    let v_base = parse_decimal(d.get("baseVolume").or_else(|| d.get("volume24h"))?.as_str()?)?;
-    let v_quote = parse_decimal(d.get("quoteVolume").or_else(|| d.get("turnover24h"))?.as_str()?)?;
+    let v_base = parse_decimal(
+        d.get("baseVolume")
+            .or_else(|| d.get("volume24h"))?
+            .as_str()?,
+    )?;
+    let v_quote = parse_decimal(
+        d.get("quoteVolume")
+            .or_else(|| d.get("turnover24h"))?
+            .as_str()?,
+    )?;
 
     let timestamp_ms = raw.get("ts")?.as_i64()?;
 
@@ -99,23 +124,51 @@ pub fn normalize_bitget_f_ticker(raw: &Value) -> Option<NormalizedTicker> {
 
     let c = parse_decimal(d.get("lastPr").or_else(|| d.get("lastPrice"))?.as_str()?)?;
 
-    let pct_str = d.get("change24h").or_else(|| d.get("price24hPcnt")).and_then(|v| v.as_str()).unwrap_or("0");
+    let pct_str = d
+        .get("change24h")
+        .or_else(|| d.get("price24hPcnt"))
+        .and_then(|v| v.as_str())
+        .unwrap_or("0");
     let change_24h = parse_decimal(pct_str).and_then(|v| v.to_f64());
 
     // open price: use open24h/openPrice24h if non-zero, otherwise derive from change pct
-    let o_raw = d.get("open24h").or_else(|| d.get("openPrice24h")).and_then(|v| v.as_str()).unwrap_or("0");
-    let o = parse_decimal(o_raw).filter(|v| !v.is_zero()).unwrap_or_else(|| {
-        // derive: open = close / (1 + change_pct)
-        if let Some(pct) = parse_decimal(pct_str) {
-            let denom = Decimal::ONE + pct;
-            if !denom.is_zero() { c / denom } else { c }
-        } else { c }
-    });
+    let o_raw = d
+        .get("open24h")
+        .or_else(|| d.get("openPrice24h"))
+        .and_then(|v| v.as_str())
+        .unwrap_or("0");
+    let o = parse_decimal(o_raw)
+        .filter(|v| !v.is_zero())
+        .unwrap_or_else(|| {
+            // derive: open = close / (1 + change_pct)
+            if let Some(pct) = parse_decimal(pct_str) {
+                let denom = Decimal::ONE + pct;
+                if !denom.is_zero() {
+                    c / denom
+                } else {
+                    c
+                }
+            } else {
+                c
+            }
+        });
 
-    let h = parse_decimal(d.get("high24h").or_else(|| d.get("highPrice24h"))?.as_str()?)?;
+    let h = parse_decimal(
+        d.get("high24h")
+            .or_else(|| d.get("highPrice24h"))?
+            .as_str()?,
+    )?;
     let l = parse_decimal(d.get("low24h").or_else(|| d.get("lowPrice24h"))?.as_str()?)?;
-    let v_base = parse_decimal(d.get("baseVolume").or_else(|| d.get("volume24h"))?.as_str()?)?;
-    let v_quote = parse_decimal(d.get("quoteVolume").or_else(|| d.get("turnover24h"))?.as_str()?)?;
+    let v_base = parse_decimal(
+        d.get("baseVolume")
+            .or_else(|| d.get("volume24h"))?
+            .as_str()?,
+    )?;
+    let v_quote = parse_decimal(
+        d.get("quoteVolume")
+            .or_else(|| d.get("turnover24h"))?
+            .as_str()?,
+    )?;
 
     let timestamp_ms = raw.get("ts")?.as_i64()?;
 

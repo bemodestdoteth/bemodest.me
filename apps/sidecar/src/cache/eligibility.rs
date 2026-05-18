@@ -1,7 +1,7 @@
 use crate::cache::lvc::LatestValueCache;
 use log::{debug, trace};
-use std::sync::{Arc, RwLock};
 use std::collections::HashSet;
+use std::sync::{Arc, RwLock};
 
 /// Gates the broadcast channel: a ticker is only eligible to be forwarded to
 /// frontend clients when **both** conditions are satisfied:
@@ -21,8 +21,16 @@ pub struct EligibilityFilter {
 }
 
 impl EligibilityFilter {
-    pub fn new(min_sources: usize, min_spread_pct: f64, pinlist: Arc<RwLock<HashSet<String>>>) -> Self {
-        Self { min_sources, min_spread_pct, pinlist }
+    pub fn new(
+        min_sources: usize,
+        min_spread_pct: f64,
+        pinlist: Arc<RwLock<HashSet<String>>>,
+    ) -> Self {
+        Self {
+            min_sources,
+            min_spread_pct,
+            pinlist,
+        }
     }
 
     /// Returns `true` if the ticker identified by `(base, quote)` passes the
@@ -42,7 +50,10 @@ impl EligibilityFilter {
         if sources.len() < self.min_sources {
             debug!(
                 "[EligibilityFilter] {}/{} rejected: found {} source(s), but min_sources is {}",
-                base, quote, sources.len(), self.min_sources
+                base,
+                quote,
+                sources.len(),
+                self.min_sources
             );
             return false;
         }
@@ -51,9 +62,7 @@ impl EligibilityFilter {
         // Use the USD-normalised close price (`c`) present on every NormalizedTicker.
         let valid_sources: Vec<&crate::types::NormalizedTicker> = sources
             .iter()
-            .filter(|t| {
-                t.c > 0.0 && t.v_quote >= 30000.0
-            })
+            .filter(|t| t.c > 0.0 && t.v_quote >= 30000.0)
             .collect();
 
         if valid_sources.len() < self.min_sources {
@@ -65,8 +74,14 @@ impl EligibilityFilter {
             return false;
         }
 
-        let min_source = valid_sources.iter().min_by(|a, b| a.c.partial_cmp(&b.c).unwrap()).unwrap();
-        let max_source = valid_sources.iter().max_by(|a, b| a.c.partial_cmp(&b.c).unwrap()).unwrap();
+        let min_source = valid_sources
+            .iter()
+            .min_by(|a, b| a.c.partial_cmp(&b.c).unwrap())
+            .unwrap();
+        let max_source = valid_sources
+            .iter()
+            .max_by(|a, b| a.c.partial_cmp(&b.c).unwrap())
+            .unwrap();
 
         let spread_pct = (max_source.c - min_source.c) / min_source.c * 100.0;
 
@@ -77,7 +92,7 @@ impl EligibilityFilter {
             );
             return false;
         }
-        
+
         let min_vol = min_source.v_quote;
         let max_vol = max_source.v_quote;
 

@@ -1,8 +1,8 @@
 use crate::cache::lvc::LatestValueCache;
 use crate::comparison::compare_pair;
 use crate::types::Exchange;
-use serde_json::{json, Value};
 use log::debug;
+use serde_json::{json, Value};
 
 /// Handle an incoming WebSocket command and return a JSON response
 pub fn handle_command(msg: &Value, lvc: &LatestValueCache) -> Value {

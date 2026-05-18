@@ -1,4 +1,4 @@
-use crate::types::{Exchange, NormalizedTicker, now_micros};
+use crate::types::{now_micros, Exchange, NormalizedTicker};
 use serde_json::Value;
 // use rust_decimal::Decimal; // Pruned by SENTINEL
 // use rust_decimal::prelude::FromStr; // Pruned by SENTINEL

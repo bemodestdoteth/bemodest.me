@@ -1,9 +1,9 @@
 use moka::future::Cache;
-use mongodb::{Client, bson::doc};
+use mongodb::{bson::doc, Client};
 
-use std::time::Duration;
-use log::{info, warn, error};
 use futures_util::TryStreamExt;
+use log::{error, info, warn};
+use std::time::Duration;
 
 use crate::types::ExchangeExt;
 
@@ -42,7 +42,10 @@ impl TokenCache {
             None
         };
 
-        let token_cache = Self { cache, mongo_client };
+        let token_cache = Self {
+            cache,
+            mongo_client,
+        };
 
         // Preload if MongoDB is available
         if token_cache.mongo_client.is_some() {
@@ -69,7 +72,9 @@ impl TokenCache {
                 doc.get_str("base").ok(),
                 doc.get_str("quote").ok(),
             ) {
-                self.cache.insert(symbol.to_string(), (base.to_string(), quote.to_string())).await;
+                self.cache
+                    .insert(symbol.to_string(), (base.to_string(), quote.to_string()))
+                    .await;
                 count += 1;
             }
         }
@@ -79,7 +84,11 @@ impl TokenCache {
     }
 
     /// Get symbol mapping (cache-first, then MongoDB, then static parser)
-    pub async fn get(&self, symbol: &str, exchange: crate::types::Exchange) -> Option<(String, String)> {
+    pub async fn get(
+        &self,
+        symbol: &str,
+        exchange: crate::types::Exchange,
+    ) -> Option<(String, String)> {
         // 1. Check cache first
         if let Some(mapping) = self.cache.get(symbol).await {
             return Some(mapping);
@@ -107,7 +116,11 @@ impl TokenCache {
     }
 
     /// Lookup symbol in MongoDB
-    async fn lookup_mongo(&self, client: &Client, symbol: &str) -> Result<(String, String), Box<dyn std::error::Error + Send + Sync>> {
+    async fn lookup_mongo(
+        &self,
+        client: &Client,
+        symbol: &str,
+    ) -> Result<(String, String), Box<dyn std::error::Error + Send + Sync>> {
         let db = client.database("codys");
         let collection = db.collection::<mongodb::bson::Document>("tokens");
 

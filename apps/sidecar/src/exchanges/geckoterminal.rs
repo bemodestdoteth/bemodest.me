@@ -1,19 +1,19 @@
-use std::collections::HashMap;
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
-use tokio::sync::broadcast;
-use serde_json::Value;
-use log::{info, warn, error};
 use async_trait::async_trait;
-use mongodb::{Client, bson::doc};
 use futures_util::TryStreamExt;
+use log::{error, info, warn};
+use mongodb::{bson::doc, Client};
+use serde_json::Value;
+use std::collections::HashMap;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
+use tokio::sync::broadcast;
 
-use crate::types::{Exchange as ExchangeType, NormalizedTicker, now_micros};
 use crate::cache::LatestValueCache;
 use crate::cache::TokenAnnotationCache;
 use crate::config::Config;
 use crate::exchanges::Exchange;
+use crate::types::{now_micros, Exchange as ExchangeType, NormalizedTicker};
 
 const GECKOTERMINAL_BASE_URL: &str = "https://api.geckoterminal.com/api/v2/networks";
 const MAX_ADDRESSES_PER_REQUEST: usize = 30;
@@ -69,7 +69,13 @@ impl GeckoterminalExchange {
         }
     }
 
-    async fn load_contract_mappings(&mut self) -> Option<(HashMap<String, Vec<String>>, HashMap<String, String>, HashMap<String, String>)> {
+    async fn load_contract_mappings(
+        &mut self,
+    ) -> Option<(
+        HashMap<String, Vec<String>>,
+        HashMap<String, String>,
+        HashMap<String, String>,
+    )> {
         let client = self.get_mongo_client().await?;
         let db = client.database("codys");
         let collection = db.collection::<mongodb::bson::Document>("tokens");
@@ -98,7 +104,7 @@ impl GeckoterminalExchange {
                             .entry(network.clone())
                             .or_insert_with(Vec::new)
                             .push(address.to_string());
-                        
+
                         let addr_key = format!("{}:{}", network, address.to_lowercase());
                         addr_to_symbol.insert(addr_key, symbol.to_string());
                     }
@@ -106,7 +112,11 @@ impl GeckoterminalExchange {
             }
         }
 
-        info!("[Geckoterminal] Loaded mappings for {} coins across {} networks", id_to_symbol.len(), network_to_addresses.len());
+        info!(
+            "[Geckoterminal] Loaded mappings for {} coins across {} networks",
+            id_to_symbol.len(),
+            network_to_addresses.len()
+        );
         Some((network_to_addresses, id_to_symbol, addr_to_symbol))
     }
 
@@ -149,13 +159,14 @@ impl Exchange for GeckoterminalExchange {
         let _tac = self.tac.clone();
         let _config = self.config.clone();
 
-        let (network_to_addresses, id_to_symbol, addr_to_symbol) = match self.load_contract_mappings().await {
-            Some(m) => m,
-            None => {
-                error!("[Geckoterminal] Could not load initial mappings. Poller won't start.");
-                return;
-            }
-        };
+        let (network_to_addresses, id_to_symbol, addr_to_symbol) =
+            match self.load_contract_mappings().await {
+                Some(m) => m,
+                None => {
+                    error!("[Geckoterminal] Could not load initial mappings. Poller won't start.");
+                    return;
+                }
+            };
 
         let gt_to_caip2 = self.load_caip_mappings().await;
         connected.store(true, Ordering::SeqCst);
@@ -172,30 +183,43 @@ impl Exchange for GeckoterminalExchange {
                 for (network, addresses) in &network_to_addresses {
                     for chunk in addresses.chunks(MAX_ADDRESSES_PER_REQUEST) {
                         let address_list = chunk.join(",");
-                        let url = format!("{}/{}/tokens/multi/{}", GECKOTERMINAL_BASE_URL, network, address_list);
-                        
+                        let url = format!(
+                            "{}/{}/tokens/multi/{}",
+                            GECKOTERMINAL_BASE_URL, network, address_list
+                        );
+
                         let mut success = false;
                         let mut backoff = INITIAL_RETRY_DELAY_MS;
 
                         for attempt in 1..=MAX_RETRY_ATTEMPTS {
-                            match client.get(&url)
+                            match client
+                                .get(&url)
                                 .header("Accept", "application/json")
                                 .header("User-Agent", "Mozilla/5.0")
                                 .send()
-                                .await 
+                                .await
                             {
                                 Ok(resp) => {
                                     if resp.status().is_success() {
                                         if let Ok(json) = resp.json::<Value>().await {
-                                            if let Some(data) = json.get("data").and_then(|v| v.as_array()) {
+                                            if let Some(data) =
+                                                json.get("data").and_then(|v| v.as_array())
+                                            {
                                                 for item in data {
-                                                    if let Some(normalized) = normalize_gt_token(item, network, &id_to_symbol, &addr_to_symbol) {
+                                                    if let Some(normalized) = normalize_gt_token(
+                                                        item,
+                                                        network,
+                                                        &id_to_symbol,
+                                                        &addr_to_symbol,
+                                                    ) {
                                                         let payload = serde_json::json!({
                                                             "type": "normalized_ticker",
                                                             "source": format!("dex_{}", gt_to_caip2.get(network).unwrap_or(network).replace(":", "_")),
                                                             "data": &normalized
                                                         });
-                                                        if let Ok(s) = serde_json::to_string(&payload) {
+                                                        if let Ok(s) =
+                                                            serde_json::to_string(&payload)
+                                                        {
                                                             let _ = tx.send(s);
                                                         }
                                                     }
@@ -204,10 +228,15 @@ impl Exchange for GeckoterminalExchange {
                                                 break;
                                             }
                                         }
-                                    } else if resp.status().as_u16() == 429 || resp.status().as_u16() >= 500 {
+                                    } else if resp.status().as_u16() == 429
+                                        || resp.status().as_u16() >= 500
+                                    {
                                         warn!("[Geckoterminal] Attempt {} failed with status {}. Retrying in {}ms...", attempt, resp.status(), backoff);
                                     } else {
-                                        warn!("[Geckoterminal] Non-retryable error: {}", resp.status());
+                                        warn!(
+                                            "[Geckoterminal] Non-retryable error: {}",
+                                            resp.status()
+                                        );
                                         break;
                                     }
                                 }
@@ -223,14 +252,17 @@ impl Exchange for GeckoterminalExchange {
                         }
 
                         if !success {
-                            error!("[Geckoterminal] Failed to fetch tokens for {} after {} attempts", network, MAX_RETRY_ATTEMPTS);
+                            error!(
+                                "[Geckoterminal] Failed to fetch tokens for {} after {} attempts",
+                                network, MAX_RETRY_ATTEMPTS
+                            );
                         }
 
                         // Respect rate limit between chunks
                         tokio::time::sleep(Duration::from_millis(WORKER_POLL_DELAY_MS)).await;
                     }
                 }
-                
+
                 // End of all networks cycle, optional delay before restart
                 tokio::time::sleep(Duration::from_secs(10)).await;
             }
@@ -246,22 +278,33 @@ fn resolve_base_symbol(
     attrs: &Value,
     network: &str,
     id_to_symbol: &HashMap<String, String>,
-    addr_to_symbol: &HashMap<String, String>
+    addr_to_symbol: &HashMap<String, String>,
 ) -> String {
-    let coingecko_id = attrs.get("coingecko_coin_id").and_then(|v| v.as_str()).unwrap_or("");
+    let coingecko_id = attrs
+        .get("coingecko_coin_id")
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
     if !coingecko_id.is_empty() {
         if let Some(sym) = id_to_symbol.get(coingecko_id) {
             return sym.to_uppercase();
         }
     }
 
-    let addr = attrs.get("address").and_then(|v| v.as_str()).unwrap_or("").to_lowercase();
+    let addr = attrs
+        .get("address")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_lowercase();
     let addr_key = format!("{}:{}", network, addr);
     if let Some(sym) = addr_to_symbol.get(&addr_key) {
         return sym.to_uppercase();
     }
 
-    let raw = attrs.get("symbol").and_then(|v| v.as_str()).unwrap_or("").to_uppercase();
+    let raw = attrs
+        .get("symbol")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_uppercase();
     if raw.starts_with('W') && raw.len() > 1 {
         raw[1..].to_string()
     } else {
@@ -282,13 +325,15 @@ fn normalize_gt_token(
     let base = resolve_base_symbol(attrs, network, id_to_symbol, addr_to_symbol);
     let now = chrono::Utc::now().timestamp_millis();
 
-    let v_quote: f64 = attrs.get("volume_usd")
+    let v_quote: f64 = attrs
+        .get("volume_usd")
         .and_then(|v| v.get("h24"))
         .and_then(|v| v.as_str())
         .and_then(|s| s.parse().ok())
         .unwrap_or(0.0);
 
-    let liquidity: Option<f64> = attrs.get("total_reserve_in_usd")
+    let liquidity: Option<f64> = attrs
+        .get("total_reserve_in_usd")
         .and_then(|v| v.as_str())
         .and_then(|s| s.parse().ok());
 

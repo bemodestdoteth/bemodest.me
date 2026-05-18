@@ -1,13 +1,13 @@
-use tokio::time::{sleep, Duration};
-use serde_json::Value;
-use log::{info, warn};
-use std::sync::Arc;
-use crate::normalizer::bitget::normalize_bitget_f_ticker;
 use crate::cache::lvc::LatestValueCache;
-use crate::cache::TokenAnnotationCache;
 use crate::cache::MarketCache;
-use crate::exchanges::batcher::TickerBatcher;
+use crate::cache::TokenAnnotationCache;
 use crate::config::Config;
+use crate::exchanges::batcher::TickerBatcher;
+use crate::normalizer::bitget::normalize_bitget_f_ticker;
+use log::{info, warn};
+use serde_json::Value;
+use std::sync::Arc;
+use tokio::time::{sleep, Duration};
 
 pub const TICKER_STREAM_URL: &str = "wss://ws.bitget.com/v3/ws/public";
 const SUBSCRIBE_BATCH_SIZE: usize = 100;
@@ -18,7 +18,10 @@ pub async fn wait_for_market_cache(market_cache: &Arc<MarketCache>) {
     loop {
         let symbols = market_cache.get_bitget_f_markets().await;
         if !symbols.is_empty() {
-            info!("[BitgetFExchange] Market cache ready with {} base coins", symbols.len());
+            info!(
+                "[BitgetFExchange] Market cache ready with {} base coins",
+                symbols.len()
+            );
             break;
         }
         if waited >= 30_000 {
@@ -48,13 +51,23 @@ pub fn handle_message(
             Some(a) => a,
             None => return,
         };
-        let channel = arg.get("channel").or_else(|| arg.get("topic")).and_then(|v| v.as_str()).unwrap_or("");
+        let channel = arg
+            .get("channel")
+            .or_else(|| arg.get("topic"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("");
         if channel != "ticker" {
             return;
         }
 
         if let Some(mut ticker) = normalize_bitget_f_ticker(&raw) {
-            if config.excludelist.read().unwrap().iter().any(|ex| ticker.base.starts_with(ex)) {
+            if config
+                .excludelist
+                .read()
+                .unwrap()
+                .iter()
+                .any(|ex| ticker.base.starts_with(ex))
+            {
                 return;
             }
             ticker.base = tac.resolve_ticker_base(&ticker.exchange, &ticker.raw_base, &ticker.base);
@@ -69,17 +82,24 @@ pub fn handle_message(
     }
 }
 
-pub async fn subscription_factory(market_cache: Arc<MarketCache>) -> Option<Vec<serde_json::Value>> {
+pub async fn subscription_factory(
+    market_cache: Arc<MarketCache>,
+) -> Option<Vec<serde_json::Value>> {
     let base_coins = market_cache.get_bitget_f_markets().await;
     if base_coins.is_empty() {
         return None;
     }
-    let args: Vec<Value> = base_coins.iter().map(|base| serde_json::json!({
-        "instType": "usdt-futures",
-        "topic": "ticker",
-        "symbol": format!("{}USDT", base)
-    })).collect();
-    
+    let args: Vec<Value> = base_coins
+        .iter()
+        .map(|base| {
+            serde_json::json!({
+                "instType": "usdt-futures",
+                "topic": "ticker",
+                "symbol": format!("{}USDT", base)
+            })
+        })
+        .collect();
+
     let mut msgs = Vec::new();
     for chunk in args.chunks(SUBSCRIBE_BATCH_SIZE) {
         msgs.push(serde_json::json!({
@@ -89,4 +109,3 @@ pub async fn subscription_factory(market_cache: Arc<MarketCache>) -> Option<Vec<
     }
     Some(msgs)
 }
-

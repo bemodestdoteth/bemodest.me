@@ -12,7 +12,6 @@ import { debounce } from '../utils/debounce';
 import { ExtensionFormDraftSchema, type ExtensionFormDraft } from '@bemodest/types';
 import { getSelectedChainsFromUI, setSelectedChainsInUI } from '../shared/labels';
 
-const API_URL = "http://localhost:25833"; // TODO: Make dynamic based on environment
 const STORAGE_KEY_TOKEN = 'jwt_token';
 
 /**
@@ -52,9 +51,11 @@ async function fetchExtensionToken(): Promise<void> {
             throw new Error('No active tab found');
         }
 
-        // Check if tab URL is the web app
-        if (!tab.url?.includes('localhost:25833')) {
-            throw new Error('Please open the web app (localhost:25833) and click "Extension Token" button');
+        // Check if tab URL is the web app (dev or prod)
+        const isDevUrl = tab.url?.includes('localhost:25833');
+        const isProdUrl = tab.url?.includes('api.bemodest.me');
+        if (!isDevUrl && !isProdUrl) {
+            throw new Error('Please open the web app and click "Extension Token" button');
         }
 
         // Token will be received via background script's message listener
@@ -480,10 +481,18 @@ window.addEventListener('load', async () => {
     entities.setupFormSubmitHandler();
 
     chains.setupFormHandlers();
-    chains.renderChainList(window.chainManager.getAllChains());
+    chains.renderChainList(window.chainManager?.getAllChains() ?? []);
 
     // Initial labels list update
     labels.updateLabelsList();
+
+    // Retry data fetch when WS connects after popup open (handles delayed WS connection)
+    chrome.runtime.onMessage.addListener((request) => {
+        if (request.type === 'ws-event' && request.event === 'statusChange' && request.data?.connected) {
+            labels.fetchDataFromServer();
+            entities.fetchDataFromServer();
+        }
+    });
 
     // Load draft state
     await loadDraftState(labels, entities, chains);

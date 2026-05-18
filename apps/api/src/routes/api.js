@@ -229,7 +229,6 @@ export const removeFront = async (req, res) => {
         await dbClient.deleteMany(COLLECTION_ADDRS, { addr: { $in: addresses } });
 
         const result = await dbClient.readMany(COLLECTION_ADDRS, {}, { projection: { _id: 0 } });
-        await dbClient.enrichLabelsWithEntityImages(result, COLLECTION_ENTITES);
 
         const io = getIO();
         if (io) {
@@ -342,7 +341,7 @@ export const getMarketMetadata = async (req, res) => {
         });
 
         const chains = await dbClient.readMany('chains', {}, {
-            projection: { caip2: 1, 'annotation.code': 1, _id: 0 }
+            projection: { caip2: 1, code: 1, _id: 0 }
         });
 
 
@@ -359,7 +358,7 @@ export const getMarketMetadata = async (req, res) => {
         const caipMap = {};
         for (const chain of chains) {
             if (chain.caip2) {
-                caipMap[chain.caip2] = chain.annotation?.code || chain.name;
+                caipMap[chain.caip2] = chain.code || chain.name;
             }
         }
 
@@ -454,21 +453,33 @@ export const getDwStatus = async (req, res) => {
     if (!ticker) return res.status(400).json({ error: 'ticker required' });
 
     const SCAN_TIMEOUT_MS = 10_000;
+    const MAX_SCAN_KEYS = 5_000;
+
+    let timeoutId;
+    let stream;
 
     try {
         const redis = getRedisClient();
         const pattern = `dw:*:*:${ticker.toUpperCase()}`;
         const keys = [];
-        const stream = redis.scanStream({ match: pattern, count: 100 });
-        stream.on('data', chunk => keys.push(...chunk));
+        stream = redis.scanStream({ match: pattern, count: 100 });
+        stream.on('data', chunk => {
+            keys.push(...chunk);
+            if (keys.length > MAX_SCAN_KEYS) {
+                stream.destroy(new Error('scanStream key limit exceeded'));
+            }
+        });
         await Promise.race([
             new Promise((resolve, reject) => {
                 stream.on('end', resolve);
                 stream.on('error', reject);
             }),
-            new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('scanStream timeout')), SCAN_TIMEOUT_MS)
-            ),
+            new Promise((_, reject) => {
+                timeoutId = setTimeout(() => {
+                    stream.destroy(new Error('scanStream timeout'));
+                    reject(new Error('scanStream timeout'));
+                }, SCAN_TIMEOUT_MS);
+            }),
         ]);
 
         if (keys.length === 0) return res.json({ success: true, data: [] });
@@ -483,6 +494,9 @@ export const getDwStatus = async (req, res) => {
     } catch (err) {
         logger.error(`getDwStatus Error: ${err.message}`);
         res.status(500).json({ success: false, message: 'Internal error' });
+    } finally {
+        if (timeoutId) clearTimeout(timeoutId);
+        if (stream && !stream.destroyed) stream.destroy();
     }
 };
 

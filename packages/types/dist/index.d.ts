@@ -14,11 +14,11 @@ export declare const AliasSchema: z.ZodObject<{
     name: z.ZodString;
     chain: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    chain: string;
     name: string;
+    chain: string;
 }, {
-    chain: string;
     name: string;
+    chain: string;
 }>;
 export declare const LabelSchema: z.ZodObject<{
     addr: z.ZodString;
@@ -30,23 +30,23 @@ export declare const LabelSchema: z.ZodObject<{
     tracking: z.ZodDefault<z.ZodBoolean>;
     comment: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    label: string;
     chain: string;
     addr: string;
+    label: string;
     tracking: boolean;
     code?: string | undefined;
     entity?: string | undefined;
     entityImage?: string | undefined;
     comment?: string | undefined;
 }, {
-    label: string;
     chain: string;
     addr: string;
+    label: string;
     code?: string | undefined;
     entity?: string | undefined;
     entityImage?: string | undefined;
-    comment?: string | undefined;
     tracking?: boolean | undefined;
+    comment?: string | undefined;
 }>;
 export type Label = z.infer<typeof LabelSchema>;
 export declare const EntitySchema: z.ZodObject<{
@@ -64,8 +64,8 @@ export declare const EntitySchema: z.ZodObject<{
 }, {
     code: string;
     name: string;
-    comment?: string | undefined;
     tracking?: boolean | undefined;
+    comment?: string | undefined;
     image?: string | undefined;
 }>;
 export type Entity = z.infer<typeof EntitySchema>;
@@ -220,27 +220,27 @@ export declare const EntityInsertSchema: z.ZodObject<{
         comment: z.ZodDefault<z.ZodOptional<z.ZodString>>;
         tracking: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
     }, "strip", z.ZodTypeAny, {
-        comment: string;
         tracking: boolean;
+        comment: string;
         image: string;
         imageFilename?: string | undefined;
     }, {
-        comment?: string | undefined;
         tracking?: boolean | undefined;
+        comment?: string | undefined;
         image?: string | undefined;
         imageFilename?: string | undefined;
     }>>;
 }, "strip", z.ZodTypeAny, {
     body: Record<string, {
-        comment: string;
         tracking: boolean;
+        comment: string;
         image: string;
         imageFilename?: string | undefined;
     }>;
 }, {
     body: Record<string, {
-        comment?: string | undefined;
         tracking?: boolean | undefined;
+        comment?: string | undefined;
         image?: string | undefined;
         imageFilename?: string | undefined;
     }>;
@@ -272,24 +272,24 @@ export declare const EntityUpdateSchema: z.ZodObject<{
         tracking: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
     }, "strip", z.ZodTypeAny, {
         name: string;
-        comment: string;
         tracking: boolean;
+        comment: string;
         image: string;
         originalName: string;
         imageFilename?: string | undefined;
     }, {
         name: string;
         originalName: string;
-        comment?: string | undefined;
         tracking?: boolean | undefined;
+        comment?: string | undefined;
         image?: string | undefined;
         imageFilename?: string | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
     body: {
         name: string;
-        comment: string;
         tracking: boolean;
+        comment: string;
         image: string;
         originalName: string;
         imageFilename?: string | undefined;
@@ -298,8 +298,8 @@ export declare const EntityUpdateSchema: z.ZodObject<{
     body: {
         name: string;
         originalName: string;
-        comment?: string | undefined;
         tracking?: boolean | undefined;
+        comment?: string | undefined;
         image?: string | undefined;
         imageFilename?: string | undefined;
     };
@@ -323,46 +323,46 @@ export declare const LabelInsertSchema: z.ZodObject<{
             name: z.ZodString;
             chain: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            chain: string;
             name: string;
+            chain: string;
         }, {
-            chain: string;
             name: string;
+            chain: string;
         }>, "many">>>;
     }, "strip", z.ZodTypeAny, {
-        label: string;
         addr: string;
-        chains: string[];
+        label: string;
         entity: string;
-        comment: string;
         tracking: boolean;
+        comment: string;
+        chains: string[];
         aliases: {
-            chain: string;
             name: string;
+            chain: string;
         }[];
     }, {
         addr: string;
         chains: string[];
         label?: string | undefined;
         entity?: string | undefined;
-        comment?: string | undefined;
         tracking?: boolean | undefined;
+        comment?: string | undefined;
         aliases?: {
-            chain: string;
             name: string;
+            chain: string;
         }[] | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
     body: {
-        label: string;
         addr: string;
-        chains: string[];
+        label: string;
         entity: string;
-        comment: string;
         tracking: boolean;
+        comment: string;
+        chains: string[];
         aliases: {
-            chain: string;
             name: string;
+            chain: string;
         }[];
     };
 }, {
@@ -371,11 +371,11 @@ export declare const LabelInsertSchema: z.ZodObject<{
         chains: string[];
         label?: string | undefined;
         entity?: string | undefined;
-        comment?: string | undefined;
         tracking?: boolean | undefined;
+        comment?: string | undefined;
         aliases?: {
-            chain: string;
             name: string;
+            chain: string;
         }[] | undefined;
     };
 }>;
@@ -392,22 +392,22 @@ export declare const LabelUpdateSchema: z.ZodObject<{
             name: z.ZodString;
             chain: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            chain: string;
             name: string;
+            chain: string;
         }, {
-            chain: string;
             name: string;
+            chain: string;
         }>, "many">>>;
     }, "strip", z.ZodTypeAny, {
-        label: string;
         addr: string;
-        chains: string[];
+        label: string;
         entity: string;
-        comment: string;
         tracking: boolean;
+        comment: string;
+        chains: string[];
         aliases: {
-            chain: string;
             name: string;
+            chain: string;
         }[];
         originalAddr: string;
     }, {
@@ -416,24 +416,24 @@ export declare const LabelUpdateSchema: z.ZodObject<{
         originalAddr: string;
         label?: string | undefined;
         entity?: string | undefined;
-        comment?: string | undefined;
         tracking?: boolean | undefined;
+        comment?: string | undefined;
         aliases?: {
-            chain: string;
             name: string;
+            chain: string;
         }[] | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
     body: {
-        label: string;
         addr: string;
-        chains: string[];
+        label: string;
         entity: string;
-        comment: string;
         tracking: boolean;
+        comment: string;
+        chains: string[];
         aliases: {
-            chain: string;
             name: string;
+            chain: string;
         }[];
         originalAddr: string;
     };
@@ -444,11 +444,11 @@ export declare const LabelUpdateSchema: z.ZodObject<{
         originalAddr: string;
         label?: string | undefined;
         entity?: string | undefined;
-        comment?: string | undefined;
         tracking?: boolean | undefined;
+        comment?: string | undefined;
         aliases?: {
-            chain: string;
             name: string;
+            chain: string;
         }[] | undefined;
     };
 }>;
@@ -481,59 +481,59 @@ export declare const LabelInsertBulkSchema: z.ZodObject<{
             name: z.ZodString;
             chain: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            chain: string;
             name: string;
+            chain: string;
         }, {
-            chain: string;
             name: string;
+            chain: string;
         }>, "many">>>;
     }, "strip", z.ZodTypeAny, {
-        label: string;
         addr: string;
-        chains: string[];
+        label: string;
         entity: string;
-        comment: string;
         tracking: boolean;
+        comment: string;
+        chains: string[];
         aliases: {
-            chain: string;
             name: string;
+            chain: string;
         }[];
     }, {
-        label: string;
         addr: string;
+        label: string;
         chains: string[];
         entity?: string | undefined;
-        comment?: string | undefined;
         tracking?: boolean | undefined;
+        comment?: string | undefined;
         aliases?: {
-            chain: string;
             name: string;
+            chain: string;
         }[] | undefined;
     }>, "many">;
 }, "strip", z.ZodTypeAny, {
     body: {
-        label: string;
         addr: string;
-        chains: string[];
+        label: string;
         entity: string;
-        comment: string;
         tracking: boolean;
+        comment: string;
+        chains: string[];
         aliases: {
-            chain: string;
             name: string;
+            chain: string;
         }[];
     }[];
 }, {
     body: {
-        label: string;
         addr: string;
+        label: string;
         chains: string[];
         entity?: string | undefined;
-        comment?: string | undefined;
         tracking?: boolean | undefined;
+        comment?: string | undefined;
         aliases?: {
-            chain: string;
             name: string;
+            chain: string;
         }[] | undefined;
     }[];
 }>;
@@ -567,23 +567,22 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
         memoRegexPatterns: z.ZodDefault<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
         block_time: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
-        annotation: z.ZodObject<{
+        code: z.ZodString;
+        annotation: z.ZodOptional<z.ZodObject<{
             geckoterminal: z.ZodOptional<z.ZodString>;
-            code: z.ZodString;
         }, "passthrough", z.ZodTypeAny, z.objectOutputType<{
             geckoterminal: z.ZodOptional<z.ZodString>;
-            code: z.ZodString;
         }, z.ZodTypeAny, "passthrough">, z.objectInputType<{
             geckoterminal: z.ZodOptional<z.ZodString>;
-            code: z.ZodString;
-        }, z.ZodTypeAny, "passthrough">>;
+        }, z.ZodTypeAny, "passthrough">>>;
         status: z.ZodDefault<z.ZodOptional<z.ZodEnum<["active", "deprecated"]>>>;
         supersededBy: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
+        code: string;
         status: "active" | "deprecated";
-        caip2: string;
-        chain: string;
         name: string;
+        chain: string;
+        caip2: string;
         isTestnet: boolean;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -593,32 +592,24 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired: boolean;
         memoRegexPatterns: string[];
         block_time: number;
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
         symbol?: string | undefined;
         chainId?: number | undefined;
         gasPriceGwei?: number | null | undefined;
         rpc?: string[] | undefined;
         wsRpc?: string[] | undefined;
+        annotation?: z.objectOutputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     }, {
-        caip2: string;
-        chain: string;
+        code: string;
         name: string;
+        chain: string;
+        caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
         fontColor: "#EFEFEF" | "#303030";
         addrRegexPatterns: string[];
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
         symbol?: string | undefined;
         status?: "active" | "deprecated" | undefined;
         chainId?: number | undefined;
@@ -630,14 +621,18 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired?: boolean | undefined;
         memoRegexPatterns?: string[] | undefined;
         block_time?: number | undefined;
+        annotation?: z.objectInputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
     body: {
+        code: string;
         status: "active" | "deprecated";
-        caip2: string;
-        chain: string;
         name: string;
+        chain: string;
+        caip2: string;
         isTestnet: boolean;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -647,34 +642,26 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired: boolean;
         memoRegexPatterns: string[];
         block_time: number;
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
         symbol?: string | undefined;
         chainId?: number | undefined;
         gasPriceGwei?: number | null | undefined;
         rpc?: string[] | undefined;
         wsRpc?: string[] | undefined;
+        annotation?: z.objectOutputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     };
 }, {
     body: {
-        caip2: string;
-        chain: string;
+        code: string;
         name: string;
+        chain: string;
+        caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
         fontColor: "#EFEFEF" | "#303030";
         addrRegexPatterns: string[];
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
         symbol?: string | undefined;
         status?: "active" | "deprecated" | undefined;
         chainId?: number | undefined;
@@ -686,14 +673,18 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired?: boolean | undefined;
         memoRegexPatterns?: string[] | undefined;
         block_time?: number | undefined;
+        annotation?: z.objectInputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     };
 }>, {
     body: {
+        code: string;
         status: "active" | "deprecated";
-        caip2: string;
-        chain: string;
         name: string;
+        chain: string;
+        caip2: string;
         isTestnet: boolean;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -703,34 +694,26 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired: boolean;
         memoRegexPatterns: string[];
         block_time: number;
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
         symbol?: string | undefined;
         chainId?: number | undefined;
         gasPriceGwei?: number | null | undefined;
         rpc?: string[] | undefined;
         wsRpc?: string[] | undefined;
+        annotation?: z.objectOutputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     };
 }, {
     body: {
-        caip2: string;
-        chain: string;
+        code: string;
         name: string;
+        chain: string;
+        caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
         fontColor: "#EFEFEF" | "#303030";
         addrRegexPatterns: string[];
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
         symbol?: string | undefined;
         status?: "active" | "deprecated" | undefined;
         chainId?: number | undefined;
@@ -742,14 +725,18 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired?: boolean | undefined;
         memoRegexPatterns?: string[] | undefined;
         block_time?: number | undefined;
+        annotation?: z.objectInputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     };
 }>, {
     body: {
+        code: string;
         status: "active" | "deprecated";
-        caip2: string;
-        chain: string;
         name: string;
+        chain: string;
+        caip2: string;
         isTestnet: boolean;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -759,34 +746,26 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired: boolean;
         memoRegexPatterns: string[];
         block_time: number;
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
         symbol?: string | undefined;
         chainId?: number | undefined;
         gasPriceGwei?: number | null | undefined;
         rpc?: string[] | undefined;
         wsRpc?: string[] | undefined;
+        annotation?: z.objectOutputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     };
 }, {
     body: {
-        caip2: string;
-        chain: string;
+        code: string;
         name: string;
+        chain: string;
+        caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
         fontColor: "#EFEFEF" | "#303030";
         addrRegexPatterns: string[];
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
         symbol?: string | undefined;
         status?: "active" | "deprecated" | undefined;
         chainId?: number | undefined;
@@ -798,6 +777,9 @@ export declare const ChainInsertSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired?: boolean | undefined;
         memoRegexPatterns?: string[] | undefined;
         block_time?: number | undefined;
+        annotation?: z.objectInputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     };
 }>;
@@ -822,24 +804,20 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired: z.ZodDefault<z.ZodOptional<z.ZodBoolean>>;
         memoRegexPatterns: z.ZodDefault<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
         block_time: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
-        annotation: z.ZodObject<{
+        annotation: z.ZodOptional<z.ZodObject<{
             geckoterminal: z.ZodOptional<z.ZodString>;
-            code: z.ZodString;
         }, "passthrough", z.ZodTypeAny, z.objectOutputType<{
             geckoterminal: z.ZodOptional<z.ZodString>;
-            code: z.ZodString;
         }, z.ZodTypeAny, "passthrough">, z.objectInputType<{
             geckoterminal: z.ZodOptional<z.ZodString>;
-            code: z.ZodString;
-        }, z.ZodTypeAny, "passthrough">>;
+        }, z.ZodTypeAny, "passthrough">>>;
         status: z.ZodDefault<z.ZodOptional<z.ZodEnum<["active", "deprecated"]>>>;
         supersededBy: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         status: "active" | "deprecated";
-        _id: string | number;
-        caip2: string;
-        chain: string;
         name: string;
+        chain: string;
+        caip2: string;
         isTestnet: boolean;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -849,34 +827,26 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired: boolean;
         memoRegexPatterns: string[];
         block_time: number;
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
+        _id: string | number;
         symbol?: string | undefined;
         code?: string | undefined;
         chainId?: number | undefined;
         gasPriceGwei?: number | null | undefined;
         rpc?: string[] | undefined;
         wsRpc?: string[] | undefined;
+        annotation?: z.objectOutputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     }, {
-        _id: string | number;
-        caip2: string;
-        chain: string;
         name: string;
+        chain: string;
+        caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
         fontColor: "#EFEFEF" | "#303030";
         addrRegexPatterns: string[];
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
+        _id: string | number;
         symbol?: string | undefined;
         code?: string | undefined;
         status?: "active" | "deprecated" | undefined;
@@ -889,15 +859,17 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired?: boolean | undefined;
         memoRegexPatterns?: string[] | undefined;
         block_time?: number | undefined;
+        annotation?: z.objectInputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
     body: {
         status: "active" | "deprecated";
-        _id: string | number;
-        caip2: string;
-        chain: string;
         name: string;
+        chain: string;
+        caip2: string;
         isTestnet: boolean;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -907,36 +879,28 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired: boolean;
         memoRegexPatterns: string[];
         block_time: number;
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
+        _id: string | number;
         symbol?: string | undefined;
         code?: string | undefined;
         chainId?: number | undefined;
         gasPriceGwei?: number | null | undefined;
         rpc?: string[] | undefined;
         wsRpc?: string[] | undefined;
+        annotation?: z.objectOutputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     };
 }, {
     body: {
-        _id: string | number;
-        caip2: string;
-        chain: string;
         name: string;
+        chain: string;
+        caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
         fontColor: "#EFEFEF" | "#303030";
         addrRegexPatterns: string[];
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
+        _id: string | number;
         symbol?: string | undefined;
         code?: string | undefined;
         status?: "active" | "deprecated" | undefined;
@@ -949,15 +913,17 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired?: boolean | undefined;
         memoRegexPatterns?: string[] | undefined;
         block_time?: number | undefined;
+        annotation?: z.objectInputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     };
 }>, {
     body: {
         status: "active" | "deprecated";
-        _id: string | number;
-        caip2: string;
-        chain: string;
         name: string;
+        chain: string;
+        caip2: string;
         isTestnet: boolean;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -967,36 +933,28 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired: boolean;
         memoRegexPatterns: string[];
         block_time: number;
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
+        _id: string | number;
         symbol?: string | undefined;
         code?: string | undefined;
         chainId?: number | undefined;
         gasPriceGwei?: number | null | undefined;
         rpc?: string[] | undefined;
         wsRpc?: string[] | undefined;
+        annotation?: z.objectOutputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     };
 }, {
     body: {
-        _id: string | number;
-        caip2: string;
-        chain: string;
         name: string;
+        chain: string;
+        caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
         fontColor: "#EFEFEF" | "#303030";
         addrRegexPatterns: string[];
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
+        _id: string | number;
         symbol?: string | undefined;
         code?: string | undefined;
         status?: "active" | "deprecated" | undefined;
@@ -1009,15 +967,17 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired?: boolean | undefined;
         memoRegexPatterns?: string[] | undefined;
         block_time?: number | undefined;
+        annotation?: z.objectInputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     };
 }>, {
     body: {
         status: "active" | "deprecated";
-        _id: string | number;
-        caip2: string;
-        chain: string;
         name: string;
+        chain: string;
+        caip2: string;
         isTestnet: boolean;
         blockExplorerPrefix: string;
         bgColor: string;
@@ -1027,36 +987,28 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired: boolean;
         memoRegexPatterns: string[];
         block_time: number;
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
+        _id: string | number;
         symbol?: string | undefined;
         code?: string | undefined;
         chainId?: number | undefined;
         gasPriceGwei?: number | null | undefined;
         rpc?: string[] | undefined;
         wsRpc?: string[] | undefined;
+        annotation?: z.objectOutputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     };
 }, {
     body: {
-        _id: string | number;
-        caip2: string;
-        chain: string;
         name: string;
+        chain: string;
+        caip2: string;
         blockExplorerPrefix: string;
         bgColor: string;
         fontColor: "#EFEFEF" | "#303030";
         addrRegexPatterns: string[];
-        annotation: {
-            code: string;
-            geckoterminal?: string | undefined;
-        } & {
-            [k: string]: unknown;
-        };
+        _id: string | number;
         symbol?: string | undefined;
         code?: string | undefined;
         status?: "active" | "deprecated" | undefined;
@@ -1069,6 +1021,9 @@ export declare const ChainUpdateSchema: z.ZodEffects<z.ZodEffects<z.ZodObject<{
         memoRequired?: boolean | undefined;
         memoRegexPatterns?: string[] | undefined;
         block_time?: number | undefined;
+        annotation?: z.objectInputType<{
+            geckoterminal: z.ZodOptional<z.ZodString>;
+        }, z.ZodTypeAny, "passthrough"> | undefined;
         supersededBy?: string | undefined;
     };
 }>;
@@ -1095,25 +1050,25 @@ export declare const DwStatusBodySchema: z.ZodObject<{
     ticker: z.ZodString;
     status: z.ZodEnum<["both", "deposit_only", "withdraw_only", "suspended"]>;
 }, "strip", z.ZodTypeAny, {
-    status: "both" | "deposit_only" | "withdraw_only" | "suspended";
-    ticker: string;
     exchange: string;
+    status: "both" | "deposit_only" | "withdraw_only" | "suspended";
     network: string;
+    ticker: string;
 }, {
-    status: "both" | "deposit_only" | "withdraw_only" | "suspended";
-    ticker: string;
     exchange: string;
+    status: "both" | "deposit_only" | "withdraw_only" | "suspended";
     network: string;
+    ticker: string;
 }>;
 export declare const DwDeepDiveTaskSchema: z.ZodObject<{
     ticker: z.ZodString;
     exchanges: z.ZodArray<z.ZodString, "many">;
 }, "strip", z.ZodTypeAny, {
-    exchanges: string[];
     ticker: string;
+    exchanges: string[];
 }, {
-    exchanges: string[];
     ticker: string;
+    exchanges: string[];
 }>;
 export declare const DraftLabelFormSchema: z.ZodObject<{
     name: z.ZodOptional<z.ZodString>;
@@ -1126,33 +1081,33 @@ export declare const DraftLabelFormSchema: z.ZodObject<{
         name: z.ZodString;
         chain: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        chain: string;
         name: string;
+        chain: string;
     }, {
-        chain: string;
         name: string;
+        chain: string;
     }>, "many">>>;
     editingAddr: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     aliases: {
-        chain: string;
         name: string;
+        chain: string;
     }[];
     name?: string | undefined;
-    chains?: string[] | undefined;
     entity?: string | undefined;
     comment?: string | undefined;
+    chains?: string[] | undefined;
     address?: string | undefined;
     track?: boolean | undefined;
     editingAddr?: string | undefined;
 }, {
     name?: string | undefined;
-    chains?: string[] | undefined;
     entity?: string | undefined;
     comment?: string | undefined;
+    chains?: string[] | undefined;
     aliases?: {
-        chain: string;
         name: string;
+        chain: string;
     }[] | undefined;
     address?: string | undefined;
     track?: boolean | undefined;
@@ -1256,33 +1211,33 @@ export declare const ExtensionFormDraftSchema: z.ZodObject<{
             name: z.ZodString;
             chain: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            chain: string;
             name: string;
+            chain: string;
         }, {
-            chain: string;
             name: string;
+            chain: string;
         }>, "many">>>;
         editingAddr: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         aliases: {
-            chain: string;
             name: string;
+            chain: string;
         }[];
         name?: string | undefined;
-        chains?: string[] | undefined;
         entity?: string | undefined;
         comment?: string | undefined;
+        chains?: string[] | undefined;
         address?: string | undefined;
         track?: boolean | undefined;
         editingAddr?: string | undefined;
     }, {
         name?: string | undefined;
-        chains?: string[] | undefined;
         entity?: string | undefined;
         comment?: string | undefined;
+        chains?: string[] | undefined;
         aliases?: {
-            chain: string;
             name: string;
+            chain: string;
         }[] | undefined;
         address?: string | undefined;
         track?: boolean | undefined;
@@ -1400,13 +1355,13 @@ export declare const ExtensionFormDraftSchema: z.ZodObject<{
     } | undefined;
     labels?: {
         aliases: {
-            chain: string;
             name: string;
+            chain: string;
         }[];
         name?: string | undefined;
-        chains?: string[] | undefined;
         entity?: string | undefined;
         comment?: string | undefined;
+        chains?: string[] | undefined;
         address?: string | undefined;
         track?: boolean | undefined;
         editingAddr?: string | undefined;
@@ -1445,12 +1400,12 @@ export declare const ExtensionFormDraftSchema: z.ZodObject<{
     } | undefined;
     labels?: {
         name?: string | undefined;
-        chains?: string[] | undefined;
         entity?: string | undefined;
         comment?: string | undefined;
+        chains?: string[] | undefined;
         aliases?: {
-            chain: string;
             name: string;
+            chain: string;
         }[] | undefined;
         address?: string | undefined;
         track?: boolean | undefined;

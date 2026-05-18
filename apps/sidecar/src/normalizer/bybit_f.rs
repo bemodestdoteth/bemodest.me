@@ -1,9 +1,8 @@
 use crate::types::{
-    Exchange, NormalizedTicker,
-    parse_decimal, now_micros, strip_scale_factor, ExchangeExt
+    now_micros, parse_decimal, strip_scale_factor, Exchange, ExchangeExt, NormalizedTicker,
 };
-use serde_json::Value;
 use rust_decimal::prelude::ToPrimitive;
+use serde_json::Value;
 
 /// Normalize a single Bybit Futures linear ticker WebSocket message into [`NormalizedTicker`].
 ///
@@ -23,7 +22,10 @@ use rust_decimal::prelude::ToPrimitive;
 ///   },
 ///   "ts": 1673853746003,
 /// }
-pub fn normalize_bybit_f_ticker(raw: &Value, existing: Option<NormalizedTicker>) -> Option<NormalizedTicker> {
+pub fn normalize_bybit_f_ticker(
+    raw: &Value,
+    existing: Option<NormalizedTicker>,
+) -> Option<NormalizedTicker> {
     let msg_type = raw.get("type")?.as_str()?;
     let topic = raw.get("topic")?.as_str()?;
     let symbol = topic.strip_prefix("tickers.")?;
@@ -36,12 +38,24 @@ pub fn normalize_bybit_f_ticker(raw: &Value, existing: Option<NormalizedTicker>)
     let timestamp_ms = raw.get("ts")?.as_i64()?;
 
     if msg_type == "snapshot" {
-        let o = (parse_decimal(data.get("prevPrice24h")?.as_str()?)? / scale).to_f64().unwrap_or(0.0);
-        let h = (parse_decimal(data.get("highPrice24h")?.as_str()?)? / scale).to_f64().unwrap_or(0.0);
-        let l = (parse_decimal(data.get("lowPrice24h")?.as_str()?)? / scale).to_f64().unwrap_or(0.0);
-        let c = (parse_decimal(data.get("lastPrice")?.as_str()?)? / scale).to_f64().unwrap_or(0.0);
-        let v_base = parse_decimal(data.get("volume24h")?.as_str()?)?.to_f64().unwrap_or(0.0);
-        let v_quote = parse_decimal(data.get("turnover24h")?.as_str()?)?.to_f64().unwrap_or(0.0);
+        let o = (parse_decimal(data.get("prevPrice24h")?.as_str()?)? / scale)
+            .to_f64()
+            .unwrap_or(0.0);
+        let h = (parse_decimal(data.get("highPrice24h")?.as_str()?)? / scale)
+            .to_f64()
+            .unwrap_or(0.0);
+        let l = (parse_decimal(data.get("lowPrice24h")?.as_str()?)? / scale)
+            .to_f64()
+            .unwrap_or(0.0);
+        let c = (parse_decimal(data.get("lastPrice")?.as_str()?)? / scale)
+            .to_f64()
+            .unwrap_or(0.0);
+        let v_base = parse_decimal(data.get("volume24h")?.as_str()?)?
+            .to_f64()
+            .unwrap_or(0.0);
+        let v_quote = parse_decimal(data.get("turnover24h")?.as_str()?)?
+            .to_f64()
+            .unwrap_or(0.0);
 
         Some(NormalizedTicker {
             exchange: Exchange::BybitF,
@@ -67,13 +81,49 @@ pub fn normalize_bybit_f_ticker(raw: &Value, existing: Option<NormalizedTicker>)
         })
     } else if msg_type == "delta" {
         if let Some(mut ticker) = existing {
-            if let Some(val) = data.get("prevPrice24h").and_then(|v| v.as_str()).and_then(parse_decimal) { ticker.o = (val / scale).to_f64().unwrap_or(ticker.o); }
-            if let Some(val) = data.get("highPrice24h").and_then(|v| v.as_str()).and_then(parse_decimal) { ticker.h = (val / scale).to_f64().unwrap_or(ticker.h); }
-            if let Some(val) = data.get("lowPrice24h").and_then(|v| v.as_str()).and_then(parse_decimal) { ticker.l = (val / scale).to_f64().unwrap_or(ticker.l); }
-            if let Some(val) = data.get("lastPrice").and_then(|v| v.as_str()).and_then(parse_decimal) { ticker.c = (val / scale).to_f64().unwrap_or(ticker.c); }
-            if let Some(val) = data.get("volume24h").and_then(|v| v.as_str()).and_then(parse_decimal) { ticker.v_base = val.to_f64().unwrap_or(ticker.v_base); }
-            if let Some(val) = data.get("turnover24h").and_then(|v| v.as_str()).and_then(parse_decimal) { ticker.v_quote = val.to_f64().unwrap_or(ticker.v_quote); }
-            
+            if let Some(val) = data
+                .get("prevPrice24h")
+                .and_then(|v| v.as_str())
+                .and_then(parse_decimal)
+            {
+                ticker.o = (val / scale).to_f64().unwrap_or(ticker.o);
+            }
+            if let Some(val) = data
+                .get("highPrice24h")
+                .and_then(|v| v.as_str())
+                .and_then(parse_decimal)
+            {
+                ticker.h = (val / scale).to_f64().unwrap_or(ticker.h);
+            }
+            if let Some(val) = data
+                .get("lowPrice24h")
+                .and_then(|v| v.as_str())
+                .and_then(parse_decimal)
+            {
+                ticker.l = (val / scale).to_f64().unwrap_or(ticker.l);
+            }
+            if let Some(val) = data
+                .get("lastPrice")
+                .and_then(|v| v.as_str())
+                .and_then(parse_decimal)
+            {
+                ticker.c = (val / scale).to_f64().unwrap_or(ticker.c);
+            }
+            if let Some(val) = data
+                .get("volume24h")
+                .and_then(|v| v.as_str())
+                .and_then(parse_decimal)
+            {
+                ticker.v_base = val.to_f64().unwrap_or(ticker.v_base);
+            }
+            if let Some(val) = data
+                .get("turnover24h")
+                .and_then(|v| v.as_str())
+                .and_then(parse_decimal)
+            {
+                ticker.v_quote = val.to_f64().unwrap_or(ticker.v_quote);
+            }
+
             ticker.timestamp_ms = timestamp_ms;
             ticker.ingest_time_us = now_micros();
             Some(ticker)

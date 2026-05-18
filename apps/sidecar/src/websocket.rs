@@ -1,31 +1,66 @@
+use crate::api;
+use crate::auth;
+use crate::cache::lvc::LatestValueCache;
+use futures_util::{SinkExt, StreamExt};
+use log::{debug, error, info, warn};
 use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::accept_async;
-use futures_util::{StreamExt, SinkExt};
-use log::{info, error, warn, debug};
-use crate::auth;
-use crate::api;
-use crate::cache::lvc::LatestValueCache;
 
-use std::sync::Arc;
-use tokio::sync::Mutex;
 use crate::exchanges::ExchangeManager;
+use std::sync::{Arc, OnceLock};
+use tokio::sync::{Mutex, Semaphore};
+use tokio::time::{timeout, Duration};
 
-pub async fn run_server(port: u16, jwt_secret: String, tx: tokio::sync::broadcast::Sender<String>, manager: Arc<Mutex<ExchangeManager>>, lvc: Arc<LatestValueCache>) {
+const MAX_CONNECTIONS: usize = 256;
+const AUTH_TIMEOUT_SECS: u64 = 10;
+static CONNECTION_LIMITER: OnceLock<Arc<Semaphore>> = OnceLock::new();
+
+pub async fn run_server(
+    port: u16,
+    jwt_secret: String,
+    tx: tokio::sync::broadcast::Sender<String>,
+    manager: Arc<Mutex<ExchangeManager>>,
+    lvc: Arc<LatestValueCache>,
+) {
     let addr = format!("0.0.0.0:{}", port);
     let listener = TcpListener::bind(&addr).await.expect("Failed to bind port");
     info!("WebSocket server listening on (IPv4): {}", addr);
 
+    let limiter = CONNECTION_LIMITER
+        .get_or_init(|| Arc::new(Semaphore::new(MAX_CONNECTIONS)))
+        .clone();
+
     while let Ok((stream, addr)) = listener.accept().await {
+        let permit = match limiter.clone().try_acquire_owned() {
+            Ok(permit) => permit,
+            Err(_) => {
+                warn!(
+                    "Rejecting WebSocket connection from {}: connection limit reached",
+                    addr
+                );
+                continue;
+            }
+        };
+
         info!("Incoming connection from: {}", addr);
         let secret = jwt_secret.clone();
         let tx = tx.clone();
         let manager = manager.clone();
         let lvc = lvc.clone();
-        tokio::spawn(handle_connection(stream, secret, tx, manager, lvc));
+        tokio::spawn(async move {
+            let _permit = permit;
+            handle_connection(stream, secret, tx, manager, lvc).await;
+        });
     }
 }
 
-async fn handle_connection(stream: TcpStream, secret: String, tx: tokio::sync::broadcast::Sender<String>, manager: Arc<Mutex<ExchangeManager>>, lvc: Arc<LatestValueCache>) {
+async fn handle_connection(
+    stream: TcpStream,
+    secret: String,
+    tx: tokio::sync::broadcast::Sender<String>,
+    manager: Arc<Mutex<ExchangeManager>>,
+    lvc: Arc<LatestValueCache>,
+) {
     // Basic handshake
     let ws_stream = match accept_async(stream).await {
         Ok(ws) => ws,
@@ -34,18 +69,29 @@ async fn handle_connection(stream: TcpStream, secret: String, tx: tokio::sync::b
             return;
         }
     };
-    
+
     let (mut write, mut read) = ws_stream.split();
-    
+
     // Auth State
     let mut authenticated = false;
     let mut user_id = String::new();
-    
-    let mut rx = tx.subscribe();
+    let mut rx: Option<tokio::sync::broadcast::Receiver<String>> = None;
 
     loop {
         tokio::select! {
-            msg_option = read.next() => {
+            msg_option = async {
+                if authenticated {
+                    read.next().await
+                } else {
+                    match timeout(Duration::from_secs(AUTH_TIMEOUT_SECS), read.next()).await {
+                        Ok(msg) => msg,
+                        Err(_) => {
+                            warn!("WebSocket authentication timed out");
+                            None
+                        }
+                    }
+                }
+            } => {
                 match msg_option {
                     Some(Ok(msg)) => {
                         if msg.is_text() {
@@ -54,13 +100,14 @@ async fn handle_connection(stream: TcpStream, secret: String, tx: tokio::sync::b
                                 // Validate Token
                                 // Expected format: "Bearer <token>" or just "<token>"
                                 let token = text.trim_start_matches("Bearer ").trim();
-                                
+
                                 match auth::validate_token(token, &secret) {
                                     Ok(claims) => {
                                         user_id = claims.sub;
                                         info!("User authenticated: {}", user_id);
                                         authenticated = true;
-                                        
+                                        rx = Some(tx.subscribe());
+
                                         // Send Ack
                                         if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text("AUTH_OK".into())).await {
                                             error!("Failed to send AUTH_OK: {}", e);
@@ -107,24 +154,28 @@ async fn handle_connection(stream: TcpStream, secret: String, tx: tokio::sync::b
                     }
                 }
             }
-            msg = rx.recv() => {
-                if authenticated {
-                    match msg {
-                        Ok(data) => {
-                            if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(data.into())).await {
-                                // Client might have disconnected
-                                debug!("Failed to send broadcast message: {}", e);
-                                break;
-                            }
-                        }
-                        Err(tokio::sync::broadcast::error::RecvError::Lagged(n)) => {
-                            warn!("Client {} lagged behind by {} messages, continuing...", user_id, n);
-                            // RecvError::Lagged means slow client; continue to catch up
-                        }
-                        Err(e) => {
-                            error!("Broadcast channel error: {}", e);
+            msg = async {
+                if let Some(rx) = rx.as_mut() {
+                    rx.recv().await
+                } else {
+                    futures_util::future::pending::<Result<String, tokio::sync::broadcast::error::RecvError>>().await
+                }
+            }, if authenticated => {
+                match msg {
+                    Ok(data) => {
+                        if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(data.into())).await {
+                            // Client might have disconnected
+                            debug!("Failed to send broadcast message: {}", e);
                             break;
                         }
+                    }
+                    Err(tokio::sync::broadcast::error::RecvError::Lagged(n)) => {
+                        warn!("Client {} lagged behind by {} messages, continuing...", user_id, n);
+                        // RecvError::Lagged means slow client; continue to catch up
+                    }
+                    Err(e) => {
+                        error!("Broadcast channel error: {}", e);
+                        break;
                     }
                 }
             }
@@ -133,19 +184,39 @@ async fn handle_connection(stream: TcpStream, secret: String, tx: tokio::sync::b
 }
 
 const LAZY_EXCHANGES: &[&str] = &[
-    "binance", "upbit", "bithumb", "binance_f", "bybit", "bybit_f", 
-    "gateio", "bitget", "bitget_f", "coinbase", "kraken", "kucoin", "okx", "okx_f"
+    "binance",
+    "upbit",
+    "bithumb",
+    "binance_f",
+    "bybit",
+    "bybit_f",
+    "gateio",
+    "bitget",
+    "bitget_f",
+    "coinbase",
+    "kraken",
+    "kucoin",
+    "okx",
+    "okx_f",
+    "hyperliquid_f",
 ];
 
-async fn trigger_lazy_connections(manager: &Arc<Mutex<ExchangeManager>>, write: &mut futures_util::stream::SplitSink<tokio_tungstenite::WebSocketStream<TcpStream>, tokio_tungstenite::tungstenite::Message>, user_id: &str) {
+async fn trigger_lazy_connections(
+    manager: &Arc<Mutex<ExchangeManager>>,
+    write: &mut futures_util::stream::SplitSink<
+        tokio_tungstenite::WebSocketStream<TcpStream>,
+        tokio_tungstenite::tungstenite::Message,
+    >,
+    user_id: &str,
+) {
     info!("Triggering lazy exchange connections for user: {}", user_id);
     let mut mgr = manager.lock().await;
-    
+
     for &exchange_name in LAZY_EXCHANGES {
         mgr.ensure_connected(exchange_name).await;
 
         if let Some((connected, total)) = mgr.get_shard_stats(exchange_name) {
-             let status = serde_json::json!({
+            let status = serde_json::json!({
                 "type": "shard_status",
                 "source": exchange_name,
                 "connected": connected,
@@ -164,6 +235,16 @@ async fn trigger_lazy_connections(manager: &Arc<Mutex<ExchangeManager>>, write: 
     info!("Exchange connections trigger completed");
 }
 
-async fn send_json(write: &mut futures_util::stream::SplitSink<tokio_tungstenite::WebSocketStream<TcpStream>, tokio_tungstenite::tungstenite::Message>, value: &serde_json::Value) -> Result<(), tokio_tungstenite::tungstenite::Error> {
-    write.send(tokio_tungstenite::tungstenite::Message::Text(value.to_string().into())).await
+async fn send_json(
+    write: &mut futures_util::stream::SplitSink<
+        tokio_tungstenite::WebSocketStream<TcpStream>,
+        tokio_tungstenite::tungstenite::Message,
+    >,
+    value: &serde_json::Value,
+) -> Result<(), tokio_tungstenite::tungstenite::Error> {
+    write
+        .send(tokio_tungstenite::tungstenite::Message::Text(
+            value.to_string().into(),
+        ))
+        .await
 }

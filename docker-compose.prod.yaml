@@ -9,7 +9,7 @@ services:
     ports:
       - 32358:32358
     env_file:
-      - apps/api/.env
+      - .env
 
   sidecar:
     image: bemodest-sidecar:latest
@@ -19,4 +19,4 @@ services:
     ports:
       - 32359:25834
     env_file:
-      - apps/api/.env
+      - .env

@@ -502,7 +502,6 @@ export async function handleLabelGet(socket, payload) {
         const dbClient = new MongoDBClient();
         await dbClient.connect();
         const result = await dbClient.readMany(COLLECTION_ADDRS, validated.params, { projection: { _id: 0 } });
-        await dbClient.enrichLabelsWithEntityImages(result, COLLECTION_ENTITES);
         await dbClient.close();
 
         const io = getIO();
@@ -577,7 +576,6 @@ export async function handleLabelInsert(socket, payload) {
 
         await dbClient.createOne(COLLECTION_ADDRS, validated.body);
         const result = await dbClient.readMany(COLLECTION_ADDRS, {}, { projection: { _id: 0 } });
-        await dbClient.enrichLabelsWithEntityImages(result, COLLECTION_ENTITES);
         await dbClient.close();
 
         const io = getIO();
@@ -737,7 +735,6 @@ export async function handleLabelUpdate(socket, payload) {
         logger.info(`[Socket.IO] successfully updated label for ${originalAddr} (modified: ${updateResult.modifiedCount})`);
 
         const result = await dbClient.readMany(COLLECTION_ADDRS, {}, { projection: { _id: 0 } });
-        await dbClient.enrichLabelsWithEntityImages(result, COLLECTION_ENTITES);
         await dbClient.close();
 
         const io = getIO();
@@ -965,7 +962,6 @@ export async function handleLabelInsertBulk(socket, payload) {
 
         if (successCount > 0) {
             const result = await dbClient.readMany(COLLECTION_ADDRS, {}, { projection: { _id: 0 } });
-            await enrichLabelsWithEntityImages(result, dbClient);
 
             const io = getIO();
             io.emit('labelUpdate', {

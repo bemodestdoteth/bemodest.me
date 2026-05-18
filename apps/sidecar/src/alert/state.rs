@@ -1,6 +1,6 @@
-use redis::AsyncCommands;
-use log::warn;
 use crate::alert::types::{AlertState, AlertStatus};
+use log::warn;
+use redis::AsyncCommands;
 
 /// Redis-backed store for per-rule alert state and cooldown locks.
 ///
@@ -21,8 +21,7 @@ impl AlertStateStore {
     /// Redis (alert state would be lost), so a hard fail on startup is
     /// preferred over silently degrading.
     pub async fn new(redis_url: &str) -> Self {
-        let client = redis::Client::open(redis_url)
-            .expect("[AlertStateStore] Invalid Redis URL");
+        let client = redis::Client::open(redis_url).expect("[AlertStateStore] Invalid Redis URL");
         let conn = client
             .get_multiplexed_async_connection()
             .await
@@ -39,7 +38,12 @@ impl AlertStateStore {
     /// Issues `SET alert:lock:{rule_id} 1 NX EX {cooldown_secs}`.
     /// Returns `true` if the lock was newly set (i.e. the alert may fire),
     /// or `false` if the key already existed (still within cooldown).
-    pub async fn try_acquire_lock(&mut self, rule_id: &str, cooldown_secs: u64, suffix: Option<&str>) -> bool {
+    pub async fn try_acquire_lock(
+        &mut self,
+        rule_id: &str,
+        cooldown_secs: u64,
+        suffix: Option<&str>,
+    ) -> bool {
         let key = if let Some(s) = suffix {
             format!("alert:lock:{}:{}", rule_id, s)
         } else {
@@ -54,10 +58,13 @@ impl AlertStateStore {
             .query_async(&mut self.conn)
             .await;
         match result {
-            Ok(Some(_)) => true,   // lock acquired — "OK" response
-            Ok(None) => false,     // key already existed — within cooldown
+            Ok(Some(_)) => true, // lock acquired — "OK" response
+            Ok(None) => false,   // key already existed — within cooldown
             Err(e) => {
-                warn!("[AlertStateStore] try_acquire_lock failed for {}: {}", rule_id, e);
+                warn!(
+                    "[AlertStateStore] try_acquire_lock failed for {}: {}",
+                    rule_id, e
+                );
                 false // fail safe — do not fire on Redis errors
             }
         }
@@ -75,15 +82,18 @@ impl AlertStateStore {
             AlertStatus::Triggered => "triggered",
             AlertStatus::Recovered => "recovered",
         };
-        let result: redis::RedisResult<()> = self.conn.hset_multiple(
-            &key,
-            &[
-                ("status",         status_str.to_string()),
-                ("triggered_at",   state.triggered_at.to_string()),
-                ("cooldown_until", state.cooldown_until.to_string()),
-                ("last_value",     state.last_value.clone()),
-            ],
-        ).await;
+        let result: redis::RedisResult<()> = self
+            .conn
+            .hset_multiple(
+                &key,
+                &[
+                    ("status", status_str.to_string()),
+                    ("triggered_at", state.triggered_at.to_string()),
+                    ("cooldown_until", state.cooldown_until.to_string()),
+                    ("last_value", state.last_value.clone()),
+                ],
+            )
+            .await;
         if let Err(e) = result {
             warn!("[AlertStateStore] set_state failed for {}: {}", rule_id, e);
         }
@@ -103,14 +113,22 @@ impl AlertStateStore {
                     Some("triggered") => AlertStatus::Triggered,
                     Some("recovered") => AlertStatus::Recovered,
                     other => {
-                        warn!("[AlertStateStore] unknown status {:?} for {}", other, rule_id);
+                        warn!(
+                            "[AlertStateStore] unknown status {:?} for {}",
+                            other, rule_id
+                        );
                         return None;
                     }
                 };
                 let triggered_at = map.get("triggered_at")?.parse::<i64>().ok()?;
                 let cooldown_until = map.get("cooldown_until")?.parse::<i64>().ok()?;
                 let last_value = map.get("last_value")?.clone();
-                Some(AlertState { status, triggered_at, cooldown_until, last_value })
+                Some(AlertState {
+                    status,
+                    triggered_at,
+                    cooldown_until,
+                    last_value,
+                })
             }
             Ok(_) => None, // empty map — key does not exist
             Err(e) => {
@@ -130,10 +148,13 @@ impl AlertStateStore {
     /// don't accumulate.
     pub async fn clear_state(&mut self, rule_id: &str) {
         let state_key = format!("alert:state:{}", rule_id);
-        let lock_key  = format!("alert:lock:{}", rule_id);
+        let lock_key = format!("alert:lock:{}", rule_id);
         let result: redis::RedisResult<()> = self.conn.del(&[state_key, lock_key]).await;
         if let Err(e) = result {
-            warn!("[AlertStateStore] clear_state failed for {}: {}", rule_id, e);
+            warn!(
+                "[AlertStateStore] clear_state failed for {}: {}",
+                rule_id, e
+            );
         }
     }
 

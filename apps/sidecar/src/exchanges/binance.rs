@@ -1,9 +1,9 @@
-use crate::normalizer::binance::normalize_binance_ticker_array;
-use crate::types::Exchange as ExchangeType;
 use crate::cache::lvc::LatestValueCache;
 use crate::cache::TokenAnnotationCache;
-use crate::exchanges::batcher::TickerBatcher;
 use crate::config::Config;
+use crate::exchanges::batcher::TickerBatcher;
+use crate::normalizer::binance::normalize_binance_ticker_array;
+use crate::types::Exchange as ExchangeType;
 use std::sync::Arc;
 
 pub const TICKER_STREAM_URL: &str = "wss://stream.binance.com:9443/ws/!miniTicker@arr";
@@ -26,7 +26,7 @@ pub fn handle_message(
                             .unwrap_or(false)
                     })
                     .cloned()
-                    .collect()
+                    .collect(),
             ),
             None => raw,
         };
@@ -34,20 +34,25 @@ pub fn handle_message(
         let normalized = normalize_binance_ticker_array(&usdt_only, ExchangeType::Binance);
 
         for mut ticker in normalized {
-            if config.excludelist.read().unwrap().iter().any(|ex| ticker.base.starts_with(ex)) {
+            if config
+                .excludelist
+                .read()
+                .unwrap()
+                .iter()
+                .any(|ex| ticker.base.starts_with(ex))
+            {
                 continue;
             }
             ticker.base = tac.resolve_ticker_base(&ticker.exchange, &ticker.raw_base, &ticker.base);
-            
+
             let payload = serde_json::json!({
                 "type": "normalized_ticker",
                 "source": ticker.exchange.to_string(),
                 "data": &ticker
             });
-            
+
             batcher.push(ticker.base.clone(), ticker.quote.clone(), payload);
             lvc.upsert(ticker);
         }
     }
 }
-

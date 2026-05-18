@@ -1,6 +1,8 @@
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
 use std::sync::RwLock;
-use serde::{Deserialize, Serialize};
+
+const STALE_HISTORY_US: i64 = 60_000_000;
 
 /// A single price/volume sample stored in the history buffer.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -70,6 +72,20 @@ impl PriceHistoryCache {
     pub fn get_latest(&self, key: &str) -> Option<PriceSample> {
         let guard = self.inner.read().unwrap();
         guard.get(key).and_then(|d| d.back().cloned())
+    }
+
+    /// Remove history keys whose newest sample is older than the rolling window.
+    pub fn prune_stale(&self, now_ms: i64) -> usize {
+        let cutoff_ms = now_ms - (STALE_HISTORY_US / 1000);
+        let mut guard = self.inner.write().unwrap();
+        let before = guard.len();
+        guard.retain(|_, samples| {
+            samples
+                .back()
+                .map(|sample| sample.timestamp_ms >= cutoff_ms)
+                .unwrap_or(false)
+        });
+        before - guard.len()
     }
 
     /// Total number of tracked keys (exchange × pair combinations).
