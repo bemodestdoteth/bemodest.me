@@ -7,6 +7,16 @@
 - Sidecar: `cargo run` / `cargo build --release`
 - Build package before depending: `pnpm --filter <pkg> build`
 
+## AI collaboration protocol
+- Read at least 5 relevant files before modifying code.
+- Always read mentioned files before answering about them.
+- Do not answer based on guesses; if unsure, verify with tools.
+- Design first in Plan Mode before implementation.
+- Make one logical change at a time; do not bundle unrelated changes.
+- Validate every code change with AST syntax check, test execution, or log verification.
+- Make data-driven decisions; when adjusting parameters, extract actual numbers from DB, APIs, or logs first.
+- Do not skip reading, planning, or validation for speed.
+
 ## Code style — respect existing patterns
 When editing an existing file, read at least one neighboring function and match its patterns exactly (imports, error handling, naming). Do not introduce new conventions unless the file is empty or you are explicitly refactoring.
 
