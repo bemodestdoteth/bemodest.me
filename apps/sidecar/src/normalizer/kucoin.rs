@@ -89,5 +89,9 @@ pub fn normalize_kucoin_ticker(raw: &Value) -> Option<NormalizedTicker> {
         v_quote_krw: None,
         change_24h: None,
         liquidity: None,
+        funding_rate: None,
+        funding_interval_hours: None,
+        next_funding_time_ms: None,
+        funding_timestamp_ms: None,
     })
 }

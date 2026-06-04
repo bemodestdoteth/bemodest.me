@@ -1,5 +1,8 @@
 use futures_util::TryStreamExt;
-use mongodb::{bson::doc, Client};
+use mongodb::{
+    bson::{doc, Bson, Document},
+    Client,
+};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::{broadcast, RwLock};
@@ -11,9 +14,9 @@ use log::{debug, error, info, warn};
 
 use crate::alert::state::AlertStateStore;
 use crate::alert::types::{AlertCondition, AlertFiredEvent, AlertRule, AlertState, AlertStatus};
-use crate::cache::{LatestValueCache, PriceHistoryCache, PriceSample};
+use crate::cache::{LatestValueCache, PriceHistoryCache, PriceSample, VisibilityPair};
 use crate::config::Config;
-use crate::types::{now_micros, NormalizedTicker};
+use crate::types::{now_micros, AlertRuleScope, NormalizedTicker};
 
 // ============================================================================
 // Constants
@@ -53,7 +56,10 @@ pub async fn load_alert_rules(config: &Config) -> Vec<AlertRule> {
     let db = client.database("codys");
     let col = db.collection::<mongodb::bson::Document>("alertRules");
 
-    let cursor = match col.find(doc! { "enabled": true }).await {
+    let cursor = match col
+        .find(doc! { "$or": [{ "enabled": true }, { "scope": "market_watch" }] })
+        .await
+    {
         Ok(c) => c,
         Err(e) => {
             error!("[AlertEngine] alertRules query failed: {}", e);
@@ -70,7 +76,8 @@ pub async fn load_alert_rules(config: &Config) -> Vec<AlertRule> {
     };
 
     let mut rules = Vec::with_capacity(docs.len());
-    for doc in docs {
+    for mut doc in docs {
+        normalize_alert_rule_dates(&mut doc);
         match mongodb::bson::from_document::<AlertRule>(doc) {
             Ok(rule) => rules.push(rule),
             Err(e) => warn!("[AlertEngine] Failed to deserialise alert rule: {}", e),
@@ -86,6 +93,14 @@ pub async fn load_alert_rules(config: &Config) -> Vec<AlertRule> {
         rules.len()
     );
     rules
+}
+
+fn normalize_alert_rule_dates(doc: &mut Document) {
+    for key in ["created_at", "updated_at"] {
+        if let Some(Bson::DateTime(value)) = doc.get(key).cloned() {
+            doc.insert(key, Bson::String(value.to_string()));
+        }
+    }
 }
 
 /// Warn when two rules reference the same raw symbol as different canonical tickers.
@@ -123,9 +138,6 @@ pub fn group_live_tickers(snapshot: &[NormalizedTicker], now_us: i64) -> LiveTic
         if now_us - ticker.ingest_time_us >= STALE_THRESHOLD_US {
             continue;
         }
-        if ticker.v_quote < VOLUME_FLOOR_USD {
-            continue;
-        }
         let key = format!("{}:{}", ticker.base, ticker.quote);
         groups.entry(key).or_default().push((
             ticker.exchange.to_string(),
@@ -140,9 +152,6 @@ pub fn group_live_tickers(snapshot: &[NormalizedTicker], now_us: i64) -> LiveTic
 fn sample_history(snapshot: &[NormalizedTicker], now_us: i64, history: &PriceHistoryCache) {
     for ticker in snapshot {
         if now_us - ticker.ingest_time_us >= STALE_THRESHOLD_US {
-            continue;
-        }
-        if ticker.v_quote < VOLUME_FLOOR_USD {
             continue;
         }
         history.push(
@@ -173,6 +182,8 @@ pub async fn run(
     rules: Arc<RwLock<Vec<AlertRule>>>,
     mut state_store: AlertStateStore,
     alert_tx: broadcast::Sender<AlertFiredEvent>,
+    tx: broadcast::Sender<String>,
+    config: Arc<Config>,
 ) {
     let mut tick = interval(Duration::from_millis(ENGINE_TICK_MS));
     loop {
@@ -193,7 +204,22 @@ pub async fn run(
             guard.clone()
         };
 
+        let visibility_rule = find_market_watch_rule(&rules_snap);
+        update_visibility_state(
+            visibility_rule,
+            &groups,
+            &config,
+            &history,
+            &mut state_store,
+            &alert_tx,
+            &tx,
+        )
+        .await;
+
         for rule in &rules_snap {
+            if rule.scope == AlertRuleScope::MarketWatch {
+                continue;
+            }
             if !rule.enabled || rule.webhook_dead {
                 continue;
             }
@@ -270,6 +296,187 @@ pub async fn run(
     }
 }
 
+fn find_market_watch_rule(rules: &[AlertRule]) -> Option<&AlertRule> {
+    let mut matches = rules
+        .iter()
+        .filter(|rule| rule.scope == AlertRuleScope::MarketWatch);
+    let first = matches.next();
+    if matches.next().is_some() {
+        error!("[AlertEngine] Multiple market_watch rules configured; failing visibility closed except pinned");
+        return None;
+    }
+    match first {
+        Some(rule)
+            if rule.ticker == "*" && rule.condition == AlertCondition::SpreadPct && !rule.webhook_url.is_empty() =>
+        {
+            Some(rule)
+        }
+        Some(rule) => {
+            error!(
+                "[AlertEngine] Invalid market_watch rule {:?}; requires ticker='*', condition='spread_pct', webhook_url",
+                rule.id
+            );
+            None
+        }
+        None => {
+            error!("[AlertEngine] No market_watch rule configured; failing visibility closed except pinned");
+            None
+        }
+    }
+}
+
+async fn update_visibility_state(
+    rule: Option<&AlertRule>,
+    groups: &LiveTickerGroups,
+    config: &Config,
+    history: &PriceHistoryCache,
+    state_store: &mut AlertStateStore,
+    alert_tx: &broadcast::Sender<AlertFiredEvent>,
+    tx: &broadcast::Sender<String>,
+) {
+    let pinlist = config.pinlist.read().unwrap().clone();
+    let Some(rule) = rule else {
+        let pinned_pairs = pinlist
+            .iter()
+            .map(|base| VisibilityPair {
+                base: base.clone(),
+                quote: "".to_string(),
+                spread_pct: 0.0,
+                threshold: 0.0,
+                pinned: true,
+                rule_id: None,
+            })
+            .collect::<Vec<_>>();
+        config.visibility.replace(pinned_pairs, false);
+        broadcast_visibility_and_summary(tx, config, groups);
+        return;
+    };
+
+    let mut visible_pairs = Vec::new();
+    let min_sources = rule.min_sources as usize;
+    let volume_floor = rule.volume_floor_usd.unwrap_or(VOLUME_FLOOR_USD);
+
+    for (group_key, all_entries) in groups {
+        let (base, quote) = group_key.split_once(':').unwrap_or((group_key, ""));
+        let entries = filter_rule_entries(rule, all_entries, volume_floor);
+        let pinned = pinlist.contains(base);
+        let spread = evaluate_condition(rule, base, quote, &entries, history).map(|result| result.0);
+        let rule_matched = entries.len() >= min_sources && spread.is_some_and(|value| value > rule.value);
+
+        if rule_matched {
+            let synthetic_id = format!("{}:{}", rule.id, group_key);
+            if !rule.webhook_dead && rule.enabled {
+                try_fire(rule, base, quote, all_entries, history, state_store, alert_tx, &synthetic_id).await;
+            }
+        }
+
+        if rule_matched || pinned {
+            visible_pairs.push(VisibilityPair {
+                base: base.to_string(),
+                quote: quote.to_string(),
+                spread_pct: spread.unwrap_or(0.0),
+                threshold: rule.value,
+                pinned,
+                rule_id: Some(rule.id.clone()),
+            });
+        }
+    }
+
+    for base in pinlist {
+        if !visible_pairs.iter().any(|pair| pair.base == base) {
+            visible_pairs.push(VisibilityPair {
+                base,
+                quote: "".to_string(),
+                spread_pct: 0.0,
+                threshold: rule.value,
+                pinned: true,
+                rule_id: Some(rule.id.clone()),
+            });
+        }
+    }
+
+    config.visibility.replace(visible_pairs, true);
+    broadcast_visibility_and_summary(tx, config, groups);
+}
+
+fn filter_rule_entries(
+    rule: &AlertRule,
+    all_entries: &[(String, f64, f64, Option<f64>)],
+    volume_floor: f64,
+) -> Vec<(String, f64, f64, Option<f64>)> {
+    all_entries
+        .iter()
+        .filter(|(ex, _, volume, _)| {
+            *volume >= volume_floor && (rule.exchanges.is_empty() || rule.exchanges.contains(ex))
+        })
+        .cloned()
+        .collect()
+}
+
+fn broadcast_visibility_and_summary(
+    tx: &broadcast::Sender<String>,
+    config: &Config,
+    groups: &LiveTickerGroups,
+) {
+    let visible_pairs = config.visibility.pairs();
+    let visibility_msg = serde_json::json!({
+        "type": "market_visibility",
+        "data": visible_pairs,
+    });
+    let _ = tx.send(visibility_msg.to_string());
+
+    let mut summary = Vec::new();
+    for pair in &visible_pairs {
+        if pair.quote.is_empty() {
+            continue;
+        }
+        let key = format!("{}:{}", pair.base, pair.quote);
+        let Some(entries) = groups.get(&key) else { continue };
+        let prices = entries
+            .iter()
+            .map(|(_, price, _, _)| *price)
+            .filter(|price| *price > 0.0)
+            .collect::<Vec<_>>();
+        let changes = entries.iter().filter_map(|(_, _, _, change)| *change).collect::<Vec<_>>();
+        let mut entry = serde_json::json!({
+            "base": pair.base,
+            "quote": pair.quote,
+            "spread_pct": round4(pair.spread_pct),
+            "arb_pct": round4(pct_spread(&prices)),
+        });
+        if let Some((leader, price, volume, _)) = entries.iter().max_by(|(_, _, a, _), (_, _, b, _)| a.partial_cmp(b).unwrap()) {
+            entry["leader"] = serde_json::json!(leader);
+            entry["leader_price"] = serde_json::json!(price);
+            entry["leader_volume"] = serde_json::json!(volume);
+        }
+        if !changes.is_empty() {
+            entry["change_24h"] = serde_json::json!(round4(changes.iter().sum::<f64>() / changes.len() as f64));
+        }
+        summary.push(entry);
+    }
+
+    let summary_msg = serde_json::json!({ "type": "market_summary", "data": summary });
+    let _ = tx.send(summary_msg.to_string());
+}
+
+fn pct_spread(prices: &[f64]) -> f64 {
+    if prices.len() < 2 {
+        return 0.0;
+    }
+    let max = prices.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+    let min = prices.iter().cloned().fold(f64::INFINITY, f64::min);
+    if min > 0.0 {
+        (max - min) / min * 100.0
+    } else {
+        0.0
+    }
+}
+
+#[inline]
+fn round4(v: f64) -> f64 {
+    (v * 10_000.0).round() / 10_000.0
+}
+
 // ============================================================================
 // Per-group evaluate-and-fire helper
 // ============================================================================
@@ -290,24 +497,18 @@ async fn try_fire(
     alert_tx: &broadcast::Sender<AlertFiredEvent>,
     lock_id: &str,
 ) -> bool {
-    // Filter to whitelisted exchanges (empty = all)
-    let entries: Vec<(String, f64, f64, Option<f64>)> = if rule.exchanges.is_empty() {
-        all_entries.to_vec()
-    } else {
-        all_entries
-            .iter()
-            .filter(|(ex, _, _, _)| rule.exchanges.contains(ex))
-            .cloned()
-            .collect()
-    };
+    let volume_floor = rule.volume_floor_usd.unwrap_or(VOLUME_FLOOR_USD);
+    let entries = filter_rule_entries(rule, all_entries, volume_floor);
+
+    let quorum_min = rule.min_sources as usize;
 
     // Quorum check
-    if entries.len() < QUORUM_MIN {
+    if entries.len() < quorum_min {
         debug!(
             "[AlertEngine] Rule {:?}: quorum not met ({}/{})",
             rule.label,
             entries.len(),
-            QUORUM_MIN
+            quorum_min
         );
         return false;
     }
@@ -346,6 +547,10 @@ async fn try_fire(
         rule_id: rule.id.clone(),
         webhook_url: rule.webhook_url.clone(),
         label: format!("{} [{}]", rule.label, pair_key),
+        scope: match rule.scope {
+            AlertRuleScope::MarketWatch => "market_watch".to_string(),
+            AlertRuleScope::Alert => "alert".to_string(),
+        },
         condition: rule.condition.clone(),
         ticker: base.to_string(),
         quote: quote.to_string(),

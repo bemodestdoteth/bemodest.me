@@ -83,3 +83,10 @@ export const getRedisClient = (): Redis => {
     }
     return sharedRedis;
 };
+
+export const closeRedisClient = async (): Promise<void> => {
+    if (sharedRedis) {
+        await sharedRedis.quit();
+        sharedRedis = null;
+    }
+};

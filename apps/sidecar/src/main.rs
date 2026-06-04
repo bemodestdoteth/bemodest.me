@@ -255,10 +255,23 @@ async fn main() -> crate::errors::Result<()> {
     {
         let manager_refresh = manager.clone();
         let mut market_refresh_rx = market_refresh_tx.subscribe();
+        let market_cache_refresh = market_cache.clone();
+        let lvc_refresh = lvc.clone();
+        let tac_refresh = tac.clone();
+        let config_refresh = config.clone();
+        let tx_refresh = tx.clone();
         set.spawn(async move {
             while market_refresh_rx.recv().await.is_ok() {
                 info!("[Sidecar] local market cache update received; refreshing WebSocket subscriptions");
                 manager_refresh.lock().await.refresh_all_subscriptions().await;
+                crate::exchanges::binance_f::backfill_missing_markets(
+                    &market_cache_refresh,
+                    &lvc_refresh,
+                    &tac_refresh,
+                    &config_refresh,
+                    tx_refresh.clone(),
+                )
+                .await;
             }
         });
     }
@@ -280,6 +293,38 @@ async fn main() -> crate::errors::Result<()> {
         "[Sidecar] Market Cache initialized (polling every {}s; Korean markets every {}s)",
         config.market_cache_update_interval_sec, config.korean_market_cache_update_interval_sec
     );
+
+    crate::exchanges::binance_f::backfill_missing_markets(
+        &market_cache,
+        &lvc,
+        &tac,
+        &config,
+        tx.clone(),
+    )
+    .await;
+
+    {
+        let market_cache_backfill = market_cache.clone();
+        let lvc_backfill = lvc.clone();
+        let tac_backfill = tac.clone();
+        let config_backfill = config.clone();
+        let tx_backfill = tx.clone();
+        set.spawn(async move {
+            let mut tick = interval(Duration::from_secs(30));
+            loop {
+                tick.tick().await;
+                crate::exchanges::binance_f::backfill_missing_markets(
+                    &market_cache_backfill,
+                    &lvc_backfill,
+                    &tac_backfill,
+                    &config_backfill,
+                    tx_backfill.clone(),
+                )
+                .await;
+            }
+        });
+    }
+    info!("[Sidecar] BinanceF missing-market backfill refresher spawned (30s)");
 
     // Alert System wiring
     let history_cache = Arc::new(PriceHistoryCache::new());
@@ -323,11 +368,13 @@ async fn main() -> crate::errors::Result<()> {
         let hist_e = history_cache.clone();
         let rules_e = alert_rules.clone();
         let alert_tx_e = alert_tx.clone();
+        let tx_e = tx.clone();
+        let config_e = config.clone();
         set.spawn(async move {
-            crate::alert::engine::run(lvc_e, hist_e, rules_e, alert_state_store, alert_tx_e).await;
+            crate::alert::engine::run(lvc_e, hist_e, rules_e, alert_state_store, alert_tx_e, tx_e, config_e).await;
         });
     }
-    info!("[Sidecar] Alert engine spawned (1000 ms tick)");
+    info!("[Sidecar] Alert/visibility engine spawned (1000 ms tick)");
 
     {
         let rx = alert_tx.subscribe();
@@ -337,15 +384,6 @@ async fn main() -> crate::errors::Result<()> {
         });
     }
     info!("[Sidecar] Webhook dispatcher spawned");
-
-    {
-        let lvc_ms = lvc.clone();
-        let tx_ms = tx.clone();
-        set.spawn(async move {
-            crate::market_summary::run(lvc_ms, tx_ms).await;
-        });
-    }
-    info!("[Sidecar] Market summary task spawned (500 ms tick)");
 
     {
         let mut mg = manager.lock().await;
@@ -950,6 +988,16 @@ async fn main() -> crate::errors::Result<()> {
             )),
         );
 
+        // Register KyberSwap DEX quote poller
+        mg.register(
+            "kyberswap",
+            Box::new(crate::exchanges::kyberswap::KyberswapExchange::new(
+                tx.clone(),
+                lvc.clone(),
+                config.clone(),
+            )),
+        );
+
         let _ = mg.ensure_connected("binance").await;
     }
 
@@ -958,14 +1006,10 @@ async fn main() -> crate::errors::Result<()> {
     let dex_redis_url = config.redis_url.clone();
     let dex_channel = config.dex_redis_channel.clone();
     let dex_lvc = lvc.clone();
-    let dex_filter = crate::cache::EligibilityFilter::new(
-        config.filter_min_sources,
-        config.filter_min_spread_pct,
-        config.pinlist.clone(),
-    );
+    let dex_config = config.clone();
 
     set.spawn(async move {
-        redis_sub::run_dex_subscriber(dex_redis_url, dex_channel, dex_tx, dex_lvc, dex_filter)
+        redis_sub::run_dex_subscriber(dex_redis_url, dex_channel, dex_tx, dex_lvc, dex_config)
             .await;
     });
     info!("[Sidecar] DEX Redis subscriber task spawned");
@@ -980,6 +1024,7 @@ async fn main() -> crate::errors::Result<()> {
             ws_tx,
             ws_manager,
             lvc,
+            config,
         )
         .await;
     });

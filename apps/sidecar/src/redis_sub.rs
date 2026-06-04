@@ -3,7 +3,7 @@ use log::{error, info, warn};
 use tokio::sync::broadcast;
 
 use crate::cache::lvc::LatestValueCache;
-use crate::cache::EligibilityFilter;
+use crate::config::Config;
 use crate::types::NormalizedTicker;
 use serde_json::Value;
 use std::sync::Arc;
@@ -15,7 +15,7 @@ pub async fn run_dex_subscriber(
     channel: String,
     tx: broadcast::Sender<String>,
     lvc: Arc<LatestValueCache>,
-    filter: EligibilityFilter,
+    config: Arc<Config>,
 ) {
     const INITIAL_BACKOFF_MS: u64 = 1_000;
     const MAX_BACKOFF_MS: u64 = 30_000;
@@ -93,7 +93,7 @@ pub async fn run_dex_subscriber(
 
                                     lvc.upsert(ticker);
 
-                                    if filter.is_eligible(&base, &quote, &lvc) {
+                                    if config.visibility.is_visible(&base, &quote, &config.pinlist) {
                                         broadcast = true;
                                     }
                                 }

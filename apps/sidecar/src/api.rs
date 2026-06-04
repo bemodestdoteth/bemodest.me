@@ -1,11 +1,12 @@
 use crate::cache::lvc::LatestValueCache;
 use crate::comparison::compare_pair;
+use crate::config::Config;
 use crate::types::Exchange;
 use log::debug;
 use serde_json::{json, Value};
 
 /// Handle an incoming WebSocket command and return a JSON response
-pub fn handle_command(msg: &Value, lvc: &LatestValueCache) -> Value {
+pub fn handle_command(msg: &Value, lvc: &LatestValueCache, config: &Config) -> Value {
     let cmd = match msg.get("cmd").and_then(|v| v.as_str()) {
         Some(c) => c,
         None => return api_error("unknown", "missing 'cmd' field"),
@@ -14,7 +15,7 @@ pub fn handle_command(msg: &Value, lvc: &LatestValueCache) -> Value {
     debug!("[API] command: {}", cmd);
 
     match cmd {
-        "snapshot" => cmd_snapshot(lvc),
+        "snapshot" => cmd_snapshot(msg, lvc, config),
         "ticker" => cmd_ticker(msg, lvc),
         "compare" => cmd_compare(msg, lvc),
         "stats" => cmd_stats(lvc),
@@ -22,9 +23,16 @@ pub fn handle_command(msg: &Value, lvc: &LatestValueCache) -> Value {
     }
 }
 
-/// Return all latest tickers in the LVC
-fn cmd_snapshot(lvc: &LatestValueCache) -> Value {
-    let tickers = lvc.snapshot();
+/// Return latest tickers in the LVC. Defaults to Market Watch visible tickers;
+/// authenticated callers may request `{ "scope": "all" }` for full debug state.
+fn cmd_snapshot(msg: &Value, lvc: &LatestValueCache, config: &Config) -> Value {
+    let tickers = if msg.get("scope").and_then(|v| v.as_str()) == Some("all") {
+        lvc.snapshot()
+    } else {
+        config
+            .visibility
+            .filter_tickers(lvc.snapshot(), &config.pinlist)
+    };
     json!({
         "type": "api",
         "cmd": "snapshot",

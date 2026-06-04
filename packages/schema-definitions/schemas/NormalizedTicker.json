@@ -52,8 +52,23 @@
         "v_quote": {
           "type": "number"
         },
+        "change_24h": {
+          "type": "number"
+        },
         "liquidity": {
           "type": "number"
+        },
+        "funding_rate": {
+          "type": "number"
+        },
+        "funding_interval_hours": {
+          "type": "number"
+        },
+        "next_funding_time_ms": {
+          "type": "integer"
+        },
+        "funding_timestamp_ms": {
+          "type": "integer"
         },
         "timestamp_ms": {
           "type": "integer"
@@ -82,9 +97,6 @@
           "type": "number"
         },
         "v_quote_krw": {
-          "type": "number"
-        },
-        "change_24h": {
           "type": "number"
         }
       },

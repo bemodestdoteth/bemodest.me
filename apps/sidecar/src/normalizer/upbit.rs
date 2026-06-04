@@ -194,6 +194,10 @@ pub fn normalize_upbit_ticker(
         v_quote_krw: v_quote_krw.and_then(|v| v.to_f64()),
         change_24h: change_24h_raw.and_then(|v| v.to_f64()),
         liquidity: None,
+        funding_rate: None,
+        funding_interval_hours: None,
+        next_funding_time_ms: None,
+        funding_timestamp_ms: None,
     })
 }
 

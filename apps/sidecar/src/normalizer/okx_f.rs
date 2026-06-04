@@ -1,3 +1,4 @@
+use crate::normalizer::funding::FundingUpdate;
 use crate::types::{now_micros, parse_decimal, Exchange, NormalizedTicker};
 use rust_decimal::prelude::ToPrimitive;
 use serde_json::Value;
@@ -24,7 +25,7 @@ use serde_json::Value;
 ///   }]
 /// }
 /// ```
-pub fn normalize_okx_f_ticker(raw: &Value) -> Option<NormalizedTicker> {
+fn okx_f_inst_parts(raw: &Value) -> Option<(String, String, String)> {
     let data_arr = raw.get("data")?.as_array()?;
     let d = data_arr.first()?;
 
@@ -40,8 +41,51 @@ pub fn normalize_okx_f_ticker(raw: &Value) -> Option<NormalizedTicker> {
         return None;
     }
 
-    let base = parts[0].to_string();
-    let quote = parts[1].to_string();
+    Some((
+        inst_id.to_string(),
+        parts[0].to_string(),
+        parts[1].to_string(),
+    ))
+}
+
+pub fn merge_okx_funding(raw: &Value, mut existing: NormalizedTicker) -> Option<NormalizedTicker> {
+    let data_arr = raw.get("data")?.as_array()?;
+    let d = data_arr.first()?;
+    let funding_time_ms = d
+        .get("fundingTime")
+        .and_then(|v| v.as_str())
+        .and_then(|s| s.parse::<i64>().ok())?;
+    let next_funding_time_ms = d
+        .get("nextFundingTime")
+        .and_then(|v| v.as_str())
+        .and_then(|s| s.parse::<i64>().ok())?;
+    let funding_interval_hours = (next_funding_time_ms - funding_time_ms) as f64 / 3_600_000.0;
+
+    FundingUpdate {
+        funding_rate: parse_decimal(d.get("fundingRate")?.as_str()?)?.to_f64(),
+        funding_interval_hours: Some(funding_interval_hours),
+        next_funding_time_ms: Some(funding_time_ms),
+        funding_timestamp_ms: d
+            .get("ts")
+            .and_then(|v| v.as_str())
+            .and_then(|s| s.parse::<i64>().ok()),
+    }
+    .apply_to(&mut existing);
+    existing.ingest_time_us = now_micros();
+
+    Some(existing)
+}
+
+pub fn okx_f_symbol(raw: &Value) -> Option<(String, String)> {
+    let (_, base, quote) = okx_f_inst_parts(raw)?;
+    Some((base, quote))
+}
+
+pub fn normalize_okx_f_ticker(raw: &Value) -> Option<NormalizedTicker> {
+    let data_arr = raw.get("data")?.as_array()?;
+    let d = data_arr.first()?;
+
+    let (_, base, quote) = okx_f_inst_parts(raw)?;
 
     let c = parse_decimal(d.get("last")?.as_str()?)?;
 
@@ -109,5 +153,88 @@ pub fn normalize_okx_f_ticker(raw: &Value) -> Option<NormalizedTicker> {
         v_quote_krw: None,
         change_24h: None,
         liquidity: None,
+        funding_rate: None,
+        funding_interval_hours: None,
+        next_funding_time_ms: None,
+        funding_timestamp_ms: None,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::MarketState;
+
+    fn btc_ticker() -> NormalizedTicker {
+        NormalizedTicker {
+            exchange: Exchange::OkxF,
+            base: "BTC".to_string(),
+            raw_base: "BTC".to_string(),
+            quote: "USDT".to_string(),
+            o: 100.0,
+            h: 110.0,
+            l: 90.0,
+            c: 105.0,
+            v_base: 1.0,
+            v_quote: 105.0,
+            timestamp_ms: 1,
+            market_state: Some(MarketState::Active),
+            ingest_time_us: 1,
+            o_krw: None,
+            h_krw: None,
+            l_krw: None,
+            c_krw: None,
+            v_quote_krw: None,
+            change_24h: None,
+            liquidity: None,
+            funding_rate: None,
+            funding_interval_hours: None,
+            next_funding_time_ms: None,
+            funding_timestamp_ms: None,
+        }
+    }
+
+    #[test]
+    fn merge_okx_funding_parses_official_funding_payload() {
+        let raw = serde_json::json!({
+            "arg": { "channel": "funding-rate", "instId": "BTC-USDT-SWAP" },
+            "data": [{
+                "fundingRate": "0.0001",
+                "fundingTime": "1700000000000",
+                "nextFundingTime": "1700028800000",
+                "ts": "1699999999000"
+            }]
+        });
+
+        let ticker = merge_okx_funding(&raw, btc_ticker()).unwrap();
+
+        assert_eq!(ticker.funding_rate, Some(0.0001));
+        assert_eq!(ticker.funding_interval_hours, Some(8.0));
+        assert_eq!(ticker.next_funding_time_ms, Some(1700000000000));
+        assert_eq!(ticker.funding_timestamp_ms, Some(1699999999000));
+        assert_eq!(
+            okx_f_symbol(&raw),
+            Some(("BTC".to_string(), "USDT".to_string()))
+        );
+    }
+
+    #[test]
+    fn merge_okx_funding_does_not_fallback_timestamp_to_funding_time() {
+        let raw = serde_json::json!({
+            "arg": { "channel": "funding-rate", "instId": "BTC-USDT-SWAP" },
+            "data": [{
+                "fundingRate": "0.0001",
+                "fundingTime": "1700000000000",
+                "nextFundingTime": "1700028800000",
+                "ts": ""
+            }]
+        });
+
+        let ticker = merge_okx_funding(&raw, btc_ticker()).unwrap();
+
+        assert_eq!(ticker.funding_rate, Some(0.0001));
+        assert_eq!(ticker.funding_interval_hours, Some(8.0));
+        assert_eq!(ticker.next_funding_time_ms, Some(1700000000000));
+        assert_eq!(ticker.funding_timestamp_ms, None);
+    }
 }

@@ -1,3 +1,4 @@
+use crate::normalizer::funding::FundingUpdate;
 use crate::types::{now_micros, parse_decimal, strip_scale_factor, Exchange, NormalizedTicker};
 use rust_decimal::prelude::ToPrimitive;
 use rust_decimal::Decimal;
@@ -106,6 +107,10 @@ pub fn normalize_bitget_ticker(raw: &Value) -> Option<NormalizedTicker> {
         v_quote_krw: None,
         change_24h,
         liquidity: None,
+        funding_rate: None,
+        funding_interval_hours: None,
+        next_funding_time_ms: None,
+        funding_timestamp_ms: None,
     })
 }
 
@@ -172,7 +177,7 @@ pub fn normalize_bitget_f_ticker(raw: &Value) -> Option<NormalizedTicker> {
 
     let timestamp_ms = raw.get("ts")?.as_i64()?;
 
-    Some(NormalizedTicker {
+    let mut ticker = NormalizedTicker {
         exchange: Exchange::BitgetF,
         base,
         raw_base,
@@ -193,5 +198,153 @@ pub fn normalize_bitget_f_ticker(raw: &Value) -> Option<NormalizedTicker> {
         v_quote_krw: None,
         change_24h,
         liquidity: None,
+        funding_rate: None,
+        funding_interval_hours: None,
+        next_funding_time_ms: None,
+        funding_timestamp_ms: None,
+    };
+
+    parse_bitget_funding(d, timestamp_ms).apply_to(&mut ticker);
+
+    Some(ticker)
+}
+
+pub fn merge_bitget_funding(
+    raw: &Value,
+    mut existing: NormalizedTicker,
+) -> Option<NormalizedTicker> {
+    let update = parse_bitget_funding(raw, now_micros() / 1000);
+    if update == FundingUpdate::default() {
+        return None;
+    }
+
+    update.apply_to(&mut existing);
+    existing.ingest_time_us = now_micros();
+
+    Some(existing)
+}
+
+fn parse_bitget_funding(data: &Value, timestamp_ms: i64) -> FundingUpdate {
+    let funding_rate = parse_optional_decimal(data, &["fundingRate"]);
+    let funding_interval_hours =
+        parse_optional_decimal(data, &["fundingRateInterval", "ratePeriod"]);
+    let next_funding_time_ms = parse_optional_i64(data, &["nextUpdate", "nextFundingTime"]);
+    let funding_timestamp_ms = parse_optional_i64(data, &["ts", "time"]).or_else(|| {
+        (funding_rate.is_some()
+            || funding_interval_hours.is_some()
+            || next_funding_time_ms.is_some())
+        .then_some(timestamp_ms)
+    });
+
+    FundingUpdate {
+        funding_rate,
+        funding_interval_hours,
+        next_funding_time_ms,
+        funding_timestamp_ms,
+    }
+}
+
+fn parse_optional_decimal(data: &Value, keys: &[&str]) -> Option<f64> {
+    keys.iter().find_map(|key| {
+        data.get(*key)
+            .and_then(|value| value.as_str())
+            .filter(|value| !value.is_empty())
+            .and_then(parse_decimal)
+            .and_then(|value| value.to_f64())
+            .or_else(|| data.get(*key).and_then(|value| value.as_f64()))
     })
+}
+
+fn parse_optional_i64(data: &Value, keys: &[&str]) -> Option<i64> {
+    keys.iter().find_map(|key| {
+        data.get(*key).and_then(|value| value.as_i64()).or_else(|| {
+            data.get(*key)
+                .and_then(|value| value.as_str())
+                .filter(|value| !value.is_empty())
+                .and_then(|value| value.parse::<i64>().ok())
+        })
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn btc_futures_ticker() -> NormalizedTicker {
+        NormalizedTicker {
+            exchange: Exchange::BitgetF,
+            base: "BTC".to_string(),
+            raw_base: "BTC".to_string(),
+            quote: "USDT".to_string(),
+            o: 100.0,
+            h: 110.0,
+            l: 90.0,
+            c: 105.0,
+            v_base: 1.0,
+            v_quote: 105.0,
+            timestamp_ms: 1,
+            market_state: None,
+            ingest_time_us: 1,
+            o_krw: None,
+            h_krw: None,
+            l_krw: None,
+            c_krw: None,
+            v_quote_krw: None,
+            change_24h: None,
+            liquidity: None,
+            funding_rate: None,
+            funding_interval_hours: None,
+            next_funding_time_ms: None,
+            funding_timestamp_ms: None,
+        }
+    }
+
+    #[test]
+    fn futures_ticker_parses_funding_fields_when_present() {
+        let raw = serde_json::json!({
+            "arg": { "instType": "usdt-futures", "topic": "ticker", "symbol": "BTCUSDT" },
+            "data": [{
+                "lastPr": "105.0",
+                "open24h": "100.0",
+                "high24h": "110.0",
+                "low24h": "90.0",
+                "baseVolume": "2.0",
+                "quoteVolume": "210.0",
+                "fundingRate": "0.0001",
+                "fundingRateInterval": "8",
+                "nextFundingTime": "1700006400000"
+            }],
+            "ts": 1700000000000_i64
+        });
+
+        let ticker = normalize_bitget_f_ticker(&raw).unwrap();
+
+        assert_eq!(ticker.funding_rate, Some(0.0001));
+        assert_eq!(ticker.funding_interval_hours, Some(8.0));
+        assert_eq!(ticker.next_funding_time_ms, Some(1700006400000));
+        assert_eq!(ticker.funding_timestamp_ms, Some(1700000000000));
+    }
+
+    #[test]
+    fn merge_funding_uses_rest_metadata_fields() {
+        let raw = serde_json::json!({
+            "fundingRate": "-0.0002",
+            "ratePeriod": "4",
+            "nextFundingTime": "1700014400000"
+        });
+
+        let ticker = merge_bitget_funding(&raw, btc_futures_ticker()).unwrap();
+
+        assert_eq!(ticker.funding_rate, Some(-0.0002));
+        assert_eq!(ticker.funding_interval_hours, Some(4.0));
+        assert_eq!(ticker.next_funding_time_ms, Some(1700014400000));
+        assert!(ticker.funding_timestamp_ms.is_some());
+    }
+
+    #[test]
+    fn merge_funding_ignores_payload_without_funding_fields() {
+        let raw = serde_json::json!({ "symbol": "BTCUSDT" });
+
+        assert!(merge_bitget_funding(&raw, btc_futures_ticker()).is_none());
+    }
 }

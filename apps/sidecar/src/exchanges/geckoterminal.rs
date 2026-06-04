@@ -358,5 +358,9 @@ fn normalize_gt_token(
         c_krw: None,
         v_quote_krw: None,
         change_24h: None,
+        funding_rate: None,
+        funding_interval_hours: None,
+        next_funding_time_ms: None,
+        funding_timestamp_ms: None,
     })
 }

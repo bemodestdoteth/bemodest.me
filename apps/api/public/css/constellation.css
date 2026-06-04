@@ -346,6 +346,19 @@
     /* Cyan-green tint */
 }
 
+.exchange-node.dex.stale {
+    opacity: 0.48;
+    filter: grayscale(0.45);
+    border-style: dashed !important;
+}
+
+.exchange-node .dex-quote {
+    font-family: 'D2Coding', monospace;
+    font-size: 0.55rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+}
+
 /* Korean exchanges */
 .exchange-node.korean {
     background: #fce4ec;
@@ -365,6 +378,19 @@
     font-size: 0.7rem;
     color: #666;
     margin-top: 4px;
+}
+
+.exchange-node .funding {
+    font-family: 'D2Coding', monospace;
+    font-size: 0.56rem;
+    line-height: 1.1;
+    color: var(--neon-purple);
+    margin-top: 2px;
+}
+
+.exchange-node .funding.stale {
+    color: #8d7f5f;
+    opacity: 0.62;
 }
 
 .exchange-node .diff {

@@ -1,5 +1,4 @@
 use crate::cache::lvc::LatestValueCache;
-use crate::cache::EligibilityFilter;
 use crate::config::Config;
 use crate::exchanges::batcher::TickerBatcher;
 use futures_util::{SinkExt, StreamExt};
@@ -96,16 +95,10 @@ impl WsSession {
                         }
                     }
 
-                    let filter = EligibilityFilter::new(
-                        ctx.config.filter_min_sources,
-                        ctx.config.filter_min_spread_pct,
-                        ctx.config.pinlist.clone(),
-                    );
                     let mut batcher = TickerBatcher::new(
                         ctx.tx.clone(),
                         ctx.source.clone(),
-                        ctx.lvc.clone(),
-                        filter,
+                        ctx.config.clone(),
                     );
                     let mut flush_interval =
                         interval(Duration::from_millis(ctx.config.batch_duration_ms));

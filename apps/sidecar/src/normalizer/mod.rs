@@ -3,6 +3,7 @@ pub mod bitget;
 pub mod bybit;
 pub mod bybit_f;
 pub mod coinbase;
+pub mod funding;
 pub mod gateio;
 pub mod hyperliquid_f;
 pub mod kraken;

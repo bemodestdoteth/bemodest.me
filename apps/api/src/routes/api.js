@@ -566,6 +566,31 @@ export const postDeepDiveStop = async (req, res) => {
 
 // ── Alert Rules ──────────────────────────────────────────────────────────────
 
+const MARKET_WATCH_SCOPE = 'market_watch';
+
+function normalizeAlertRuleScope(rule) {
+    return rule.scope ?? 'alert';
+}
+
+function validateMarketWatchRuleShape(rule) {
+    if (normalizeAlertRuleScope(rule) !== MARKET_WATCH_SCOPE) return null;
+    if (rule.ticker !== '*') return 'market_watch rule must use ticker "*"';
+    if (rule.condition !== 'spread_pct') return 'market_watch rule must use condition "spread_pct"';
+    if (!rule.webhook_url) return 'market_watch rule requires webhook_url';
+    return null;
+}
+
+async function countOtherMarketWatchRules(dbClient, excludeId) {
+    const query = { scope: MARKET_WATCH_SCOPE };
+    if (excludeId) query._id = { $ne: excludeId };
+    const rules = await dbClient.readMany(COLLECTION_ALERT_RULES, query, { projection: { _id: 1 } });
+    return rules.length;
+}
+
+function alertRuleIdQuery(id, ObjectId) {
+    return ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { _id: id };
+}
+
 /**
  * GET /api/alert-rules
  * Returns all alert rules from MongoDB (enabled and disabled).
@@ -596,8 +621,16 @@ export const createAlertRule = async (req, res) => {
     }
 
     try {
-        const now = new Date();
+        const now = new Date().toISOString();
         const dbClient = await getDBClient();
+        const shapeError = validateMarketWatchRuleShape(body);
+        if (shapeError) return res.status(400).json({ error: shapeError });
+        if (normalizeAlertRuleScope(body) === MARKET_WATCH_SCOPE) {
+            const existingCount = await countOtherMarketWatchRules(dbClient);
+            if (existingCount > 0) {
+                return res.status(409).json({ error: 'Only one market_watch alert rule is allowed' });
+            }
+        }
         const result = await dbClient.insertOne(COLLECTION_ALERT_RULES, {
             ...body,
             created_at: now,
@@ -630,10 +663,23 @@ export const updateAlertRule = async (req, res) => {
     try {
         const { ObjectId } = await import('mongodb');
         const dbClient = await getDBClient();
+        const idQuery = alertRuleIdQuery(id, ObjectId);
+        const currentRules = await dbClient.readMany(COLLECTION_ALERT_RULES, idQuery, { projection: { _id: 1, scope: 1, ticker: 1, condition: 1, webhook_url: 1 } });
+        const currentRule = currentRules[0];
+        if (!currentRule) return res.status(404).json({ success: false, message: 'Alert rule not found' });
+        const nextRule = { ...currentRule, ...body };
+        const shapeError = validateMarketWatchRuleShape(nextRule);
+        if (shapeError) return res.status(400).json({ error: shapeError });
+        if (normalizeAlertRuleScope(nextRule) === MARKET_WATCH_SCOPE) {
+            const existingCount = await countOtherMarketWatchRules(dbClient, currentRule._id);
+            if (existingCount > 0) {
+                return res.status(409).json({ error: 'Only one market_watch alert rule is allowed' });
+            }
+        }
         await dbClient.updateOne(
             COLLECTION_ALERT_RULES,
-            { _id: new ObjectId(id) },
-            { $set: { ...body, updated_at: new Date() } }
+            idQuery,
+            { $set: { ...body, updated_at: new Date().toISOString() } }
         );
 
         const redis = getRedisClient();
@@ -656,7 +702,7 @@ export const deleteAlertRule = async (req, res) => {
     try {
         const { ObjectId } = await import('mongodb');
         const dbClient = await getDBClient();
-        await dbClient.deleteOne(COLLECTION_ALERT_RULES, { _id: new ObjectId(id) });
+        await dbClient.deleteOne(COLLECTION_ALERT_RULES, alertRuleIdQuery(id, ObjectId));
 
         // Clear sidecar-side Redis state for this rule
         const redis = getRedisClient();
@@ -684,8 +730,8 @@ export const resetWebhookDead = async (req, res) => {
         const dbClient = await getDBClient();
         await dbClient.updateOne(
             COLLECTION_ALERT_RULES,
-            { _id: new ObjectId(id) },
-            { $set: { webhook_dead: false, updated_at: new Date() } }
+            alertRuleIdQuery(id, ObjectId),
+            { $set: { webhook_dead: false, updated_at: new Date().toISOString() } }
         );
 
         const redis = getRedisClient();
@@ -711,8 +757,8 @@ export const markWebhookDead = async (req, res) => {
         const dbClient = await getDBClient();
         await dbClient.updateOne(
             COLLECTION_ALERT_RULES,
-            { _id: new ObjectId(id) },
-            { $set: { webhook_dead: true, updated_at: new Date() } }
+            alertRuleIdQuery(id, ObjectId),
+            { $set: { webhook_dead: true, updated_at: new Date().toISOString() } }
         );
 
         // Notify UI via Socket.IO

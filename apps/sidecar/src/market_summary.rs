@@ -1,7 +1,7 @@
+use log::{debug, info};
 use std::sync::Arc;
 use tokio::sync::broadcast;
 use tokio::time::{interval, Duration};
-use log::{debug, info};
 
 use crate::alert::engine::group_live_tickers;
 use crate::cache::LatestValueCache;

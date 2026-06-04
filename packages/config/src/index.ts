@@ -37,6 +37,7 @@ const ApiConfigSchema = SystemConfigSchema.extend({
   COOKIE_MAX_AGE_MS: z.string().default('604800000'),
   COOKIE_SAME_SITE: z.string().default('lax'),
   SIDECAR_URL: z.string().optional(),
+  WEBHOOK_URL: z.string().url().optional(),
   PROXY_URL: z.string().optional(),
   INFURA_KEY: z.string().optional(),
   ETHERSCAN_KEY: z.string().optional(),

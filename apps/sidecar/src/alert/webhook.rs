@@ -29,8 +29,8 @@ const DEAD_AFTER_FAILURES: u32 = 3;
 /// Consume `AlertFiredEvent`s from the broadcast channel and deliver them
 /// to each rule's configured webhook URL.
 ///
-/// HMAC-SHA256 signing reuses the existing `SNAPPER_API_SECRET` via:
-///   `sig = HMAC-SHA256(key=secret, msg=payload_bytes + timestamp_ms_string)`
+/// HMAC-SHA256 signing reuses the existing `SNAPPER_API_SECRET` via
+/// the Node API's timestamp-only signature contract.
 ///
 /// Headers sent:
 ///   `X-Timestamp: <unix_ms>`
@@ -111,8 +111,8 @@ async fn deliver_with_retry(
         }
     };
 
-    // Build HMAC-SHA256 signature: key=SNAPPER_API_SECRET, msg=payload+timestamp
-    let sig_hex = sign_payload(&payload, timestamp_ms, &config.webhook_secret);
+    // Build HMAC-SHA256 signature matching the Node API validator.
+    let sig_hex = sign_timestamp(timestamp_ms, &config.webhook_secret);
 
     for (attempt, delay_secs) in RETRY_DELAYS_SECS.iter().enumerate() {
         if attempt > 0 {
@@ -166,15 +166,11 @@ async fn deliver_with_retry(
 // HMAC-SHA256 Singer
 // ============================================================================
 
-/// Produce a lower-hex HMAC-SHA256 signature.
-///
-/// The message is `payload_bytes || timestamp_ms_decimal_string`, matching the
-/// validation the Node API performs (same SNAPPER_API_SECRET, same algorithm).
-fn sign_payload(payload: &[u8], timestamp_ms: i64, secret: &str) -> String {
+/// Produce a lower-hex HMAC-SHA256 signature over the timestamp string.
+fn sign_timestamp(timestamp_ms: i64, secret: &str) -> String {
     let mut mac = HmacSha256::new_from_slice(secret.as_bytes())
         .expect("[Webhook] HMAC initialization failed");
 
-    mac.update(payload);
     mac.update(timestamp_ms.to_string().as_bytes());
 
     let result = mac.finalize();

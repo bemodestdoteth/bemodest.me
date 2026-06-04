@@ -7,15 +7,23 @@
         "_id": {
           "type": "string"
         },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "alert",
+            "market_watch"
+          ],
+          "default": "alert"
+        },
         "condition": {
           "type": "string",
           "enum": [
             "change_pct_5m",
+            "change_pct_24h",
             "price_above",
             "price_below",
             "spread_pct",
-            "volume_spike",
-            "change_pct_24h"
+            "volume_spike"
           ]
         },
         "cooldown_secs": {
@@ -36,6 +44,10 @@
         "label": {
           "type": "string"
         },
+        "minSources": {
+          "type": "integer",
+          "default": 2
+        },
         "quote": {
           "type": "string"
         },
@@ -51,6 +63,10 @@
         "value": {
           "type": "number"
         },
+        "volumeFloorUsd": {
+          "type": "number",
+          "default": 30000
+        },
         "webhook_dead": {
           "type": "boolean",
           "default": false
@@ -58,17 +74,6 @@
         "webhook_url": {
           "type": "string",
           "format": "uri"
-        },
-        "target_type": {
-          "type": "string",
-          "enum": [
-            "specific",
-            "global"
-          ],
-          "default": "specific"
-        },
-        "min_volume_usd": {
-          "type": "number"
         }
       },
       "required": [

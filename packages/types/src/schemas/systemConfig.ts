@@ -28,8 +28,6 @@ export const SystemConfigSchema = z.object({
     NODE_ENV: z.enum(['dev', 'prod', 'test']).default('dev'),
     DEX_REDIS_CHANNEL: z.string().default('dex_prices'),
     BATCHING_DURATION_MS: z.number().int().default(1000),
-    FILTER_MIN_SOURCES: z.number().int().default(2),
-    FILTER_MIN_SPREAD_PCT: z.number().default(10.0),
 });
 
 

@@ -1,3 +1,4 @@
+use crate::normalizer::funding::FundingUpdate;
 use crate::types::{
     now_micros, parse_decimal, strip_scale_factor, Exchange, ExchangeExt, MarketState,
     NormalizedTicker,
@@ -59,6 +60,10 @@ pub fn normalize_binance_ticker(raw: &Value, exchange: Exchange) -> Option<Norma
         v_quote_krw: None,
         change_24h: None,
         liquidity: None,
+        funding_rate: None,
+        funding_interval_hours: None,
+        next_funding_time_ms: None,
+        funding_timestamp_ms: None,
     })
 }
 
@@ -70,5 +75,72 @@ pub fn normalize_binance_ticker_array(raw: &Value, exchange: Exchange) -> Vec<No
             .filter_map(|item| normalize_binance_ticker(item, exchange))
             .collect(),
         None => Vec::new(),
+    }
+}
+
+pub fn merge_binance_funding(
+    raw: &Value,
+    mut existing: NormalizedTicker,
+) -> Option<NormalizedTicker> {
+    FundingUpdate {
+        funding_rate: parse_decimal(raw.get("r")?.as_str()?)?.to_f64(),
+        funding_interval_hours: existing.funding_interval_hours.or(Some(8.0)),
+        next_funding_time_ms: Some(raw.get("T")?.as_i64()?),
+        funding_timestamp_ms: Some(raw.get("E")?.as_i64()?),
+    }
+    .apply_to(&mut existing);
+    existing.ingest_time_us = now_micros();
+
+    Some(existing)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::{Exchange, MarketState};
+
+    fn btc_futures_ticker() -> NormalizedTicker {
+        NormalizedTicker {
+            exchange: Exchange::BinanceF,
+            base: "BTC".to_string(),
+            raw_base: "BTC".to_string(),
+            quote: "USDT".to_string(),
+            o: 100.0,
+            h: 110.0,
+            l: 90.0,
+            c: 105.0,
+            v_base: 1.0,
+            v_quote: 105.0,
+            timestamp_ms: 1,
+            market_state: Some(MarketState::Active),
+            ingest_time_us: 1,
+            o_krw: None,
+            h_krw: None,
+            l_krw: None,
+            c_krw: None,
+            v_quote_krw: None,
+            change_24h: None,
+            liquidity: None,
+            funding_rate: None,
+            funding_interval_hours: Some(4.0),
+            next_funding_time_ms: None,
+            funding_timestamp_ms: None,
+        }
+    }
+
+    #[test]
+    fn merge_binance_funding_preserves_existing_interval() {
+        let raw = serde_json::json!({
+            "r": "0.0001",
+            "T": 1700006400000_i64,
+            "E": 1700000000000_i64
+        });
+
+        let ticker = merge_binance_funding(&raw, btc_futures_ticker()).unwrap();
+
+        assert_eq!(ticker.funding_rate, Some(0.0001));
+        assert_eq!(ticker.funding_interval_hours, Some(4.0));
+        assert_eq!(ticker.next_funding_time_ms, Some(1700006400000));
+        assert_eq!(ticker.funding_timestamp_ms, Some(1700000000000));
     }
 }

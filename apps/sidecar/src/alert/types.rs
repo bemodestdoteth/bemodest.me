@@ -53,6 +53,7 @@ pub struct AlertFiredEvent {
     pub webhook_url: String,
 
     pub label: String,
+    pub scope: String,
     pub condition: AlertCondition,
     pub ticker: String,
     pub quote: String,

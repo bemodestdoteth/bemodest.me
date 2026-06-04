@@ -2,6 +2,7 @@ use std::env;
 use std::str::FromStr;
 use std::sync::{Arc, RwLock};
 
+use crate::cache::VisibilityCache;
 use crate::types::{SystemConfig, SystemConfigJwtSecret, SystemConfigNodeEnv};
 use std::collections::HashSet;
 
@@ -15,14 +16,13 @@ pub struct Config {
     pub redis_url: String,
     pub dex_redis_channel: String,
     pub batch_duration_ms: u64,
-    pub filter_min_sources: usize,
-    pub filter_min_spread_pct: f64,
     pub webhook_secret: String,
     pub forex_update_interval_sec: u64,
     pub market_cache_update_interval_sec: u64,
     pub korean_market_cache_update_interval_sec: u64,
     pub excludelist: Arc<RwLock<HashSet<String>>>,
     pub pinlist: Arc<RwLock<HashSet<String>>>,
+    pub visibility: Arc<VisibilityCache>,
 }
 
 impl Config {
@@ -45,13 +45,6 @@ impl Config {
             .ok()
             .and_then(|s| s.parse::<i64>().ok())
             .unwrap_or(1000);
-        let filter_min_sources = env::var("FILTER_MIN_SOURCES")
-            .ok()
-            .and_then(|s| s.parse::<i64>().ok())
-            .unwrap_or(2);
-        let filter_min_spread_pct = env::var("FILTER_MIN_SPREAD_PCT")
-            .ok()
-            .and_then(|s| s.parse::<f64>().ok());
 
         // MongoDB URI logic
         let mongo_uri = env::var("MONGO_URI").ok().or_else(|| {
@@ -100,8 +93,6 @@ impl Config {
             dex_redis_channel: env::var("DEX_REDIS_CHANNEL")
                 .unwrap_or_else(|_| "dex_prices".to_string()),
             batching_duration_ms,
-            filter_min_sources,
-            filter_min_spread_pct,
             mongo_user: env::var("MONGO_USER").ok(),
             mongo_password: env::var("MONGO_PASSWORD").ok(),
             mongo_host: env::var("MONGO_HOST").ok(),
@@ -153,8 +144,6 @@ impl Config {
                 .unwrap_or_else(|| "redis://127.0.0.1:6380".to_string()),
             dex_redis_channel: inner.dex_redis_channel.clone(),
             batch_duration_ms: inner.batching_duration_ms as u64,
-            filter_min_sources: inner.filter_min_sources as usize,
-            filter_min_spread_pct: inner.filter_min_spread_pct.unwrap_or(10.0),
             webhook_secret: inner.snapper_api_secret.clone().unwrap_or_default(),
             inner,
             forex_update_interval_sec,
@@ -162,6 +151,7 @@ impl Config {
             korean_market_cache_update_interval_sec,
             excludelist: Arc::new(RwLock::new(excludelist_set)),
             pinlist: Arc::new(RwLock::new(pinlist_set)),
+            visibility: Arc::new(VisibilityCache::new()),
         }
     }
 }

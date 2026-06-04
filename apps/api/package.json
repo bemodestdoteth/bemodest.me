@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node --env-file=.env src/server.js",
     "dev": "NODE_OPTIONS='--max-old-space-size=512' nodemon --exec 'node --env-file=.env.dev' src/server.js",
+    "upsert:market-watch-rule": "node --env-file=.env.dev src/scripts/upsert-market-watch-rule.js",
     "generate:credentials": "node --env-file=.env.dev src/scripts/generate-credentials.js",
     "test:auth": "node --env-file=.env.dev src/scripts/test-auth.js",
     "test:websocket": "node --env-file=.env.dev src/scripts/test-websocket.js",

@@ -6,6 +6,8 @@ use log::{debug, error, info, warn};
 use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::accept_async;
 
+use crate::config::Config;
+use crate::exchanges::kyberswap;
 use crate::exchanges::ExchangeManager;
 use std::sync::{Arc, OnceLock};
 use tokio::sync::{Mutex, Semaphore};
@@ -21,6 +23,7 @@ pub async fn run_server(
     tx: tokio::sync::broadcast::Sender<String>,
     manager: Arc<Mutex<ExchangeManager>>,
     lvc: Arc<LatestValueCache>,
+    config: Arc<Config>,
 ) {
     let addr = format!("0.0.0.0:{}", port);
     let listener = TcpListener::bind(&addr).await.expect("Failed to bind port");
@@ -47,9 +50,10 @@ pub async fn run_server(
         let tx = tx.clone();
         let manager = manager.clone();
         let lvc = lvc.clone();
+        let config = config.clone();
         tokio::spawn(async move {
             let _permit = permit;
-            handle_connection(stream, secret, tx, manager, lvc).await;
+            handle_connection(stream, secret, tx, manager, lvc, config).await;
         });
     }
 }
@@ -60,6 +64,7 @@ async fn handle_connection(
     tx: tokio::sync::broadcast::Sender<String>,
     manager: Arc<Mutex<ExchangeManager>>,
     lvc: Arc<LatestValueCache>,
+    config: Arc<Config>,
 ) {
     // Basic handshake
     let ws_stream = match accept_async(stream).await {
@@ -116,7 +121,7 @@ async fn handle_connection(
 
                                         // Push Initial State (LVC Snapshot)
                                         // This ensures the client starts with a ground truth for all tickers/sources
-                                        let snapshot = api::handle_command(&serde_json::json!({"cmd": "snapshot"}), &lvc);
+                                        let snapshot = api::handle_command(&serde_json::json!({"cmd": "snapshot"}), &lvc, &config);
                                         let _ = send_json(&mut write, &snapshot).await;
 
                                         // Trigger Lazy Exchange Connections
@@ -132,7 +137,30 @@ async fn handle_connection(
                                 // Handle API commands from authenticated clients
                                 if let Ok(cmd) = serde_json::from_str::<serde_json::Value>(text) {
                                     if cmd.get("cmd").is_some() {
-                                        let response = api::handle_command(&cmd, &lvc);
+                                        let response = if cmd.get("cmd").and_then(|v| v.as_str()) == Some("dex_quote_refresh") {
+                                            match kyberswap::quote_handle() {
+                                                Some(handle) => {
+                                                    let symbols = cmd
+                                                        .get("symbols")
+                                                        .and_then(|v| v.as_array())
+                                                        .map(|items| {
+                                                            items
+                                                                .iter()
+                                                                .filter_map(|item| item.as_str().map(str::to_string))
+                                                                .collect::<Vec<_>>()
+                                                        })
+                                                        .unwrap_or_default();
+                                                    handle.enqueue_symbols(symbols).await
+                                                }
+                                                None => serde_json::json!({
+                                                    "type": "api_error",
+                                                    "cmd": "dex_quote_refresh",
+                                                    "error": "kyberswap exchange is not initialized"
+                                                }),
+                                            }
+                                        } else {
+                                            api::handle_command(&cmd, &lvc, &config)
+                                        };
                                         if let Err(e) = write.send(tokio_tungstenite::tungstenite::Message::Text(response.to_string().into())).await {
                                             error!("Failed to send API response: {}", e);
                                             break;
@@ -199,6 +227,7 @@ const LAZY_EXCHANGES: &[&str] = &[
     "okx",
     "okx_f",
     "hyperliquid_f",
+    "kyberswap",
 ];
 
 async fn trigger_lazy_connections(

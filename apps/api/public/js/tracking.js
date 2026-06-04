@@ -12,6 +12,8 @@
     let dwStatusTimeout = null;
     let hotBalanceInterval = null;
     let timelineInterval = null;
+    let fundingRefreshInterval = null;
+    let dexRefreshInterval = null;
     let socket = null;
 
     // D/W Status cache: { 'exchange:network': status }
@@ -32,6 +34,7 @@
     let marketMetadata = {};
     let marketCaipMap = {};
     let currentPinlist = [];
+    let marketWatchEligibleSymbols = new Set();
 
     // Track active deep dive
     let isDeepDiveActive = false;
@@ -180,6 +183,57 @@
         return v.toFixed(2);
     }
 
+    function formatFundingCountdown(nextFundingTimeMs) {
+        const remainingMs = Math.max(0, nextFundingTimeMs - Date.now());
+        const totalSeconds = Math.floor(remainingMs / 1000);
+        const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+        const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+        const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+    }
+
+    function isDexSource(source) {
+        return source && source.toLowerCase().startsWith('dex_');
+    }
+
+    function isDexStale(data) {
+        return !data?.updatedAtMs || Date.now() - data.updatedAtMs > 60000;
+    }
+
+    function displayQuoteLabel(quote) {
+        return quote === 'USDT' || quote === 'USDC' ? 'USD stable' : quote;
+    }
+
+    function requestDexQuotes(symbols) {
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        const uniqueSymbols = Array.from(new Set(symbols.filter(Boolean).map(s => s.toUpperCase())));
+        if (uniqueSymbols.length === 0) return;
+        ws.send(JSON.stringify({ cmd: 'dex_quote_refresh', symbols: uniqueSymbols }));
+    }
+
+    function requestVisibleDexQuotes() {
+        const symbols = [selectedSymbol, ...currentPinlist];
+        requestDexQuotes(symbols);
+    }
+
+    function formatFundingInfo(data) {
+        if (!data || data.fundingRate === undefined || data.fundingRate === null) return '';
+
+        const rate = Number(data.fundingRate) * 100;
+        const rateText = `${rate >= 0 ? '+' : ''}${rate.toFixed(4)}%`;
+        const intervalText = data.fundingIntervalHours ? `${data.fundingIntervalHours}h ` : '';
+        const isStale = !data.fundingTimestampMs || Date.now() - data.fundingTimestampMs > 45000;
+
+        if (isStale) {
+            return `<span class="funding stale">${intervalText}${rateText} stale</span>`;
+        }
+        if (!data.nextFundingTimeMs) {
+            return `<span class="funding">${intervalText}${rateText}</span>`;
+        }
+
+        return `<span class="funding">${intervalText}${rateText} ${formatFundingCountdown(data.nextFundingTimeMs)}</span>`;
+    }
+
     function _renderDwForNode(source) {
         if (!source) return '';
         const lower = source.toLowerCase();
@@ -320,7 +374,7 @@
         // Find leader volume for relative line thickness and center node
         const validLeaderSources = sources.filter(s => {
             const lower = s.toLowerCase();
-            return lower !== 'binance_f' && lower !== 'bybit_f' && lower !== 'bitget_f' && lower !== 'okx_f' && lower !== 'upbit' && lower !== 'bithumb' && !lower.startsWith('dex_');
+            return !lower.endsWith('_f') && lower !== 'upbit' && lower !== 'bithumb' && !lower.startsWith('dex_');
         });
 
         let leaderVol = 0;
@@ -400,12 +454,12 @@
             const midY = (centerY + pos.y) / 2;
 
             let textLabelHTML = `<text x="${midX}" y="${midY}" fill="#333" font-size="13" text-anchor="middle" dy="-5" font-family="'D2Coding', monospace" style="font-weight: bold;">$${formatVolume(ex.volume)}</text>`;
-            if (source.toLowerCase().startsWith('dex_')) {
-                const liq = ex.liquidity ? formatVolume(ex.liquidity) : '0';
+            if (isDexSource(source)) {
+                const liquidityLine = ex.liquidity ? `<tspan x="${midX}" dy="16">l:$${formatVolume(ex.liquidity)}</tspan>` : '';
                 textLabelHTML = `
                     <text x="${midX}" y="${midY}" fill="#333" font-size="13" text-anchor="middle" font-family="'D2Coding', monospace" style="font-weight: bold;">
                         <tspan x="${midX}" dy="-12">v:$${formatVolume(ex.volume)}</tspan>
-                        <tspan x="${midX}" dy="16">l:$${liq}</tspan>
+                        ${liquidityLine}
                     </text>
                 `;
             }
@@ -426,10 +480,11 @@
             const node = document.createElement('div');
             const srcLower = source.toLowerCase();
             const isFutures = srcLower.endsWith('_f');
-            const isDex = srcLower.startsWith('dex_');
+            const isDex = isDexSource(source);
             const isKorean = srcLower === 'upbit' || srcLower === 'bithumb';
+            const isStaleDex = isDex && isDexStale(ex);
             const nodeType = isFutures ? 'futures' : isDex ? 'dex' : isKorean ? 'korean' : '';
-            node.className = `exchange-node ${nodeType}`;
+            node.className = `exchange-node ${nodeType}${isStaleDex ? ' stale' : ''}`;
             node.style.cssText = `
                 left: ${pos.x}px; 
                 top: ${pos.y}px; 
@@ -443,8 +498,12 @@
                 krwHtml = `<span class="price krw-price" style="font-family: 'D2Coding', Courier, monospace;">₩${formatKrwPrice(ex.krwPrice)}</span>`;
             }
 
+            const fundingHtml = isFutures ? formatFundingInfo(ex) : '';
+
             node.innerHTML = `
                 <span class="name">${getPrettyName(source)}</span>
+                ${isDex ? `<span class="dex-quote">${displayQuoteLabel(ex.quote)}</span>` : ''}
+                ${fundingHtml}
                 <span class="price" style="color: #333; font-weight: 600;">$${formatPrice(price)}</span>
                 ${krwHtml}
                 <span class="diff ${diffClass}">${diffStr}</span>
@@ -471,7 +530,7 @@
         const nonFuturesSources = allSources.filter(s => {
             const lower = s.toLowerCase();
             const vol = parseFloat(data[s].volume) || 0;
-            return lower !== 'binance_f' && lower !== 'bybit_f' && lower !== 'bitget_f' && lower !== 'okx_f' && vol > MIN_VOLUME_USD;
+            return !lower.endsWith('_f') && vol > MIN_VOLUME_USD;
         });
         const nonFuturesPrices = nonFuturesSources.map(s => parseFloat(data[s].price)).filter(p => !isNaN(p));
 
@@ -519,7 +578,7 @@
         // Leader based on exact rules: max volume rejecting futures/upbit/bithumb/dex.
         const validSources = allSources.filter(s => {
             const lower = s.toLowerCase();
-            return lower !== 'binance_f' && lower !== 'bybit_f' && lower !== 'bitget_f' && lower !== 'okx_f' && lower !== 'upbit' && lower !== 'bithumb' && !lower.startsWith('dex_');
+            return !lower.endsWith('_f') && lower !== 'upbit' && lower !== 'bithumb' && !lower.startsWith('dex_');
         });
 
         let leader = '--';
@@ -567,6 +626,11 @@
     }
 
     // Initialize Timeline (Visuals only for now)
+    function refreshFundingCountdowns() {
+        if (!marketData[selectedSymbol]) return;
+        renderConstellation(selectedSymbol);
+    }
+
     function renderTimeline() {
         const bars = document.getElementById('timelineBars');
         if (!bars) return;
@@ -713,6 +777,109 @@
         renderConstellation(selectedSymbol);
     }
 
+    function updateMarketWatchVisibility(visibilityData) {
+        if (!Array.isArray(visibilityData)) return;
+
+        const nextVisible = new Set(currentPinlist);
+        for (const item of visibilityData) {
+            if (item.base) nextVisible.add(item.base);
+        }
+
+        marketWatchEligibleSymbols = nextVisible;
+        marketWatchEligibleSymbols.forEach(ensureMarketWatchItem);
+        pruneHiddenMarketWatchItems();
+        syncSelectedSymbolWithVisibility();
+        updateMarketWatchEmptyState();
+    }
+
+    function pruneHiddenMarketWatchItems() {
+        document.querySelectorAll('.coin-item').forEach(item => {
+            const symbol = item.getAttribute('data-symbol');
+            if (!marketWatchEligibleSymbols.has(symbol)) {
+                item.remove();
+                if (symbol !== selectedSymbol) delete marketData[symbol];
+            }
+        });
+    }
+
+    function syncSelectedSymbolWithVisibility() {
+        if (marketWatchEligibleSymbols.has(selectedSymbol)) return;
+
+        const firstVisible = Array.from(marketWatchEligibleSymbols)[0];
+        if (!firstVisible) return;
+
+        if (isDeepDiveActive && selectedSymbol !== firstVisible) {
+            stopDeepDiveUI();
+        }
+
+        selectedSymbol = firstVisible;
+        const selectedEl = document.getElementById('selectedSymbol');
+        if (selectedEl) selectedEl.textContent = selectedSymbol;
+        document.querySelectorAll('.coin-item').forEach(item => {
+            item.classList.toggle('active', item.getAttribute('data-symbol') === selectedSymbol);
+        });
+        renderConstellation(selectedSymbol);
+    }
+
+    function updateMarketWatchEmptyState() {
+        const emptyEl = document.getElementById('marketWatchEmptyState');
+        if (!emptyEl) return;
+        emptyEl.style.display = marketWatchEligibleSymbols.size === 0 ? 'block' : 'none';
+    }
+
+    function ensureMarketWatchItem(symbol) {
+        let listEl = document.querySelector(`.coin-item[data-symbol="${symbol}"]`);
+        const coinList = document.getElementById('coinList');
+        if (listEl || !coinList || !marketWatchEligibleSymbols.has(symbol)) return;
+
+        const rank = marketMetadata[symbol]?.market_cap_rank || '-';
+        const mcap = marketMetadata[symbol]?.market_cap ? '$' + formatVolume(marketMetadata[symbol].market_cap) : '';
+
+        listEl = document.createElement('li');
+        const isPinned = currentPinlist.includes(symbol);
+        listEl.className = `coin-item ${isPinned ? 'pinned' : ''}`;
+        if (symbol === selectedSymbol) {
+            listEl.classList.add('active');
+            document.getElementById('selectedSymbol').textContent = symbol;
+        }
+        listEl.setAttribute('data-symbol', symbol);
+        listEl.innerHTML = `
+            <span class="coin-rank">${rank}</span>
+            <div class="coin-info">
+                <div class="coin-symbol">${symbol}</div>
+                <div class="coin-name" style="color: var(--text-dim); font-size: 0.75rem; margin-top: 2px;">${mcap}</div>
+            </div>
+            <span class="coin-change neutral" id="list_${symbol}_change">--%</span>
+        `;
+
+        listEl.addEventListener('click', () => {
+            document.querySelectorAll('.coin-item').forEach(i => i.classList.remove('active'));
+            listEl.classList.add('active');
+
+            // AUTO-STOP Deep Dive on coin switch
+            if (isDeepDiveActive && selectedSymbol !== symbol) {
+                console.log(`[DeepDive] Auto-stopping session for ${selectedSymbol} due to coin switch to ${symbol}`);
+                stopDeepDiveUI();
+            }
+
+            selectedSymbol = symbol;
+            document.getElementById('selectedSymbol').textContent = selectedSymbol;
+            requestDexQuotes([selectedSymbol]);
+            renderConstellation(selectedSymbol);
+        });
+
+        const searchInput = document.getElementById('coinSearchInput');
+        if (searchInput && searchInput.value) {
+            const term = searchInput.value.toLowerCase();
+            if (!symbol.toLowerCase().includes(term)) {
+                listEl.style.display = 'none';
+            }
+        }
+
+        coinList.appendChild(listEl);
+        requestAnimationFrame(sortMarketWatch);
+    }
+
     async function initSidecar() {
         if (ws || isConnecting) return;
         isConnecting = true;
@@ -758,6 +925,9 @@
             if (msg === 'AUTH_OK') {
                 console.log('[Sidecar] Auth OK');
                 updateSidecarConnectionStatus(true);
+                requestVisibleDexQuotes();
+                if (dexRefreshInterval) clearInterval(dexRefreshInterval);
+                dexRefreshInterval = setInterval(requestVisibleDexQuotes, 60000);
             } else if (msg === 'AUTH_FAILED') {
                 updateSidecarConnectionStatus(false, 'Auth Failed');
                 ws.close();
@@ -780,12 +950,45 @@
                         }
                     }
                     else if (data.type === 'batch' && Array.isArray(data.data)) {
+                        let touchedSelected = false;
                         for (const item of data.data) {
-                            processTickerPayload(item);
+                            touchedSelected = processTickerPayload(item) === selectedSymbol || touchedSelected;
+                        }
+                        if (touchedSelected) {
+                            renderConstellation(selectedSymbol);
+                            updateListDisplay();
+                        }
+                    }
+                    else if (data.type === 'api' && data.cmd === 'snapshot') {
+                        const tickers = data.data?.tickers;
+                        let touchedSelected = false;
+                        let firstProcessedSymbol = null;
+                        if (Array.isArray(tickers)) {
+                            for (const ticker of tickers) {
+                                const processedSymbol = processTickerPayload({ source: ticker.exchange, data: ticker });
+                                if (!firstProcessedSymbol && processedSymbol) firstProcessedSymbol = processedSymbol;
+                                touchedSelected = processedSymbol === selectedSymbol || touchedSelected;
+                            }
+                        }
+                        if (firstProcessedSymbol) {
+                            if (!touchedSelected && !marketData[selectedSymbol]) {
+                                selectedSymbol = firstProcessedSymbol;
+                                document.getElementById('selectedSymbol').textContent = selectedSymbol;
+                            }
+                            renderConstellation(selectedSymbol);
+                            updateListDisplay();
                         }
                     }
                     else if (data.type === 'normalized_ticker') {
-                        processTickerPayload(data);
+                        if (processTickerPayload(data) === selectedSymbol) {
+                            renderConstellation(selectedSymbol);
+                            updateListDisplay();
+                        }
+                    }
+                    else if (data.type === 'market_visibility') {
+                        updateMarketWatchVisibility(data.data);
+                        renderConstellation(selectedSymbol);
+                        updateListDisplay();
                     }
                     else if (data.type === 'market_summary') {
                         renderConstellation(selectedSymbol);
@@ -812,20 +1015,11 @@
                             }
                         }
                     }
-                    else if (data.type === 'api' && data.cmd === 'snapshot') {
-                        const tickers = data.data?.tickers;
-                        if (Array.isArray(tickers)) {
-                            for (const ticker of tickers) {
-                                processTickerPayload({ source: ticker.exchange, data: ticker });
-                            }
-                        }
-                    }
-
                     function processTickerPayload(data) {
                         // Unified NormalizedTicker format from sidecar
                         // Fields: exchange, base, quote, o, h, l, c, v_base, v_quote, timestamp_ms
                         const d = data.data;
-                        if (!d || !d.base) return;
+                        if (!d || !d.base) return null;
 
                         const symbol = d.base; // Already normalized (e.g. "BTC")
                         const price = d.c;     // Close price (USD for KRW pairs)
@@ -836,71 +1030,29 @@
                         const close = parseFloat(d.c);
                         const change = (open > 0) ? ((close - open) / open * 100).toFixed(4) : '0';
 
+                        if (!marketWatchEligibleSymbols.has(symbol)) return null;
+
                         if (!marketData[symbol]) {
                             marketData[symbol] = {};
-
-                            // Dynamically add to the UI list if it doesn't exist
-                            let listEl = document.querySelector(`.coin-item[data-symbol="${symbol}"]`);
-                            const coinList = document.getElementById('coinList');
-                            if (!listEl && coinList) {
-                                const rank = marketMetadata[symbol]?.market_cap_rank || '-';
-                                const mcap = marketMetadata[symbol]?.market_cap ? '$' + formatVolume(marketMetadata[symbol].market_cap) : '';
-
-                                listEl = document.createElement('li');
-                                const isPinned = currentPinlist.includes(symbol);
-                                listEl.className = `coin-item ${isPinned ? 'pinned' : ''}`;
-                                if (Object.keys(marketData).length === 1) {
-                                    listEl.classList.add('active'); // First item becomes active
-                                    selectedSymbol = symbol;
-                                    document.getElementById('selectedSymbol').textContent = symbol;
-                                }
-                                listEl.setAttribute('data-symbol', symbol);
-                                listEl.innerHTML = `
-                                    <span class="coin-rank">${rank}</span>
-                                    <div class="coin-info">
-                                        <div class="coin-symbol">${symbol}</div>
-                                        <div class="coin-name" style="color: var(--text-dim); font-size: 0.75rem; margin-top: 2px;">${mcap}</div>
-                                    </div>
-                                    <span class="coin-change neutral" id="list_${symbol}_change">--%</span>
-                                `;
-
-                                // Attach click listener specifically to new item
-                                listEl.addEventListener('click', () => {
-                                    document.querySelectorAll('.coin-item').forEach(i => i.classList.remove('active'));
-                                    listEl.classList.add('active');
-
-                                    // AUTO-STOP Deep Dive on coin switch
-                                    if (isDeepDiveActive && selectedSymbol !== symbol) {
-                                        console.log(`[DeepDive] Auto-stopping session for ${selectedSymbol} due to coin switch to ${symbol}`);
-                                        stopDeepDiveUI();
-                                    }
-
-                                    selectedSymbol = symbol;
-                                    document.getElementById('selectedSymbol').textContent = selectedSymbol;
-                                    renderConstellation(selectedSymbol);
-                                });
-                                // Apply current search filter if active
-                                const searchInput = document.getElementById('coinSearchInput');
-                                if (searchInput && searchInput.value) {
-                                    const term = searchInput.value.toLowerCase();
-                                    if (!symbol.toLowerCase().includes(term)) {
-                                        listEl.style.display = 'none';
-                                    }
-                                }
-
-                                coinList.appendChild(listEl);
-                                requestAnimationFrame(sortMarketWatch); // Enqueue sorting after append
-                            }
                         }
+                        ensureMarketWatchItem(symbol);
 
                         if (marketData[symbol] !== undefined) {
+                            const existing = marketData[symbol][data.source] || {};
                             marketData[symbol][data.source] = {
+                                ...existing,
                                 price: price,
                                 volume: volume,
                                 liquidity: liquidity,
                                 krwPrice: d.c_krw,
                                 change: change,
-                                name: data.source
+                                name: data.source,
+                                quote: d.quote,
+                                updatedAtMs: d.timestamp_ms || Date.now(),
+                                fundingRate: d.funding_rate ?? existing.fundingRate,
+                                fundingIntervalHours: d.funding_interval_hours ?? existing.fundingIntervalHours,
+                                nextFundingTimeMs: d.next_funding_time_ms ?? existing.nextFundingTimeMs,
+                                fundingTimestampMs: d.funding_timestamp_ms ?? existing.fundingTimestampMs
                             };
                         }
 
@@ -949,6 +1101,8 @@
                                 debugEl.style.color = color;
                             }, 100);
                         }
+
+                        return symbol;
                     }
 
                     if (data.type === 'ticker') {
@@ -1067,6 +1221,14 @@
                 clearInterval(timelineInterval);
                 timelineInterval = null;
             }
+            if (fundingRefreshInterval) {
+                clearInterval(fundingRefreshInterval);
+                fundingRefreshInterval = null;
+            }
+            if (dexRefreshInterval) {
+                clearInterval(dexRefreshInterval);
+                dexRefreshInterval = null;
+            }
 
             if (isDeepDiveActive) {
                 const token = sessionStorage.getItem('jwt_token');
@@ -1084,6 +1246,8 @@
         renderConstellation(selectedSymbol);
         if (timelineInterval) clearInterval(timelineInterval);
         timelineInterval = setInterval(renderTimeline, 2000); // Animate timeline slightly
+        if (fundingRefreshInterval) clearInterval(fundingRefreshInterval);
+        fundingRefreshInterval = setInterval(refreshFundingCountdowns, 1000);
 
         // Debug Toggle
         const toggleDebugBtn = document.getElementById('toggleDebugBtn');
@@ -1410,6 +1574,8 @@
                 const data = await res.json();
                 if (data.success && Array.isArray(data.data)) {
                     currentPinlist = data.data.map(sym => sym.toUpperCase());
+                    currentPinlist.forEach(sym => marketWatchEligibleSymbols.add(sym));
+                    currentPinlist.forEach(ensureMarketWatchItem);
                     sortMarketWatch();
                 }
             }

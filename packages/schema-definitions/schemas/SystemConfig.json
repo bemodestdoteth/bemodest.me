@@ -71,14 +71,6 @@
         "BATCHING_DURATION_MS": {
           "type": "integer",
           "default": 1000
-        },
-        "FILTER_MIN_SOURCES": {
-          "type": "integer",
-          "default": 2
-        },
-        "FILTER_MIN_SPREAD_PCT": {
-          "type": "number",
-          "default": 10
         }
       },
       "required": [

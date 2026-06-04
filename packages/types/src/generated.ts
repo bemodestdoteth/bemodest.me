@@ -1,27 +1,35 @@
 export interface AlertRule {
-    _id:            string;
-    condition:      Condition;
-    cooldown_secs:  number;
-    created_at?:    string;
-    enabled:        boolean;
-    exchanges:      string[];
-    label:          string;
-    quote:          string;
-    recovery_value: number;
-    ticker:         string;
-    updated_at?:    string;
-    value:          number;
-    webhook_dead?:  boolean;
-    webhook_url:    string;
+    _id:             string;
+    condition:       Condition;
+    cooldown_secs:   number;
+    created_at?:     string;
+    enabled:         boolean;
+    exchanges:       string[];
+    label:           string;
+    minSources?:     number;
+    quote:           string;
+    recovery_value:  number;
+    scope?:          Scope;
+    ticker:          string;
+    updated_at?:     string;
+    value:           number;
+    volumeFloorUsd?: number;
+    webhook_dead?:   boolean;
+    webhook_url:     string;
 }
 
 export enum Condition {
+    ChangePct24H = "change_pct_24h",
     ChangePct5M = "change_pct_5m",
-    ChangePct24h = "change_pct_24h",
     PriceAbove = "price_above",
     PriceBelow = "price_below",
     SpreadPct = "spread_pct",
     VolumeSpike = "volume_spike",
+}
+
+export enum Scope {
+    Alert = "alert",
+    MarketWatch = "market_watch",
 }
 
 export interface SidecarConfigPayload {
@@ -36,25 +44,30 @@ export enum Type {
 }
 
 export interface NormalizedTicker {
-    base:           string;
-    c:              number;
-    c_krw?:         number;
-    exchange:       Exchange;
-    h:              number;
-    h_krw?:         number;
-    ingest_time_us: number;
-    l:              number;
-    l_krw?:         number;
-    liquidity?:     number;
-    market_state?:  MarketState;
-    o:              number;
-    o_krw?:         number;
-    quote:          string;
-    raw_base:       string;
-    timestamp_ms:   number;
-    v_base:         number;
-    v_quote:        number;
-    v_quote_krw?:   number;
+    base:                    string;
+    c:                       number;
+    c_krw?:                  number;
+    change_24h?:             number;
+    exchange:                Exchange;
+    funding_interval_hours?: number;
+    funding_rate?:           number;
+    funding_timestamp_ms?:   number;
+    h:                       number;
+    h_krw?:                  number;
+    ingest_time_us:          number;
+    l:                       number;
+    l_krw?:                  number;
+    liquidity?:              number;
+    market_state?:           MarketState;
+    next_funding_time_ms?:   number;
+    o:                       number;
+    o_krw?:                  number;
+    quote:                   string;
+    raw_base:                string;
+    timestamp_ms:            number;
+    v_base:                  number;
+    v_quote:                 number;
+    v_quote_krw?:            number;
 }
 
 export enum Exchange {
@@ -68,6 +81,7 @@ export enum Exchange {
     Coinbase = "coinbase",
     Dex = "dex",
     Gateio = "gateio",
+    HyperliquidF = "hyperliquid_f",
     Kraken = "kraken",
     Kucoin = "kucoin",
     Okx = "okx",
@@ -82,26 +96,24 @@ export enum MarketState {
 }
 
 export interface SystemConfig {
-    API_PORT?:              number;
-    BATCHING_DURATION_MS?:  number;
-    DEX_REDIS_CHANNEL?:     string;
-    FILTER_MIN_SOURCES?:    number;
-    FILTER_MIN_SPREAD_PCT?: number;
-    JWT_SECRET:             string;
-    MONGO_DB_NAME?:         string;
-    MONGO_HOST?:            string;
-    MONGO_PASSWORD?:        string;
-    MONGO_PORT?:            string;
-    MONGO_URI?:             string;
-    MONGO_USER?:            string;
-    NODE_ENV?:              NodeEnv;
-    PORT?:                  number;
-    REDIS_HOST?:            string;
-    REDIS_PASSWORD?:        string;
-    REDIS_PORT?:            string;
-    REDIS_URL?:             string;
-    SIDECAR_PORT?:          number;
-    SNAPPER_API_SECRET?:    string;
+    API_PORT?:             number;
+    BATCHING_DURATION_MS?: number;
+    DEX_REDIS_CHANNEL?:    string;
+    JWT_SECRET:            string;
+    MONGO_DB_NAME?:        string;
+    MONGO_HOST?:           string;
+    MONGO_PASSWORD?:       string;
+    MONGO_PORT?:           string;
+    MONGO_URI?:            string;
+    MONGO_USER?:           string;
+    NODE_ENV?:             NodeEnv;
+    PORT?:                 number;
+    REDIS_HOST?:           string;
+    REDIS_PASSWORD?:       string;
+    REDIS_PORT?:           string;
+    REDIS_URL?:            string;
+    SIDECAR_PORT?:         number;
+    SNAPPER_API_SECRET?:   string;
 }
 
 export enum NodeEnv {

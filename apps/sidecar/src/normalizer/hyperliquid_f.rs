@@ -1,3 +1,4 @@
+use crate::normalizer::funding::FundingUpdate;
 use crate::types::{now_micros, parse_decimal, Exchange, ExchangeExt, NormalizedTicker};
 use rust_decimal::prelude::ToPrimitive;
 use serde_json::Value;
@@ -37,7 +38,7 @@ pub fn normalize_hyperliquid_f_ticker(raw: &Value) -> Option<Vec<NormalizedTicke
         .and_then(parse_decimal)
         .unwrap_or_else(|| v_base * c);
 
-    Some(vec![NormalizedTicker {
+    let mut ticker = NormalizedTicker {
         exchange: Exchange::HyperliquidF,
         base,
         raw_base: raw_base.to_string(),
@@ -58,7 +59,29 @@ pub fn normalize_hyperliquid_f_ticker(raw: &Value) -> Option<Vec<NormalizedTicke
         v_quote_krw: None,
         change_24h: None,
         liquidity: None,
-    }])
+        funding_rate: None,
+        funding_interval_hours: None,
+        next_funding_time_ms: None,
+        funding_timestamp_ms: None,
+    };
+
+    let funding_rate = ctx.get("funding").and_then(|value| {
+        value
+            .as_str()
+            .and_then(parse_decimal)
+            .and_then(|value| value.to_f64())
+            .or_else(|| value.as_f64())
+    });
+
+    FundingUpdate {
+        funding_rate,
+        funding_interval_hours: funding_rate.map(|_| 1.0),
+        next_funding_time_ms: funding_rate.map(|_| ((timestamp_ms / 3_600_000) + 1) * 3_600_000),
+        funding_timestamp_ms: funding_rate.map(|_| timestamp_ms),
+    }
+    .apply_to(&mut ticker);
+
+    Some(vec![ticker])
 }
 
 #[cfg(test)]
@@ -77,7 +100,8 @@ mod tests {
                     "oraclePx": "80610.0",
                     "markPx": "80574.0",
                     "midPx": "80573.5",
-                    "dayBaseVlm": "25177.68437"
+                    "dayBaseVlm": "25177.68437",
+                    "funding": "0.0000125"
                 }
             }
         });
@@ -95,6 +119,10 @@ mod tests {
         assert_eq!(tickers[0].l, 80574.0);
         assert_eq!(tickers[0].v_base, 25177.68437);
         assert_eq!(tickers[0].v_quote, 2047457724.105479);
+        assert_eq!(tickers[0].funding_rate, Some(0.0000125));
+        assert!(tickers[0].funding_timestamp_ms.is_some());
+        assert_eq!(tickers[0].funding_interval_hours, Some(1.0));
+        assert!(tickers[0].next_funding_time_ms.unwrap() > tickers[0].timestamp_ms);
     }
 
     #[test]

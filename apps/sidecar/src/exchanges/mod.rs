@@ -17,6 +17,7 @@ pub mod generic;
 pub mod hyperliquid_f;
 pub mod kraken;
 pub mod kucoin;
+pub mod kyberswap;
 pub mod okx;
 pub mod okx_f;
 pub mod upbit;

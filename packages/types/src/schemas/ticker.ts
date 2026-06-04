@@ -15,6 +15,7 @@ export const ExchangeEnum = z.enum([
     'kucoin',
     'okx',
     'okx_f',
+    'hyperliquid_f',
     'dex'
 ]);
 
@@ -35,7 +36,12 @@ export const NormalizedTickerSchema = z.object({
     c: z.number(),
     v_base: z.number(),
     v_quote: z.number(),
+    change_24h: z.number().optional(),
     liquidity: z.number().optional(),
+    funding_rate: z.number().optional(),
+    funding_interval_hours: z.number().optional(),
+    next_funding_time_ms: z.number().int().optional(),
+    funding_timestamp_ms: z.number().int().optional(),
     timestamp_ms: z.number().int(),
     market_state: MarketStateEnum.optional(),
     ingest_time_us: z.number().int(),

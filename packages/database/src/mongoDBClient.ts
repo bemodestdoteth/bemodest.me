@@ -1,6 +1,6 @@
 import { logger } from '@bemodest/utils';
 import { encodeDbPassword } from '@bemodest/config';
-import { MongoClient, Db, Collection, FindOptions, UpdateFilter, Filter, AggregateOptions } from 'mongodb';
+import { MongoClient, Db, Collection, FindOptions, UpdateFilter, Filter, AggregateOptions, IndexSpecification, CreateIndexesOptions } from 'mongodb';
 import * as fs from 'node:fs/promises';
 
 
@@ -87,6 +87,21 @@ export class MongoDBClient {
             return document;
         } catch (error) {
             logger.error('Error reading document:', error);
+            throw error;
+        }
+    }
+
+    async createIndex(
+        collectionName: string,
+        indexSpec: IndexSpecification,
+        options: CreateIndexesOptions = {}
+    ): Promise<string> {
+        try {
+            this._ensureConnected();
+            const collection = this.database!.collection(collectionName);
+            return await collection.createIndex(indexSpec, { ...options, maxTimeMS: this.maxTimeMS });
+        } catch (error) {
+            logger.error('Error creating index:', error);
             throw error;
         }
     }
