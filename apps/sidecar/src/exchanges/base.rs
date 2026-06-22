@@ -95,11 +95,8 @@ impl WsSession {
                         }
                     }
 
-                    let mut batcher = TickerBatcher::new(
-                        ctx.tx.clone(),
-                        ctx.source.clone(),
-                        ctx.config.clone(),
-                    );
+                    let mut batcher =
+                        TickerBatcher::new(ctx.tx.clone(), ctx.source.clone(), ctx.config.clone());
                     let mut flush_interval =
                         interval(Duration::from_millis(ctx.config.batch_duration_ms));
 

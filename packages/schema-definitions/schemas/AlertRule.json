@@ -67,13 +67,67 @@
           "type": "number",
           "default": 30000
         },
-        "webhook_dead": {
-          "type": "boolean",
-          "default": false
+        "destination_assignments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "destination_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "enabled": {
+                "type": "boolean",
+                "default": true
+              },
+              "dead": {
+                "type": "boolean",
+                "default": false
+              },
+              "last_failed_at": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "destination_id"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
         },
-        "webhook_url": {
-          "type": "string",
-          "format": "uri"
+        "alert_type_rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "alert_type": {
+                "type": "string",
+                "enum": [
+                  "normal",
+                  "urgent"
+                ]
+              },
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "gt",
+                  "gte",
+                  "lt",
+                  "lte"
+                ]
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "alert_type",
+              "operator",
+              "value"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
         }
       },
       "required": [
@@ -87,7 +141,8 @@
         "recovery_value",
         "ticker",
         "value",
-        "webhook_url"
+        "destination_assignments",
+        "alert_type_rules"
       ],
       "additionalProperties": false
     }

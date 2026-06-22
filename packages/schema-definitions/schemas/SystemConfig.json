@@ -71,6 +71,10 @@
         "BATCHING_DURATION_MS": {
           "type": "integer",
           "default": 1000
+        },
+        "COLLECTION_ALERT_DESTINATIONS": {
+          "type": "string",
+          "default": "alertDestinations"
         }
       },
       "required": [

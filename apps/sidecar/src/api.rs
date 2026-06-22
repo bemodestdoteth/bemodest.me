@@ -138,6 +138,119 @@ fn parse_exchange(s: &str) -> Option<Exchange> {
         "kucoin" => Some(Exchange::Kucoin),
         "okx" => Some(Exchange::Okx),
         "okx_f" | "okx_futures" => Some(Exchange::OkxF),
+        "hyperliquid_f" | "hyperliquid_futures" => Some(Exchange::HyperliquidF),
         _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cache::VisibilityCache;
+    use crate::types::{NormalizedTicker, SystemConfig, SystemConfigJwtSecret, SystemConfigNodeEnv};
+    use std::collections::HashSet;
+    use std::str::FromStr;
+    use std::sync::{Arc, RwLock};
+
+    fn test_config() -> Config {
+        let jwt_secret = "x".repeat(32);
+
+        Config {
+            inner: SystemConfig {
+                port: 3000,
+                api_port: 3001,
+                sidecar_port: 25834,
+                jwt_secret: SystemConfigJwtSecret::from_str(&jwt_secret).unwrap(),
+                snapper_api_secret: None,
+                mongo_uri: None,
+                redis_url: Some("redis://127.0.0.1:6380".to_string()),
+                dex_redis_channel: "dex_prices".to_string(),
+                batching_duration_ms: 1000,
+                collection_alert_destinations: "alertDestinations".to_string(),
+                mongo_user: None,
+                mongo_password: None,
+                mongo_host: None,
+                mongo_port: "27017".to_string(),
+                mongo_db_name: None,
+                redis_host: None,
+                redis_port: "6380".to_string(),
+                redis_password: None,
+                node_env: SystemConfigNodeEnv::Dev,
+            },
+            port: 25834,
+            api_port: 3001,
+            jwt_secret,
+            mongo_uri: None,
+            redis_url: "redis://127.0.0.1:6380".to_string(),
+            dex_redis_channel: "dex_prices".to_string(),
+            batch_duration_ms: 1000,
+            webhook_secret: String::new(),
+            forex_update_interval_sec: 60,
+            market_cache_update_interval_sec: 1800,
+            korean_market_cache_update_interval_sec: 60,
+            alert_destination_tailscale_suffix: ".ts.net".to_string(),
+            alert_destination_allow_loopback_in_dev: false,
+            excludelist: Arc::new(RwLock::new(HashSet::new())),
+            pinlist: Arc::new(RwLock::new(HashSet::new())),
+            visibility: Arc::new(VisibilityCache::new()),
+        }
+    }
+
+    fn skhx_ticker() -> NormalizedTicker {
+        NormalizedTicker {
+            exchange: Exchange::HyperliquidF,
+            base: "xyz:SKHX".to_string(),
+            raw_base: "xyz:SKHX".to_string(),
+            quote: "USDC".to_string(),
+            o: 1580.0,
+            h: 1590.0,
+            l: 1570.0,
+            c: 1582.5,
+            v_base: 1.0,
+            v_quote: 1582.5,
+            timestamp_ms: 1781500000000,
+            market_state: None,
+            ingest_time_us: 1,
+            o_krw: None,
+            h_krw: None,
+            l_krw: None,
+            c_krw: None,
+            v_quote_krw: None,
+            change_24h: None,
+            liquidity: None,
+            funding_rate: None,
+            funding_interval_hours: None,
+            next_funding_time_ms: None,
+            funding_timestamp_ms: None,
+        }
+    }
+
+    #[test]
+    fn handle_command_accepts_hyperliquid_futures_ticker() {
+        let lvc = LatestValueCache::new();
+        lvc.upsert(skhx_ticker());
+        let response = handle_command(
+            &json!({
+                "cmd": "ticker",
+                "exchange": "hyperliquid_f",
+                "base": "xyz:SKHX",
+                "quote": "USDC"
+            }),
+            &lvc,
+            &test_config(),
+        );
+
+        assert_ne!(response.get("type").and_then(Value::as_str), Some("api_error"));
+        assert_eq!(response.get("type").and_then(Value::as_str), Some("api"));
+        assert_eq!(response["data"]["base"], "xyz:SKHX");
+        assert!(!response.to_string().contains("unknown exchange"));
+    }
+
+    #[test]
+    fn parse_exchange_accepts_hyperliquid_futures_alias() {
+        assert_eq!(
+            parse_exchange("hyperliquid_futures"),
+            Some(Exchange::HyperliquidF)
+        );
     }
 }

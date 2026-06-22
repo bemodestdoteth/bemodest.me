@@ -2,7 +2,7 @@ import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { AlertRuleSchema } from '../../database/src/schemas/alertRule.js';
+import { AlertDestinationTemplateSchema, AlertRuleSchema } from '../../database/src/schemas/alertRule.js';
 import {
     NormalizedTickerSchema,
     SidecarConfigPayloadSchema,
@@ -18,6 +18,7 @@ if (!existsSync(OUTPUT_DIR)) {
 }
 
 const schemas = [
+    { name: 'AlertDestinationTemplate', schema: AlertDestinationTemplateSchema },
     { name: 'AlertRule', schema: AlertRuleSchema },
     { name: 'NormalizedTicker', schema: NormalizedTickerSchema },
     { name: 'SidecarConfigPayload', schema: SidecarConfigPayloadSchema },

@@ -80,11 +80,24 @@ pub async fn run(lvc: Arc<LatestValueCache>, tx: broadcast::Sender<String>) {
                 Some(changes.iter().sum::<f64>() / changes.len() as f64)
             };
 
+            let source_entries: Vec<serde_json::Value> = entries
+                .iter()
+                .map(|(exchange, price, volume, change)| {
+                    serde_json::json!({
+                        "exchange": exchange,
+                        "price": price,
+                        "volume": volume,
+                        "change_24h": change,
+                    })
+                })
+                .collect();
+
             let mut entry = serde_json::json!({
                 "base": base,
                 "quote": quote,
                 "spread_pct": round4(spread_pct),
                 "arb_pct": round4(arb_pct),
+                "entries": source_entries,
             });
 
             if let Some((name, price, vol, _)) = leader {

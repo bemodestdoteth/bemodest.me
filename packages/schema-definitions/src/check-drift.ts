@@ -7,6 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, '../../..');
 const packageDir = resolve(__dirname, '..');
 const generatedPaths = [
+    'packages/schema-definitions/schemas/AlertDestinationTemplate.json',
     'packages/schema-definitions/schemas/AlertRule.json',
     'packages/schema-definitions/schemas/NormalizedTicker.json',
     'packages/schema-definitions/schemas/SidecarConfigPayload.json',
@@ -33,7 +34,7 @@ if (changed.length > 0) {
 }
 
 const alertRule = readFileSync(join(repoRoot, 'packages/schema-definitions/schemas/AlertRule.json'), 'utf8');
-for (const field of ['condition', 'cooldown_secs', 'webhook_url']) {
+for (const field of ['condition', 'cooldown_secs', 'destination_assignments', 'alert_type_rules']) {
     if (!alertRule.includes(`"${field}"`)) {
         throw new Error(`Generated AlertRule.json is missing ${field}`);
     }

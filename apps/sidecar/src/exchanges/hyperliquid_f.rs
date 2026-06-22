@@ -124,6 +124,7 @@ mod tests {
                 redis_url: Some("redis://127.0.0.1:6380".to_string()),
                 dex_redis_channel: "dex_prices".to_string(),
                 batching_duration_ms: 1000,
+                collection_alert_destinations: "alertDestinations".to_string(),
                 mongo_user: None,
                 mongo_password: None,
                 mongo_host: None,
@@ -145,6 +146,8 @@ mod tests {
             forex_update_interval_sec: 60,
             market_cache_update_interval_sec: 1800,
             korean_market_cache_update_interval_sec: 60,
+            alert_destination_tailscale_suffix: ".ts.net".to_string(),
+            alert_destination_allow_loopback_in_dev: false,
             excludelist: Arc::new(RwLock::new(HashSet::new())),
             pinlist: Arc::new(RwLock::new(HashSet::new())),
             visibility: Arc::new(VisibilityCache::new()),
@@ -223,6 +226,24 @@ mod tests {
                 "method": "subscribe",
                 "subscription": { "type": "activeAssetCtx", "coin": "BTC" }
             })
+        );
+    }
+
+    #[tokio::test]
+    async fn subscription_factory_uses_hip3_qualified_market_names() {
+        let market_cache = MarketCache::new();
+        market_cache
+            .set_markets_for_test("hyperliquid_f", vec!["xyz:SKHX".to_string()])
+            .await;
+
+        let messages = subscription_factory(market_cache).await.unwrap();
+
+        assert_eq!(
+            messages,
+            vec![serde_json::json!({
+                "method": "subscribe",
+                "subscription": { "type": "activeAssetCtx", "coin": "xyz:SKHX" }
+            })]
         );
     }
 }

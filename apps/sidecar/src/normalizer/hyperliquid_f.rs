@@ -126,6 +126,30 @@ mod tests {
     }
 
     #[test]
+    fn normalizes_hip3_qualified_active_asset_context() {
+        let raw = serde_json::json!({
+            "channel": "activeAssetCtx",
+            "data": {
+                "coin": "xyz:SKHX",
+                "ctx": {
+                    "prevDayPx": "1500.0",
+                    "markPx": "1582.5",
+                    "dayBaseVlm": "10.0",
+                    "dayNtlVlm": "15825.0"
+                }
+            }
+        });
+
+        let tickers = normalize_hyperliquid_f_ticker(&raw).unwrap();
+
+        assert_eq!(tickers.len(), 1);
+        assert_eq!(tickers[0].base, "xyz:SKHX");
+        assert_eq!(tickers[0].raw_base, "xyz:SKHX");
+        assert_eq!(tickers[0].quote, "USDC");
+        assert_eq!(tickers[0].c, 1582.5);
+    }
+
+    #[test]
     fn ignores_other_channels() {
         let raw = serde_json::json!({
             "channel": "subscriptionResponse",

@@ -53,6 +53,13 @@ These wrappers handle Winston formatting, MongoDB/Redis connection pooling, Zod 
 - Before answering questions or making changes in an area with reference material, check `/mnt/870-evo-1/server-dev/bemodest.me/docs/references` and follow any matching reference doc.
 - If a reference doc conflicts with current code or tool results, trust the current verified result and state the conflict instead of guessing.
 
+## Alert webhook contract
+- Current alert delivery uses global `alertDestinations` templates plus per-rule `destination_assignments`.
+- Built-in API ingest is `POST /api/alert-events/ingest`; local default URL is `http://127.0.0.1:${PORT}/api/alert-events/ingest`.
+- `/api/alerts/fired` is legacy/stale and must not be used or reintroduced.
+- `WEBHOOK_URL` is deprecated and rejected; do not add per-rule `webhook_url` back to alert rules.
+- `external_webhook` destinations must point to a real external receiver URL, typically an allowed HTTPS `.ts.net` endpoint such as `/hooks/new-entry` or `/hooks/price-spike`.
+
 ## Dependencies
 When implementing features that use external libraries, use the **Context7 MCP server** to fetch current documentation.
 

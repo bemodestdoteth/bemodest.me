@@ -13,7 +13,7 @@ use crate::normalizer::funding::FundingUpdate;
 use crate::types::{parse_decimal, strip_scale_factor, Exchange as ExchangeType, ExchangeExt};
 
 pub const TICKER_STREAM_URL: &str =
-    "wss://fstream.binance.com/stream?streams=!miniTicker@arr/!markPrice@arr@1s";
+    "wss://fstream.binance.com/market/stream?streams=!miniTicker@arr/!markPrice@arr@1s";
 
 pub fn handle_message(
     text: &str,
@@ -368,7 +368,7 @@ fn apply_funding_backfill(
 
 fn handle_funding_update(
     data: &Value,
-    batcher: &mut TickerBatcher,
+    _batcher: &mut TickerBatcher,
     tac: &Arc<TokenAnnotationCache>,
     config: &Arc<Config>,
     lvc: &Arc<LatestValueCache>,
@@ -399,12 +399,6 @@ fn handle_funding_update(
         return;
     };
 
-    let payload = serde_json::json!({
-        "type": "normalized_ticker",
-        "source": ticker.exchange.to_string(),
-        "data": &ticker
-    });
-    batcher.push(ticker.base.clone(), ticker.quote.clone(), payload);
     lvc.upsert(ticker);
 }
 
@@ -434,6 +428,7 @@ mod tests {
                 redis_url: Some("redis://127.0.0.1:6380".to_string()),
                 dex_redis_channel: "dex_prices".to_string(),
                 batching_duration_ms: 1000,
+                collection_alert_destinations: "alertDestinations".to_string(),
                 mongo_user: None,
                 mongo_password: None,
                 mongo_host: None,
@@ -455,6 +450,8 @@ mod tests {
             forex_update_interval_sec: 60,
             market_cache_update_interval_sec: 1800,
             korean_market_cache_update_interval_sec: 60,
+            alert_destination_tailscale_suffix: ".ts.net".to_string(),
+            alert_destination_allow_loopback_in_dev: false,
             excludelist: Arc::new(RwLock::new(HashSet::new())),
             pinlist: Arc::new(RwLock::new(HashSet::new())),
             visibility: Arc::new(VisibilityCache::new()),
@@ -521,6 +518,69 @@ mod tests {
         assert_eq!(ticker.funding_interval_hours, Some(8.0));
         assert_eq!(ticker.next_funding_time_ms, Some(1700006400000));
         assert_eq!(ticker.funding_timestamp_ms, Some(1700000000000));
+    }
+
+    #[test]
+    fn mark_price_update_does_not_overwrite_buffered_mini_ticker_price() {
+        let lvc = Arc::new(LatestValueCache::new());
+        lvc.upsert(btc_ticker());
+        let tac = Arc::new(TokenAnnotationCache::new());
+        let config = test_config();
+        config.visibility.replace(
+            vec![crate::cache::visibility::VisibilityPair {
+                base: "BTC".to_string(),
+                quote: "USDT".to_string(),
+                spread_pct: 0.0,
+                threshold: 0.0,
+                pinned: false,
+                rule_id: Some("test".to_string()),
+            }],
+            true,
+        );
+        let (tx, mut rx) = broadcast::channel(4);
+        let mut batcher = TickerBatcher::new(tx, "binance_f".to_string(), config.clone());
+        let mini_ticker = serde_json::json!({
+            "stream": "!miniTicker@arr",
+            "data": [
+                {
+                    "e": "24hrMiniTicker",
+                    "E": 1700000000000_i64,
+                    "s": "BTCUSDT",
+                    "c": "101.0",
+                    "o": "100.0",
+                    "h": "102.0",
+                    "l": "99.0",
+                    "v": "1.0",
+                    "q": "101.0"
+                }
+            ]
+        });
+        let mark_price = serde_json::json!({
+            "stream": "!markPrice@arr@1s",
+            "data": [
+                {
+                    "e": "markPriceUpdate",
+                    "E": 1700000000100_i64,
+                    "s": "BTCUSDT",
+                    "p": "100.0",
+                    "i": "100.0",
+                    "P": "100.0",
+                    "r": "0.0001",
+                    "T": 1700006400000_i64
+                }
+            ]
+        });
+
+        handle_message(&mini_ticker.to_string(), &mut batcher, &tac, &config, &lvc);
+        handle_message(&mark_price.to_string(), &mut batcher, &tac, &config, &lvc);
+        batcher.flush();
+
+        let message = rx.try_recv().unwrap();
+        let payload: Value = serde_json::from_str(&message).unwrap();
+        let price = payload["data"][0]["data"]["c"].as_f64().unwrap();
+        assert_eq!(price, 101.0);
+        let cached = lvc.get(&ExchangeType::BinanceF, "BTC", "USDT").unwrap();
+        assert_eq!(cached.funding_rate, Some(0.0001));
     }
 
     #[test]

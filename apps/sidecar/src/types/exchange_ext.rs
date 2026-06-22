@@ -132,6 +132,15 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_hyperliquid_qualified_coin() {
+        let ex = Exchange::HyperliquidF;
+        assert_eq!(
+            ex.parse_symbol("xyz:SKHX"),
+            Some(("xyz:SKHX".to_string(), "USDC".to_string()))
+        );
+    }
+
+    #[test]
     fn test_parse_gateio() {
         let ex = Exchange::Gateio;
         assert_eq!(

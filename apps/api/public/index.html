@@ -5,8 +5,8 @@
     <title>Wallet Tracker</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- DataTables CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" integrity="sha384-w9ufcIOKS67vY4KePhJtmWDp4+Ai5DMaHvqqF85VvjaGYSW2AhIbqorgKYqIJopv" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css" integrity="sha384-P82uzAoBEm1hxQbD1Ox+ohCxw4LCZc2mJVl5VS9raZC2+1ZRzuHGQ2px0Lox8HO8" crossorigin="anonymous">
     <!-- Preload custom font for better performance -->
     <link rel="preload" href="/fonts/beaufort_medium.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="/fonts/d2coding.ttf" as="font" type="font/ttf" crossorigin>
@@ -102,7 +102,15 @@
             <a href="/alert" class="grid-list-item">
                 <span>Alert</span>
             </a>
-            <!-- Placeholder for future pages -->
+            <a href="/premium" class="grid-list-item">
+                <span>Premium</span>
+            </a>
+            <a href="/delta" class="grid-list-item">
+                <span>Delta</span>
+            </a>
+            <a href="/hynix" class="grid-list-item">
+                <span>SK hynix</span>
+            </a>
         </div>
 
 
@@ -157,10 +165,10 @@
     </div>
 
     <!-- Socket.IO Client -->
-    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js"></script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js" integrity="sha384-k5vbMeKHbxEZ0AEBTSdR7UjAgWCcUfrS8c0c5b2AfIh7olfhNkyCZYwOfzOQhauK" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js" integrity="sha384-5UUEYV/x07jNYpizRK5+tnFvFPDDq5s5wVr5mc802xveN8Ve7kuFu4Ym6mN+QcmZ" crossorigin="anonymous"></script>
     <script src="/js/main.js"></script>
 </body>
 

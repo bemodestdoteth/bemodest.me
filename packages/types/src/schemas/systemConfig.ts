@@ -28,6 +28,7 @@ export const SystemConfigSchema = z.object({
     NODE_ENV: z.enum(['dev', 'prod', 'test']).default('dev'),
     DEX_REDIS_CHANNEL: z.string().default('dex_prices'),
     BATCHING_DURATION_MS: z.number().int().default(1000),
+    COLLECTION_ALERT_DESTINATIONS: z.string().default('alertDestinations'),
 });
 
 

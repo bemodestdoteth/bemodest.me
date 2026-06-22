@@ -5,8 +5,8 @@
     <title>Alert Management | Wallet Tracker</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- DataTables CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" integrity="sha384-w9ufcIOKS67vY4KePhJtmWDp4+Ai5DMaHvqqF85VvjaGYSW2AhIbqorgKYqIJopv" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css" integrity="sha384-P82uzAoBEm1hxQbD1Ox+ohCxw4LCZc2mJVl5VS9raZC2+1ZRzuHGQ2px0Lox8HO8" crossorigin="anonymous">
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
     <style>
@@ -83,6 +83,16 @@
             text-decoration: line-through;
         }
 
+        .status-node-allowed {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .status-node-blocked {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+
         .action-btn {
             border: none;
             padding: 5px 10px;
@@ -138,6 +148,49 @@
         .exchange-grid input[type="checkbox"] {
             width: auto;
         }
+
+        .helper-text {
+            font-size: 11px;
+            color: #888;
+            margin: 6px 0 10px;
+        }
+
+        .alert-type-grid,
+        .destination-assignment-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .alert-type-row,
+        .destination-assignment-row {
+            display: grid;
+            grid-template-columns: auto 80px 90px 1fr;
+            gap: 8px;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px;
+            font-weight: normal;
+        }
+
+        .destination-assignment-row {
+            grid-template-columns: auto 1fr;
+        }
+
+        .alert-type-row input[type="checkbox"],
+        .destination-assignment-row input[type="checkbox"] {
+            width: auto;
+        }
+
+        .destination-assignment-row.inactive {
+            opacity: 0.65;
+        }
+
+        .destination-assignment-row small {
+            display: block;
+            color: #888;
+            margin-top: 2px;
+        }
     </style>
 </head>
 
@@ -154,6 +207,7 @@
 
         <div class="tabs">
             <div class="tab-button active" onclick="switchTab('rules')">Alert Rules</div>
+            <div class="tab-button" onclick="switchTab('destinations')">Alert Destinations</div>
             <div class="tab-button" onclick="switchTab('logs')">Alert Logs</div>
         </div>
 
@@ -169,8 +223,31 @@
                             <th>Label</th>
                             <th>Ticker</th>
                             <th>Condition</th>
-                            <th>Value</th>
+                            <th>Severity Thresholds</th>
                             <th>Exchanges</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="destinations-tab" class="tab-content">
+            <div class="table-container">
+                <div class="filter-container">
+                    <h2>Alert Destinations</h2>
+                    <button id="addDestinationBtn" class="btn-primary" style="margin-left: auto;">+ Add Destination</button>
+                </div>
+                <p class="helper-text">Protected destinations are managed by the app. Use assignments on each rule to choose which endpoints receive normal or urgent alerts. Node status shows sidecar URL policy readiness, not a live HTTP probe.</p>
+                <table id="destinationsTable" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Label</th>
+                            <th>Kind</th>
+                            <th>URL</th>
+                            <th>Alert Types</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -189,7 +266,9 @@
                             <th>Time</th>
                             <th>Alert</th>
                             <th>Ticker</th>
-                            <th>Metric Value</th>
+                            <th>Adjusted Metric</th>
+                            <th>Alert Type</th>
+                            <th>Destination</th>
                             <th>Details</th>
                         </tr>
                     </thead>
@@ -221,7 +300,7 @@
                 <div class="form-group">
                     <label>Condition</label>
                     <select id="ruleCondition" required>
-                        <option value="spread_pct">Spread % (min vs max)</option>
+                        <option value="spread_pct">Spread % (premium-adjusted for Korean venues)</option>
                         <option value="price_above">Price Above (average)</option>
                         <option value="price_below">Price Below (average)</option>
                         <option value="change_pct_5m">5m Change % (absolute)</option>
@@ -229,15 +308,10 @@
                         <option value="volume_spike">Volume Spike (ratio vs avg)</option>
                     </select>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Threshold Value</label>
-                        <input type="number" id="ruleValue" step="0.0001" required>
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Cooldown (secs)</label>
-                        <input type="number" id="ruleCooldown" value="300" required>
-                    </div>
+                <input type="hidden" id="ruleValue">
+                <div class="form-group">
+                    <label>Cooldown (secs)</label>
+                    <input type="number" id="ruleCooldown" value="300" required>
                 </div>
                 <div class="form-group">
                     <label>Exchanges (empty = all)</label>
@@ -260,9 +334,37 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Webhook URL (Optional Override)</label>
-                    <input type="url" id="ruleWebhook" placeholder="http://127.0.0.1:3001/api/alerts/fired">
-                    <p style="font-size: 11px; color: #888;">Default: API internal logger if left empty.</p>
+                    <label>Severity Thresholds</label>
+                    <div class="alert-type-grid">
+                        <label class="alert-type-row">
+                            <input type="checkbox" id="normalRuleEnabled" checked>
+                            <span>normal</span>
+                            <select id="normalRuleOperator">
+                                <option value="gt">gt</option>
+                                <option value="gte">gte</option>
+                                <option value="lt">lt</option>
+                                <option value="lte">lte</option>
+                            </select>
+                            <input type="number" id="normalRuleValue" step="0.0001" placeholder="Metric threshold">
+                        </label>
+                        <label class="alert-type-row">
+                            <input type="checkbox" id="urgentRuleEnabled">
+                            <span>urgent</span>
+                            <select id="urgentRuleOperator">
+                                <option value="gt">gt</option>
+                                <option value="gte">gte</option>
+                                <option value="lt">lt</option>
+                                <option value="lte">lte</option>
+                            </select>
+                            <input type="number" id="urgentRuleValue" step="0.0001" placeholder="Metric threshold">
+                        </label>
+                    </div>
+                    <p class="helper-text">Normal is required and becomes the rule baseline. Urgent wins if both rows match. For spread %, Korean venue alerts use premium-adjusted spread: Korean high subtracts premium, Korean low adds premium; both-Korean and non-Korean pairs stay raw.</p>
+                </div>
+                <div class="form-group">
+                    <label>Destination Assignments</label>
+                    <div id="destinationAssignments" class="destination-assignment-list"></div>
+                    <p class="helper-text">Built-in API ingest is required and cannot be unchecked.</p>
                 </div>
                 <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
                     <input type="checkbox" id="ruleEnabled" checked style="width: auto;">
@@ -277,9 +379,9 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js" integrity="sha384-k5vbMeKHbxEZ0AEBTSdR7UjAgWCcUfrS8c0c5b2AfIh7olfhNkyCZYwOfzOQhauK" crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
     <script src="/js/alert.js"></script>
 </body>
 

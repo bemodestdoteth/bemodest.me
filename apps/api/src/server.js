@@ -33,13 +33,17 @@ import {
     getDeepDiveBalance,
     postDeepDiveStart,
     postDeepDiveStop,
+    getAlertDestinations,
+    createAlertDestination,
+    updateAlertDestination,
+    deleteAlertDestination,
     getAlertRules,
     createAlertRule,
     updateAlertRule,
     deleteAlertRule,
-    resetWebhookDead,
-    markWebhookDead,
-    postAlertFired,
+    resetAlertDestination,
+    markAlertDestinationDead,
+    postAlertEventIngest,
     getAlertLogs,
     getExcludelist,
     updateExcludelist,
@@ -48,8 +52,14 @@ import {
     getMarketMetadata,
     postDwStatus,
     getDwStatus,
+    getDeltaPositions,
+    getDeltaSpotExchanges,
+    updateDeltaPositionRatios,
+    updateDeltaPositionSpotExchange,
 } from './routes/api.js';
 import authRouter from './modules/auth/routes.js';
+import premiumRouter from './modules/premium/routes.js';
+import hynixRouter from './modules/hynix/routes.js';
 import { sseConnect } from './utils/sse.js';
 import { checkSocketIOStatus } from './socket/index.js';
 import { getStatus } from './routes/status.js';
@@ -90,6 +100,9 @@ app.get('/ping', (req, res) => res.status(200).send('{ "message": "pong", "times
 app.get('/status', (req, res) => res.sendFile(path.join(publicDir, 'status.html')));
 app.get('/tracking', (req, res) => res.sendFile(path.join(publicDir, 'tracking.html')));
 app.get('/alert', (req, res) => res.sendFile(path.join(publicDir, 'alert.html')));
+app.get('/premium', (req, res) => res.sendFile(path.join(publicDir, 'premium.html')));
+app.get('/delta', (req, res) => res.sendFile(path.join(publicDir, 'delta.html')));
+app.get('/hynix', (req, res) => res.sendFile(path.join(publicDir, 'hynix.html')));
 app.get('/events', (req, res) => sseConnect(req, res));
 app.get('/api/entityTotal', authMiddleware, entityTotal);
 app.get('/api/wallets', authMiddleware, walletList);
@@ -101,6 +114,8 @@ app.get('/entities', entityGet);
 app.get('/coingecko', coingeckoGet);
 app.get('/coingecko/solana', coingeckoGetSolana);
 app.post('/api/removeFront', authMiddleware, removeFront);
+app.use('/api/premium', authMiddleware, premiumRouter);
+app.use('/api/hynix', authMiddleware, hynixRouter);
 
 app.get('/api/config/excludelist', authMiddleware, getExcludelist);
 app.post('/api/config/excludelist', authMiddleware, updateExcludelist);
@@ -116,18 +131,26 @@ app.use('/', authRouter);
 app.post('/api/dw-status', postDwStatus);
 app.get('/api/dw-status', getDwStatus);
 app.get('/api/deep-dive/balance', authMiddleware, getDeepDiveBalance);
+app.get('/api/delta/spot-exchanges', authMiddleware, getDeltaSpotExchanges);
+app.get('/api/delta/positions', authMiddleware, getDeltaPositions);
+app.patch('/api/delta/positions/:exchange/:symbol/ratios', authMiddleware, updateDeltaPositionRatios);
+app.patch('/api/delta/positions/:exchange/:symbol/spot-exchange', authMiddleware, updateDeltaPositionSpotExchange);
 app.post('/api/deep-dive/start', authMiddleware, postDeepDiveStart);
 app.post('/api/deep-dive/stop', authMiddleware, postDeepDiveStop);
 
 // ── Alert Rules ──────────────────────────────────────────────────────────────
+app.get('/api/alert-destinations', authMiddleware, getAlertDestinations);
+app.post('/api/alert-destinations', authMiddleware, createAlertDestination);
+app.patch('/api/alert-destinations/:destinationId', authMiddleware, updateAlertDestination);
+app.delete('/api/alert-destinations/:destinationId', authMiddleware, deleteAlertDestination);
 app.get('/api/alert-rules', authMiddleware, getAlertRules);
 app.post('/api/alert-rules', authMiddleware, createAlertRule);
 app.patch('/api/alert-rules/:id', authMiddleware, updateAlertRule);
 app.delete('/api/alert-rules/:id', authMiddleware, deleteAlertRule);
-app.patch('/api/alert-rules/:id/reset-webhook', authMiddleware, resetWebhookDead);
+app.patch('/api/alert-rules/:id/destinations/:destinationId/reset', authMiddleware, resetAlertDestination);
 // Internal — called by sidecar, not protected by user auth (signed by SNAPPER_API_SECRET)
-app.patch('/api/alert-rules/:id/mark-dead', markWebhookDead);
-app.post('/api/alerts/fired', express.json(), postAlertFired);
+app.patch('/api/alert-rules/:id/destinations/:destinationId/mark-dead', markAlertDestinationDead);
+app.post('/api/alert-events/ingest', express.json(), postAlertEventIngest);
 app.get('/api/alerts/logs', authMiddleware, getAlertLogs);
 
 // Socket.IO Status (Optional)

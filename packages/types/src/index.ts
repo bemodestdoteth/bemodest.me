@@ -218,7 +218,68 @@ export const LabelDeleteBulkSchema = z.object({
   key: z.string().optional()
 });
 
-export const AlertRuleSchema = z.any(); // Placeholder as per deprecated original, pending full JSON schema integration
+export const AlertDestinationKindSchema = z.enum(['builtin_api_ingest', 'external_webhook']);
+
+export const AlertDestinationSchema = z.object({
+  id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  label: z.string().min(1),
+  kind: AlertDestinationKindSchema,
+  url: z.string().url(),
+  enabled: z.boolean().default(true),
+  dead: z.boolean().default(false),
+  last_failed_at: z.string().optional(),
+});
+
+export const AlertDestinationsSchema = z.array(AlertDestinationSchema).refine(
+  destinations => new Set(destinations.map(destination => destination.id)).size === destinations.length,
+  { message: 'alert_destinations ids must be unique' },
+);
+
+export const DeliveryDestinationSchema = AlertDestinationSchema.pick({
+  id: true,
+  label: true,
+  kind: true,
+});
+
+export const AlertEventIngestSchema = z.object({
+  alert_event_id: z.string().uuid(),
+  rule_id: z.string(),
+  label: z.string(),
+  scope: z.enum(['alert', 'market_watch']),
+  condition: z.enum(ALERT_CONDITIONS),
+  ticker: z.string(),
+  quote: z.string(),
+  exchanges: z.array(z.string()),
+  value: z.number(),
+  threshold: z.number(),
+  highest_exchange: z.string().optional().nullable(),
+  lowest_exchange: z.string().optional().nullable(),
+  price_high: z.number().optional().nullable(),
+  price_low: z.number().optional().nullable(),
+  premium_exchange: z.string().optional().nullable(),
+  premium_adjustment_pct: z.number().optional().nullable(),
+  triggered_at: z.string(),
+  delivery_destination: DeliveryDestinationSchema,
+});
+
+export const AlertRuleSchema = z.object({
+  _id: z.string(),
+  scope: z.enum(['alert', 'market_watch']).default('alert'),
+  condition: z.enum(ALERT_CONDITIONS),
+  cooldown_secs: z.number().int(),
+  created_at: z.string().optional(),
+  enabled: z.boolean(),
+  exchanges: z.array(z.string()),
+  label: z.string(),
+  minSources: z.number().int().default(2),
+  quote: z.string(),
+  recovery_value: z.number(),
+  ticker: z.string(),
+  updated_at: z.string().optional(),
+  value: z.number(),
+  volumeFloorUsd: z.number().default(30000),
+  alert_destinations: AlertDestinationsSchema,
+});
 
 export const ChainInsertSchema = z.object({
   body: z.object({
@@ -321,7 +382,10 @@ export const DwStatusBodySchema = z.object({
   exchange: z.string().min(1, 'exchange required'),
   network: z.string().min(1, 'network required').transform(val => val.replace('/', ':')),
   ticker: z.string().min(1, 'ticker required'),
-  status: z.enum(DW_STATUS_VALUES, { message: 'Invalid status value' }),
+  status: z.union([
+    z.enum(DW_STATUS_VALUES, { message: 'Invalid status value' }),
+    z.string().regex(/^error:.+$/, 'Invalid status value'),
+  ]),
 });
 
 export const DwDeepDiveTaskSchema = z.object({

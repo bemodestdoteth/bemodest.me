@@ -93,7 +93,8 @@ pub async fn run_dex_subscriber(
 
                                     lvc.upsert(ticker);
 
-                                    if config.visibility.is_visible(&base, &quote, &config.pinlist) {
+                                    if config.visibility.is_visible(&base, &quote, &config.pinlist)
+                                    {
                                         broadcast = true;
                                     }
                                 }

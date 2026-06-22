@@ -46,7 +46,12 @@ impl VisibilityCache {
         };
     }
 
-    pub fn is_visible(&self, base: &str, quote: &str, pinlist: &Arc<RwLock<HashSet<String>>>) -> bool {
+    pub fn is_visible(
+        &self,
+        base: &str,
+        quote: &str,
+        pinlist: &Arc<RwLock<HashSet<String>>>,
+    ) -> bool {
         if pinlist.read().unwrap().contains(base) {
             return true;
         }
@@ -80,4 +85,29 @@ impl VisibilityCache {
 
 pub fn pair_key(base: &str, quote: &str) -> String {
     format!("{}:{}", base, quote)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn base_visibility_allows_different_quote_for_visible_base() {
+        let cache = VisibilityCache::new();
+        let pinlist = Arc::new(RwLock::new(HashSet::new()));
+        cache.replace(
+            vec![VisibilityPair {
+                base: "B3".to_string(),
+                quote: "USDT".to_string(),
+                spread_pct: 1.0,
+                threshold: 0.5,
+                pinned: false,
+                rule_id: Some("market-watch".to_string()),
+            }],
+            true,
+        );
+
+        assert!(!cache.is_visible("B3", "USDC", &pinlist));
+        assert!(cache.is_base_visible("B3", &pinlist));
+    }
 }

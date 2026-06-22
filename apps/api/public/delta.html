@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Delta Margin | Wallet Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preload" href="/fonts/beaufort_medium.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="/fonts/d2coding.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" integrity="sha384-w9ufcIOKS67vY4KePhJtmWDp4+Ai5DMaHvqqF85VvjaGYSW2AhIbqorgKYqIJopv" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/css/premium.css">
+    <style>
+        .delta-table-card {
+            margin-bottom: 20px;
+            padding: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+
+        .delta-table-card table td,
+        .delta-table-card table th {
+            font-family: 'D2Coding', monospace;
+        }
+
+        .ratio-input {
+            width: 88px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'D2Coding', monospace;
+        }
+
+        .save-ratios {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #2196F3;
+            color: #fff;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .risk-high { color: #c62828; font-weight: bold; }
+        .risk-medium { color: #ef6c00; font-weight: bold; }
+        .risk-low { color: #2e7d32; font-weight: bold; }
+    </style>
+</head>
+
+<body>
+    <div id="loginForm" class="login-container">
+        <h2>Login</h2>
+        <form id="login">
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <div id="content" style="display: none">
+        <header>
+            <div class="premium-header-title">
+                <h1><a href="/" style="text-decoration: none; color: inherit;">Delta Margin</a></h1>
+                <div id="sessionStatus" class="session-status active">
+                    <span class="session-icon">⏱</span>
+                    <span class="session-time">--</span>
+                </div>
+            </div>
+            <div class="premium-header-actions">
+                <button id="logoutBtn">Logout</button>
+            </div>
+        </header>
+
+        <div id="sessionExpiryModal" class="modal" style="display: none;">
+            <div class="modal-content session-warning-modal">
+                <h3>Session Expiring Soon</h3>
+                <p>Your session will expire in <span class="expiry-countdown">--</span></p>
+                <div class="modal-actions">
+                    <button onclick="hideSessionWarningModal()" class="btn-secondary">Dismiss</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="sessionExpiredModal" class="modal" style="display: none;">
+            <div class="modal-content session-expired-modal">
+                <h3>Session Expired</h3>
+                <p class="expiry-message">Your session has expired. Please log in again to continue.</p>
+                <div class="modal-actions">
+                    <button onclick="redirectToLogin()" class="btn-primary">Log In</button>
+                </div>
+            </div>
+        </div>
+
+        <section class="premium-controls">
+            <label>
+                Polling
+                <input type="text" value="2 seconds" disabled>
+            </label>
+            <label>
+                Scope
+                <input type="text" value="Active shorts" disabled>
+            </label>
+            <button id="refreshDeltaBtn">Refresh</button>
+        </section>
+
+        <div id="deltaStatus" class="premium-status">Loading active short positions...</div>
+
+        <section class="delta-table-card">
+            <table id="deltaTable" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Exchange</th>
+                        <th>Symbol</th>
+                        <th>Short Amount</th>
+                        <th>Short Amount ($)</th>
+                        <th>Spot Exchange</th>
+                        <th>Spot Balance</th>
+                        <th>Spot Balance ($)</th>
+                        <th>Coverage</th>
+                        <th>Mark</th>
+                        <th>Liquidation</th>
+                        <th>Risk</th>
+                        <th>Danger</th>
+                        <th>Target</th>
+                        <th>Safe</th>
+                        <th>Updated</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js" integrity="sha384-k5vbMeKHbxEZ0AEBTSdR7UjAgWCcUfrS8c0c5b2AfIh7olfhNkyCZYwOfzOQhauK" crossorigin="anonymous"></script>
+    <script src="/js/delta.js"></script>
+</body>
+
+</html>

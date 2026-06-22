@@ -99,6 +99,50 @@ impl AlertStateStore {
         }
     }
 
+    pub async fn get_first_visible_at(&mut self, pair_key: &str) -> Option<i64> {
+        let key = format!("alert:visible_since:{}", pair_key);
+        match self.conn.get(&key).await {
+            Ok(value) => value,
+            Err(e) => {
+                warn!(
+                    "[AlertStateStore] get_first_visible_at failed for {}: {}",
+                    pair_key, e
+                );
+                None
+            }
+        }
+    }
+
+    pub async fn ensure_first_visible_at(
+        &mut self,
+        pair_key: &str,
+        timestamp_ms: i64,
+    ) -> Option<i64> {
+        let key = format!("alert:visible_since:{}", pair_key);
+        let result: redis::RedisResult<bool> = self.conn.set_nx(&key, timestamp_ms).await;
+        if let Err(e) = result {
+            warn!(
+                "[AlertStateStore] ensure_first_visible_at failed for {}: {}",
+                pair_key, e
+            );
+            return None;
+        }
+        self.get_first_visible_at(pair_key)
+            .await
+            .or(Some(timestamp_ms))
+    }
+
+    pub async fn clear_first_visible_at(&mut self, pair_key: &str) {
+        let key = format!("alert:visible_since:{}", pair_key);
+        let result: redis::RedisResult<()> = self.conn.del(&key).await;
+        if let Err(e) = result {
+            warn!(
+                "[AlertStateStore] clear_first_visible_at failed for {}: {}",
+                pair_key, e
+            );
+        }
+    }
+
     /// Read back the persisted `AlertState` for `rule_id`, if present.
     ///
     /// Returns `None` when the key does not exist or any field is missing /

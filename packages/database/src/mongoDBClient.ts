@@ -91,6 +91,18 @@ export class MongoDBClient {
         }
     }
 
+    async readOneFromDatabase(databaseName: string, collectionName: string, query: Filter<any>): Promise<any | null> {
+        try {
+            this._ensureConnected();
+            const collection = this.client.db(databaseName).collection(collectionName);
+            const document = await collection.findOne(query, { maxTimeMS: this.maxTimeMS });
+            return document;
+        } catch (error) {
+            logger.error('Error reading document from database:', error);
+            throw error;
+        }
+    }
+
     async createIndex(
         collectionName: string,
         indexSpec: IndexSpecification,

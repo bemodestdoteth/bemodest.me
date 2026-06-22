@@ -2,6 +2,7 @@ use async_trait::async_trait;
 use futures_util::TryStreamExt;
 use log::{error, info, warn};
 use mongodb::{bson::doc, Client};
+use primp::{Client as ImpersonateClient, Impersonate, ImpersonateOS};
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -11,6 +12,7 @@ use std::time::{Duration, Instant};
 use tokio::sync::{broadcast, Mutex, RwLock};
 
 use crate::cache::LatestValueCache;
+use crate::chain_annotations::translate_annotation;
 use crate::config::Config;
 use crate::exchanges::Exchange;
 use crate::types::{now_micros, Exchange as ExchangeType, MarketState, NormalizedTicker};
@@ -65,7 +67,14 @@ impl KyberswapQuoteHandle {
                     symbol: symbol.clone(),
                 };
                 if queues.queued.contains(&key) {
-                    already_queued.push(json!({ "chain": chain, "symbol": symbol }));
+                    if let Some(index) = queues.background.iter().position(|queued| queued == &key)
+                    {
+                        queues.background.remove(index);
+                        queues.priority.push_back(key);
+                        queued.push(json!({ "chain": chain, "symbol": symbol }));
+                    } else {
+                        already_queued.push(json!({ "chain": chain, "symbol": symbol }));
+                    }
                     continue;
                 }
                 queues.queued.insert(key.clone());
@@ -99,9 +108,15 @@ pub struct KyberswapExchange {
 }
 
 impl KyberswapExchange {
-    pub fn new(tx: broadcast::Sender<String>, lvc: Arc<LatestValueCache>, config: Arc<Config>) -> Self {
+    pub fn new(
+        tx: broadcast::Sender<String>,
+        lvc: Arc<LatestValueCache>,
+        config: Arc<Config>,
+    ) -> Self {
         let state = Arc::new(KyberswapState::new(config.mongo_uri.clone()));
-        let _ = QUOTE_HANDLE.set(Arc::new(KyberswapQuoteHandle { state: state.clone() }));
+        let _ = QUOTE_HANDLE.set(Arc::new(KyberswapQuoteHandle {
+            state: state.clone(),
+        }));
         Self {
             tx,
             connected: Arc::new(AtomicBool::new(false)),
@@ -220,8 +235,10 @@ async fn run_worker(
     let mongo = Client::with_uri_str(&mongo_uri)
         .await
         .map_err(|e| format!("MongoDB connection failed: {}", e))?;
-    let http = reqwest::Client::builder()
+    let http = ImpersonateClient::builder()
         .timeout(Duration::from_secs(20))
+        .impersonate(Impersonate::ChromeV148)
+        .impersonate_os(ImpersonateOS::Linux)
         .build()
         .map_err(|e| format!("HTTP client build failed: {}", e))?;
 
@@ -262,11 +279,17 @@ async fn reload_configs(state: &KyberswapState, mongo: &Client) {
         match mongodb::bson::from_document::<ChainQuoteConfig>(doc) {
             Ok(cfg) => {
                 if !valid_chains.contains(&cfg.kyberswap_chain) {
-                    warn!("[KyberSwap] Skipping invalid chain slug: {}", cfg.kyberswap_chain);
+                    warn!(
+                        "[KyberSwap] Skipping invalid chain slug: {}",
+                        cfg.kyberswap_chain
+                    );
                     continue;
                 }
                 if !is_evm_address(&cfg.quote.contract_address) {
-                    warn!("[KyberSwap] Skipping invalid quote address for {}", cfg.kyberswap_chain);
+                    warn!(
+                        "[KyberSwap] Skipping invalid quote address for {}",
+                        cfg.kyberswap_chain
+                    );
                     continue;
                 }
                 configs.insert(cfg.kyberswap_chain.clone(), cfg);
@@ -281,8 +304,13 @@ async fn reload_configs(state: &KyberswapState, mongo: &Client) {
 }
 
 async fn load_valid_kyberswap_chains(mongo: &Client) -> HashSet<String> {
-    let collection = mongo.database("codys").collection::<mongodb::bson::Document>(CHAINS_COLLECTION);
-    let mut cursor = match collection.find(doc! { "annotation.kyberswap": { "$exists": true } }).await {
+    let collection = mongo
+        .database("codys")
+        .collection::<mongodb::bson::Document>(CHAINS_COLLECTION);
+    let mut cursor = match collection
+        .find(doc! { "annotation.kyberswap": { "$exists": true } })
+        .await
+    {
         Ok(cursor) => cursor,
         Err(e) => {
             error!("[KyberSwap] Failed to load chain annotations: {}", e);
@@ -307,7 +335,9 @@ async fn fill_background_queue(state: &KyberswapState, mongo: &Client) {
         return;
     }
 
-    let collection = mongo.database("codys").collection::<mongodb::bson::Document>(RANK_COLLECTION);
+    let collection = mongo
+        .database("codys")
+        .collection::<mongodb::bson::Document>(RANK_COLLECTION);
     let options = mongodb::options::FindOptions::builder()
         .sort(doc! { "market_cap_rank": 1 })
         .limit(BACKGROUND_SYMBOL_LIMIT)
@@ -340,7 +370,10 @@ async fn fill_background_queue(state: &KyberswapState, mongo: &Client) {
 
 async fn pop_next_job(state: &KyberswapState) -> Option<QuoteJobKey> {
     let mut queues = state.queues.lock().await;
-    let job = queues.priority.pop_front().or_else(|| queues.background.pop_front());
+    let job = queues
+        .priority
+        .pop_front()
+        .or_else(|| queues.background.pop_front());
     if let Some(job) = &job {
         queues.queued.remove(job);
     }
@@ -350,7 +383,7 @@ async fn pop_next_job(state: &KyberswapState) -> Option<QuoteJobKey> {
 async fn process_job(
     state: &KyberswapState,
     mongo: &Client,
-    http: &reqwest::Client,
+    http: &ImpersonateClient,
     tx: &broadcast::Sender<String>,
     lvc: &LatestValueCache,
     config: &Config,
@@ -363,12 +396,16 @@ async fn process_job(
 
     apply_rate_limit(state, &cfg).await;
 
-    let token = match resolve_token(mongo, &job.symbol, &cfg.kyberswap_chain).await {
+    let coingecko_platform = translate_annotation(&cfg.kyberswap_chain, "kyberswap", "coingecko");
+    let token = match resolve_token(mongo, &job.symbol, coingecko_platform).await {
         Some(token) => token,
         None => return,
     };
 
-    if token.contract_address.eq_ignore_ascii_case(&cfg.quote.contract_address) {
+    if token
+        .contract_address
+        .eq_ignore_ascii_case(&cfg.quote.contract_address)
+    {
         return;
     }
 
@@ -378,7 +415,14 @@ async fn process_job(
             set_429_cooldown(state, &cfg).await;
             warn!("[KyberSwap] 429 cooldown set for {}", cfg.kyberswap_chain);
         }
-        Err(QuoteError::Other(msg)) => warn!("[KyberSwap] quote failed for {} {}: {}", cfg.kyberswap_chain, job.symbol, msg),
+        Err(QuoteError::UnsupportedRoute) => info!(
+            "[KyberSwap] no route for {} {}",
+            cfg.kyberswap_chain, job.symbol
+        ),
+        Err(QuoteError::Other(msg)) => warn!(
+            "[KyberSwap] quote failed for {} {}: {}",
+            cfg.kyberswap_chain, job.symbol, msg
+        ),
     }
 }
 
@@ -408,8 +452,10 @@ async fn set_429_cooldown(state: &KyberswapState, cfg: &ChainQuoteConfig) {
         .and_then(|r| r.cooldown_seconds_on429)
         .unwrap_or(DEFAULT_COOLDOWN_ON_429_SECS);
     let mut rates = state.rate_state.lock().await;
-    rates.entry(cfg.kyberswap_chain.clone()).or_default().next_allowed_at =
-        Some(Instant::now() + Duration::from_secs(seconds));
+    rates
+        .entry(cfg.kyberswap_chain.clone())
+        .or_default()
+        .next_allowed_at = Some(Instant::now() + Duration::from_secs(seconds));
 }
 
 async fn resolve_token(mongo: &Client, symbol: &str, chain: &str) -> Option<ResolvedToken> {
@@ -448,34 +494,46 @@ async fn resolve_token(mongo: &Client, symbol: &str, chain: &str) -> Option<Reso
 
 enum QuoteError {
     RateLimited,
+    UnsupportedRoute,
     Other(String),
 }
 
 async fn fetch_quote(
-    http: &reqwest::Client,
+    http: &ImpersonateClient,
     cfg: &ChainQuoteConfig,
     token: &ResolvedToken,
 ) -> Result<NormalizedTicker, QuoteError> {
     let amount_in_units = decimal_to_units(&cfg.default_notional, cfg.quote.decimals)
         .ok_or_else(|| QuoteError::Other("invalid defaultNotional".to_string()))?;
-    let url = format!("{}/{}/api/v1/routes", KYBERSWAP_HOST, cfg.kyberswap_chain);
+    let url = format!(
+        "{}/{}/api/v1/routes?tokenIn={}&tokenOut={}&amountIn={}",
+        KYBERSWAP_HOST,
+        cfg.kyberswap_chain,
+        urlencoding::encode(&cfg.quote.contract_address),
+        urlencoding::encode(&token.contract_address),
+        urlencoding::encode(&amount_in_units)
+    );
     let response = http
         .get(&url)
-        .query(&[
-            ("tokenIn", cfg.quote.contract_address.as_str()),
-            ("tokenOut", token.contract_address.as_str()),
-            ("amountIn", amount_in_units.as_str()),
-        ])
         .header("Accept", "application/json")
         .send()
         .await
         .map_err(|e| QuoteError::Other(e.to_string()))?;
 
-    if response.status().as_u16() == 429 {
+    let status = response.status();
+    if status.as_u16() == 429 {
         return Err(QuoteError::RateLimited);
     }
-    if !response.status().is_success() {
-        return Err(QuoteError::Other(format!("status {}", response.status())));
+    if !status.is_success() {
+        let body = response.text().await.unwrap_or_default();
+        if is_unsupported_route_response(status.as_u16(), &body) {
+            return Err(QuoteError::UnsupportedRoute);
+        }
+        return Err(QuoteError::Other(format!(
+            "status {}: {}",
+            status,
+            truncate_error_body(&body)
+        )));
     }
 
     let body = response
@@ -546,7 +604,7 @@ fn emit_ticker(
     lvc.upsert(ticker.clone());
     if !config
         .visibility
-        .is_visible(&ticker.base, &ticker.quote, &config.pinlist)
+        .is_base_visible(&ticker.base, &config.pinlist)
     {
         return;
     }
@@ -559,6 +617,31 @@ fn emit_ticker(
     let _ = tx.send(payload.to_string());
 }
 
+fn is_unsupported_route_response(status: u16, body: &str) -> bool {
+    if status != 400 {
+        return false;
+    }
+
+    serde_json::from_str::<Value>(body)
+        .ok()
+        .and_then(|body| {
+            let code = body.get("code").and_then(|value| value.as_i64())?;
+            let message = body.get("message").and_then(|value| value.as_str())?;
+            Some(code == 4008 && message.eq_ignore_ascii_case("route not found"))
+        })
+        .unwrap_or(false)
+}
+
+fn truncate_error_body(body: &str) -> String {
+    const MAX_ERROR_BODY_CHARS: usize = 500;
+    let mut chars = body.chars();
+    let mut snippet: String = chars.by_ref().take(MAX_ERROR_BODY_CHARS).collect();
+    if chars.next().is_some() {
+        snippet.push_str("...");
+    }
+    snippet
+}
+
 fn decimal_to_units(value: &str, decimals: u32) -> Option<String> {
     let trimmed = value.trim();
     if trimmed.is_empty() || trimmed.starts_with('-') {
@@ -567,7 +650,10 @@ fn decimal_to_units(value: &str, decimals: u32) -> Option<String> {
     let mut parts = trimmed.split('.');
     let whole = parts.next().unwrap_or("0");
     let frac = parts.next().unwrap_or("");
-    if parts.next().is_some() || !whole.chars().all(|c| c.is_ascii_digit()) || !frac.chars().all(|c| c.is_ascii_digit()) {
+    if parts.next().is_some()
+        || !whole.chars().all(|c| c.is_ascii_digit())
+        || !frac.chars().all(|c| c.is_ascii_digit())
+    {
         return None;
     }
 
@@ -582,7 +668,8 @@ fn decimal_to_units(value: &str, decimals: u32) -> Option<String> {
     let frac_units = if frac_padded.is_empty() {
         0
     } else {
-        let padded = format!("{:<0width$}", frac_padded, width = decimals_usize);
+        let mut padded = frac_padded.to_string();
+        padded.extend(std::iter::repeat('0').take(decimals_usize.saturating_sub(padded.len())));
         padded.parse::<u128>().ok()?
     };
     Some(whole_units.checked_add(frac_units)?.to_string())
@@ -643,6 +730,47 @@ mod tests {
     fn validates_evm_addresses() {
         assert!(is_evm_address("0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"));
         assert!(!is_evm_address("https://example.com"));
-        assert!(!is_evm_address("0xzz3589fcd6edb6e08f4c7c32d4f71b54bda02913"));
+        assert!(!is_evm_address(
+            "0xzz3589fcd6edb6e08f4c7c32d4f71b54bda02913"
+        ));
+    }
+
+    #[test]
+    fn promotes_background_jobs_to_priority_on_refresh() {
+        let key = QuoteJobKey {
+            chain: "bsc".to_string(),
+            symbol: "ESPORTS".to_string(),
+        };
+        let mut queues = QuoteQueues::default();
+        queues.queued.insert(key.clone());
+        queues.background.push_back(key.clone());
+
+        if let Some(index) = queues.background.iter().position(|queued| queued == &key) {
+            queues.background.remove(index);
+            queues.priority.push_back(key.clone());
+        }
+
+        assert!(queues.background.is_empty());
+        assert_eq!(queues.priority.pop_front(), Some(key));
+    }
+
+    #[test]
+    fn classifies_kyberswap_route_not_found_as_unsupported() {
+        let body = r#"{"code":4008,"message":"route not found","details":null}"#;
+
+        assert!(is_unsupported_route_response(400, body));
+    }
+
+    #[test]
+    fn leaves_other_kyberswap_errors_generic() {
+        let rate_limit = r#"{"code":429,"message":"rate limited"}"#;
+        let malformed = "route not found";
+
+        assert!(!is_unsupported_route_response(400, rate_limit));
+        assert!(!is_unsupported_route_response(400, malformed));
+        assert!(!is_unsupported_route_response(
+            500,
+            r#"{"code":4008,"message":"route not found"}"#
+        ));
     }
 }

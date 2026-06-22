@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SK hynix Dashboard | Wallet Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preload" href="/fonts/beaufort_medium.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="/fonts/d2coding.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/css/premium.css">
+</head>
+
+<body>
+    <div id="loginForm" class="login-container">
+        <h2>Login</h2>
+        <form id="login">
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <div id="content" style="display: none">
+        <header>
+            <div class="premium-header-title">
+                <h1><a href="/" style="text-decoration: none; color: inherit;">SK hynix Dashboard</a></h1>
+                <div id="sessionStatus" class="session-status active">
+                    <span class="session-icon">Session</span>
+                    <span class="session-time">--</span>
+                </div>
+            </div>
+            <div class="premium-header-actions">
+                <button id="refreshBtn">Refresh</button>
+                <button id="logoutBtn">Logout</button>
+            </div>
+        </header>
+
+        <div id="sessionExpiryModal" class="modal" style="display: none;">
+            <div class="modal-content session-warning-modal">
+                <h3>Session Expiring Soon</h3>
+                <p>Your session will expire in <span class="expiry-countdown">--</span></p>
+                <div class="modal-actions">
+                    <button onclick="hideSessionWarningModal()" class="btn-secondary">Dismiss</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="sessionExpiredModal" class="modal" style="display: none;">
+            <div class="modal-content session-expired-modal">
+                <h3>Session Expired</h3>
+                <p class="expiry-message">Your session has expired. Please log in again to continue.</p>
+                <div class="modal-actions">
+                    <button onclick="redirectToLogin()" class="btn-primary">Log In</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="hynixStatus" class="premium-status">Loading SK hynix snapshot...</div>
+
+        <section class="premium-targets" id="priceCards">
+            <div>
+                <span>Regular market</span>
+                <strong id="regularPrice">--</strong>
+                <small id="regularMeta">--</small>
+            </div>
+            <div>
+                <span>NXT</span>
+                <strong id="nxtPrice">--</strong>
+                <small id="nxtMeta">--</small>
+            </div>
+            <div>
+                <span>ETF market price</span>
+                <strong id="etfPrice">--</strong>
+                <small id="etfMeta">--</small>
+            </div>
+            <div>
+                <span>Hyperliquid</span>
+                <strong id="hyperliquidPrice">--</strong>
+                <small id="hyperliquidMeta">--</small>
+            </div>
+        </section>
+
+        <section id="hynixRecommendedActionCard" class="premium-action-card neutral" hidden>
+            <span>Recommended action</span>
+            <strong id="hynixRecommendedActionLabel">Neutral/Wait</strong>
+            <div id="hynixRecommendedActionSpread" class="premium-action-spread">--</div>
+            <p id="hynixRecommendedActionDetail">Load SK hynix data to compare USDT spread against Hyperliquid.</p>
+        </section>
+
+        <section class="premium-chart-card">
+            <div class="premium-chart-toolbar">
+                <h2>USD Spread vs Hyperliquid</h2>
+            </div>
+            <table class="hynix-table">
+                <thead>
+                    <tr>
+                        <th>Venue</th>
+                        <th>KRW price</th>
+                        <th>USD via current forex</th>
+                        <th>USD via USDT/KRW</th>
+                        <th>Hyperliquid USD</th>
+                        <th>Current forex spread</th>
+                        <th>USDT spread</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-venue="regularMarket">
+                        <td>Regular market</td>
+                        <td id="regularMarketKrwPrice">--</td>
+                        <td id="regularMarketCurrentForexUsd">--</td>
+                        <td id="regularMarketUpbitUsdtUsd">--</td>
+                        <td id="regularMarketHyperliquidUsd">--</td>
+                        <td id="regularMarketCurrentForexSpread">--</td>
+                        <td id="regularMarketUpbitUsdtSpread">--</td>
+                        <td id="regularMarketComparisonStatus">--</td>
+                    </tr>
+                    <tr data-venue="nxt">
+                        <td>NXT</td>
+                        <td id="nxtKrwPrice">--</td>
+                        <td id="nxtCurrentForexUsd">--</td>
+                        <td id="nxtUpbitUsdtUsd">--</td>
+                        <td id="nxtHyperliquidUsd">--</td>
+                        <td id="nxtCurrentForexSpread">--</td>
+                        <td id="nxtUpbitUsdtSpread">--</td>
+                        <td id="nxtComparisonStatus">--</td>
+                    </tr>
+                    <tr data-venue="etf">
+                        <td>ETF underlying-like</td>
+                        <td id="etfKrwPrice">--</td>
+                        <td id="etfCurrentForexUsd">--</td>
+                        <td id="etfUpbitUsdtUsd">--</td>
+                        <td id="etfHyperliquidUsd">--</td>
+                        <td id="etfCurrentForexSpread">--</td>
+                        <td id="etfUpbitUsdtSpread">--</td>
+                        <td id="etfComparisonStatus">--</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script src="/js/hynix.js"></script>
+</body>
+
+</html>

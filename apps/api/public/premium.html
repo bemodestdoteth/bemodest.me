@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Premium Dashboard | Wallet Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preload" href="/fonts/beaufort_medium.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="/fonts/d2coding.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/css/premium.css">
+    <script src="https://unpkg.com/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js" integrity="sha384-stKllnUqA9AD0gsKCuUtf5XlqAW7PwIgDagoNsTWkjkBmJ/GZ/uHTgEBxdLV2VSK" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="loginForm" class="login-container">
+        <h2>Login</h2>
+        <form id="login">
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <div id="content" style="display: none">
+        <header>
+            <div class="premium-header-title">
+                <h1><a href="/" style="text-decoration: none; color: inherit;">Premium Dashboard</a></h1>
+                <div id="sessionStatus" class="session-status active">
+                    <span class="session-icon">⏱</span>
+                    <span class="session-time">--</span>
+                </div>
+            </div>
+            <div class="premium-header-actions">
+                <button id="logoutBtn">Logout</button>
+            </div>
+        </header>
+
+        <div id="sessionExpiryModal" class="modal" style="display: none;">
+            <div class="modal-content session-warning-modal">
+                <h3>Session Expiring Soon</h3>
+                <p>Your session will expire in <span class="expiry-countdown">--</span></p>
+                <div class="modal-actions">
+                    <button onclick="hideSessionWarningModal()" class="btn-secondary">Dismiss</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="sessionExpiredModal" class="modal" style="display: none;">
+            <div class="modal-content session-expired-modal">
+                <h3>Session Expired</h3>
+                <p class="expiry-message">Your session has expired. Please log in again to continue.</p>
+                <div class="modal-actions">
+                    <button onclick="redirectToLogin()" class="btn-primary">Log In</button>
+                </div>
+            </div>
+        </div>
+
+        <section class="premium-controls">
+            <label>
+                Korean
+                <select id="koreanExchange">
+                    <option value="bithumb">Bithumb</option>
+                    <option value="upbit">Upbit</option>
+                </select>
+            </label>
+            <label>
+                Foreign
+                <select id="foreignExchange">
+                    <optgroup label="Spot">
+                        <option value="binance">Binance Spot</option>
+                        <option value="bybit">Bybit Spot</option>
+                        <option value="bitget">Bitget Spot</option>
+                        <option value="mexc">MEXC Spot</option>
+                        <option value="gateio">Gate.io Spot</option>
+                        <option value="kucoin">KuCoin Spot</option>
+                        <option value="cryptocom">Crypto.com Spot</option>
+                        <option value="huobi">Huobi Spot</option>
+                        <option value="coinbase">Coinbase Spot</option>
+                        <option value="kraken">Kraken Spot</option>
+                    </optgroup>
+                    <optgroup label="Futures">
+                        <option value="bybit_f" selected>Bybit Futures</option>
+                        <option value="binance_f">Binance Futures</option>
+                        <option value="bitget_f">Bitget Futures</option>
+                        <option value="okx_f">OKX Futures</option>
+                        <option value="hyperliquid_f">Hyperliquid Futures</option>
+                    </optgroup>
+                </select>
+            </label>
+            <label>
+                Symbol
+                <input id="symbol" type="text" value="BTC" autocomplete="off">
+            </label>
+            <label>
+                Interval
+                <select id="interval">
+                    <option value="1m" selected>1m</option>
+                    <option value="5m">5m</option>
+                    <option value="15m">15m</option>
+                    <option value="1h">1h</option>
+                    <option value="4h">4h</option>
+                    <option value="1d">1d</option>
+                </select>
+            </label>
+            <label>
+                Lookback
+                <select id="lookbackBars">
+                    <option value="300">300</option>
+                    <option value="500" selected>500</option>
+                    <option value="1000">1000</option>
+                    <option value="2000">2000</option>
+                </select>
+            </label>
+            <label>
+                Exit Target %
+                <input id="exitTargetPct" type="number" step="0.01" placeholder="Manual">
+            </label>
+            <button id="loadPremiumBtn">Load</button>
+            <button id="reloadPremiumBtn">Reload visible range</button>
+        </section>
+
+        <div id="premiumStatus" class="premium-status">Choose parameters and load candles.</div>
+
+        <section class="premium-targets">
+            <div>
+                <span>Entry target</span>
+                <strong id="entryTargetPct">--</strong>
+            </div>
+            <div>
+                <span>Exit target</span>
+                <strong id="exitTargetDisplay">Manual</strong>
+            </div>
+        </section>
+
+        <section class="premium-chart-card">
+            <div class="premium-chart-toolbar">
+                <h2>Asset Comparison</h2>
+                <div>
+                    <button class="chart-toggle active" data-chart="top" data-mode="candles">Candles</button>
+                    <button class="chart-toggle" data-chart="top" data-mode="line">Lines</button>
+                </div>
+            </div>
+            <div id="topChart" class="premium-chart"></div>
+        </section>
+
+        <section id="recommendedActionCard" class="premium-action-card neutral" hidden>
+            <span>Recommended action</span>
+            <strong id="recommendedActionLabel">Neutral/Wait</strong>
+            <p id="recommendedActionDetail">Load Hyperliquid data to compare current USDT spread against target.</p>
+        </section>
+
+        <section class="premium-chart-card">
+            <div class="premium-chart-toolbar">
+                <h2 id="premiumChartTitle">Premium %</h2>
+                <div>
+                    <button class="chart-toggle active" data-chart="premium" data-mode="candles">Candles</button>
+                    <button class="chart-toggle" data-chart="premium" data-mode="line">Line</button>
+                </div>
+            </div>
+            <div id="premiumChart" class="premium-chart"></div>
+        </section>
+    </div>
+
+    <script src="/js/premium.js"></script>
+</body>
+
+</html>

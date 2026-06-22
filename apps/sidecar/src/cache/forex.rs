@@ -90,6 +90,13 @@ impl ForexCache {
             .store(rate.to_bits(), Ordering::Relaxed);
     }
 
+    #[cfg(test)]
+    pub fn set_test_rates(&self, krw_per_usd: f64, upbit_usdt_krw: f64, bithumb_usdt_krw: f64) {
+        self.set_krw_per_usd(krw_per_usd);
+        self.set_upbit_usdt_krw(upbit_usdt_krw);
+        self.set_bithumb_usdt_krw(bithumb_usdt_krw);
+    }
+
     /// Spawn a background task that refreshes the rate every `interval`.
     /// Reads the URL from the `UPBIT_FOREX_URL` environment variable.
     pub fn start_poller(

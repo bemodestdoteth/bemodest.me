@@ -7,9 +7,12 @@
     "start": "node --env-file=.env src/server.js",
     "dev": "NODE_OPTIONS='--max-old-space-size=512' nodemon --exec 'node --env-file=.env.dev' src/server.js",
     "upsert:market-watch-rule": "node --env-file=.env.dev src/scripts/upsert-market-watch-rule.js",
+    "migrate:alert-destinations": "node --env-file=.env.dev src/scripts/migrate-alert-destinations.js",
     "generate:credentials": "node --env-file=.env.dev src/scripts/generate-credentials.js",
     "test:auth": "node --env-file=.env.dev src/scripts/test-auth.js",
     "test:websocket": "node --env-file=.env.dev src/scripts/test-websocket.js",
+    "test:premium": "node --test src/modules/premium/service.test.js",
+    "test:hynix": "node --test src/modules/hynix/service.test.js",
     "verify:password": "node --env-file=.env.dev src/scripts/verify-password.js"
   },
   "author": "",
@@ -20,13 +23,15 @@
     "@bemodest/database": "workspace:*",
     "@bemodest/types": "workspace:*",
     "@bemodest/utils": "workspace:*",
+    "@my-exchanges/core": "file:../../../my_exchanges_ts/core",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "express-rate-limit": "^7.5.0",
     "jsonwebtoken": "^9.0.3",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

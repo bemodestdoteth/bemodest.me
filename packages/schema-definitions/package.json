@@ -4,7 +4,7 @@
     "description": "JSON Schemas for polyglot type generation",
     "scripts": {
         "generate:json": "node --import tsx src/generate.ts",
-        "generate:ts": "quicktype -s schema schemas/AlertRule.json schemas/SidecarConfigPayload.json schemas/NormalizedTicker.json schemas/SystemConfig.json -o ../types/src/generated.ts --just-types",
+        "generate:ts": "quicktype -s schema schemas/AlertDestinationTemplate.json schemas/AlertRule.json schemas/SidecarConfigPayload.json schemas/NormalizedTicker.json schemas/SystemConfig.json -o ../types/src/generated.ts --just-types",
         "build": "pnpm run generate:json && pnpm run generate:ts",
         "check:drift": "node --import tsx src/check-drift.ts"
     },

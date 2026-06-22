@@ -3,6 +3,7 @@ mod alert;
 mod api;
 mod auth;
 mod cache;
+mod chain_annotations;
 mod comparison;
 mod config;
 mod errors;
@@ -13,7 +14,7 @@ mod redis_sub;
 mod types;
 mod websocket;
 
-use crate::alert::engine::load_alert_rules;
+use crate::alert::engine::load_alert_runtime_config;
 use crate::alert::state::AlertStateStore;
 use crate::alert::types::AlertFiredEvent;
 use crate::cache::ForexCache;
@@ -69,9 +70,10 @@ async fn main() -> crate::errors::Result<()> {
 
     let config = Arc::new(Config::from_env());
 
-    // Pre-declare alert rules Arc so the pubsub task can reload it on alertrules_updated
-    let alert_rules: Arc<RwLock<Vec<crate::alert::types::AlertRule>>> =
-        Arc::new(RwLock::new(Vec::new()));
+    // Pre-declare alert runtime config Arc so the pubsub task can reload it on alertrules_updated
+    let alert_runtime_config: Arc<RwLock<crate::alert::types::AlertRuntimeConfig>> = Arc::new(
+        RwLock::new(crate::alert::types::AlertRuntimeConfig::default()),
+    );
 
     // Initialize Exchange Manager
     let manager = ExchangeManager::new();
@@ -81,7 +83,7 @@ async fn main() -> crate::errors::Result<()> {
     let pubsub_client_res = redis::Client::open(config.redis_url.clone());
     if let Ok(client) = pubsub_client_res {
         let config_clone = config.clone();
-        let alert_rules_clone = alert_rules.clone();
+        let alert_runtime_config_clone = alert_runtime_config.clone();
         let manager_redis = manager.clone();
         set.spawn(async move {
             let mut backoff = 1;
@@ -176,9 +178,9 @@ async fn main() -> crate::errors::Result<()> {
                                                                      manager_redis.lock().await.refresh_all_subscriptions().await;
                                                                  }
                                                                  crate::types::Type::AlertrulesUpdated => {
-                                                                    let reloaded = load_alert_rules(&config_clone).await;
-                                                                    let count = reloaded.len();
-                                                                    let mut guard = alert_rules_clone.write().await;
+                                                                    let reloaded = load_alert_runtime_config(&config_clone).await;
+                                                                    let count = reloaded.rules.len();
+                                                                    let mut guard = alert_runtime_config_clone.write().await;
                                                                     *guard = reloaded;
                                                                     info!("[AlertEngine] Reloaded {} alert rules from Redis stream", count);
                                                                 }
@@ -349,14 +351,14 @@ async fn main() -> crate::errors::Result<()> {
     }
     info!("[Sidecar] Cache stale-entry pruner spawned (60s)");
 
-    let initial_rules = load_alert_rules(&config).await;
+    let initial_alert_config = load_alert_runtime_config(&config).await;
     info!(
         "[Sidecar] Loaded {} alert rules on startup",
-        initial_rules.len()
+        initial_alert_config.rules.len()
     );
     {
-        let mut guard = alert_rules.write().await;
-        *guard = initial_rules;
+        let mut guard = alert_runtime_config.write().await;
+        *guard = initial_alert_config;
     }
 
     let alert_state_store = AlertStateStore::new(&config.redis_url).await;
@@ -366,12 +368,23 @@ async fn main() -> crate::errors::Result<()> {
     {
         let lvc_e = lvc.clone();
         let hist_e = history_cache.clone();
-        let rules_e = alert_rules.clone();
+        let forex_e = forex_cache.clone();
+        let rules_e = alert_runtime_config.clone();
         let alert_tx_e = alert_tx.clone();
         let tx_e = tx.clone();
         let config_e = config.clone();
         set.spawn(async move {
-            crate::alert::engine::run(lvc_e, hist_e, rules_e, alert_state_store, alert_tx_e, tx_e, config_e).await;
+            crate::alert::engine::run(
+                lvc_e,
+                hist_e,
+                forex_e,
+                rules_e,
+                alert_state_store,
+                alert_tx_e,
+                tx_e,
+                config_e,
+            )
+            .await;
         });
     }
     info!("[Sidecar] Alert/visibility engine spawned (1000 ms tick)");

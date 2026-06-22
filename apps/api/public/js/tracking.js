@@ -22,6 +22,9 @@
     // Hot Wallet Balance cache: { 'exchange:network': aggregatedUsdBalance }
     const hotBalanceCache = {};
 
+    // Display labels for normalized D/W network keys: { 'exchange:network': originalNetwork }
+    const dwNetworkLabels = {};
+
     const STATUS_EMOJI = {
         'both': '✅',
         'deposit_only': '⬅️',
@@ -64,6 +67,23 @@
             return net.charAt(0).toUpperCase() + net.slice(1) + ' (DEX)';
         }
         return sourcePrettyNames[name.toLowerCase()] || name;
+    }
+
+    function normalizeDwExchangeKey(exchange) {
+        return String(exchange || '').toLowerCase();
+    }
+
+    function normalizeDwNetworkKey(network) {
+        const raw = String(network || '').trim();
+        const colonNetwork = raw.replace(/\//g, ':');
+        const mappedName = marketCaipMap[colonNetwork] || marketCaipMap[raw];
+        if (mappedName) return mappedName.toLowerCase();
+
+        const lower = raw.toLowerCase();
+        const mappedEntry = Object.entries(marketCaipMap).find(([, name]) => String(name).toLowerCase() === lower);
+        if (mappedEntry) return String(mappedEntry[1]).toLowerCase();
+
+        return colonNetwork.toLowerCase();
     }
 
     // UI Config
@@ -238,25 +258,25 @@
         if (!source) return '';
         const lower = source.toLowerCase();
 
-        // Unique set of networks from BOTH caches for this exchange
-        const networksSet = new Set();
-        [dwStatusCache, hotBalanceCache].forEach(cache => {
-            Object.keys(cache).forEach(key => {
-                const kLower = key.toLowerCase();
-                if (kLower.startsWith(lower + ':')) {
-                    networksSet.add(key.split(':').slice(1).join(':'));
-                }
-            });
+        // Render only networks that have D/W status; hot balances annotate those rows.
+        const networksByKey = new Map();
+        Object.keys(dwStatusCache).forEach(key => {
+            const [exchangeKey, ...networkParts] = key.split(':');
+            if (exchangeKey.toLowerCase() === lower) {
+                const network = networkParts.join(':');
+                networksByKey.set(normalizeDwNetworkKey(network), network);
+            }
         });
 
-        const networks = Array.from(networksSet).sort();
-        const matches = networks.map(network => {
-            const status = dwStatusCache[`${lower}:${network}`] ?? dwStatusCache[`${source}:${network}`];
-            const balance = hotBalanceCache[`${lower}:${network}`];
+        const networks = Array.from(networksByKey.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+        const matches = networks.map(([networkKey, network]) => {
+            const status = dwStatusCache[`${lower}:${networkKey}`] ?? dwStatusCache[`${source}:${networkKey}`];
+            const balance = hotBalanceCache[`${lower}:${networkKey}`];
+            const displaySourceNetwork = dwNetworkLabels[`${lower}:${networkKey}`] || network;
 
-            const normalizedNetwork = network.replace(/\//g, ':');
-            const displayNetwork = marketCaipMap[normalizedNetwork] || network;
-            const isCaip2 = /^[a-z0-9]+[:/][a-z0-9-]+$/i.test(network);
+            const normalizedNetwork = displaySourceNetwork.replace(/\//g, ':');
+            const displayNetwork = marketCaipMap[normalizedNetwork] || displaySourceNetwork;
+            const isCaip2 = /^[a-z0-9]+[:/][a-z0-9-]+$/i.test(displaySourceNetwork);
 
             const balanceStr = (balance === null || balance === undefined) ? ' -' : (balance > 0 ? ` $${formatVolume(balance)}` : ' $0');
 
@@ -265,18 +285,15 @@
                 networkHtml = `<span style="color: var(--neon-red); text-decoration: underline;">${displayNetwork}</span>`;
             }
 
-            if (status) {
-                return `${STATUS_EMOJI[status] || '❓'} ${networkHtml}${balanceStr}`;
-            } else {
-                // Balance exists but no D/W status reported
-                return `💰 ${networkHtml}${balanceStr}`;
-            }
+            return `${STATUS_EMOJI[status] || '❓'} ${networkHtml}${balanceStr}`;
         });
 
         return matches.length ? matches.join(' · ') : '';
     }
 
     async function fetchDwStatus(ticker) {
+        if (!isDeepDiveActive) return;
+
         try {
             const resp = await fetch(`/api/dw-status?ticker=${encodeURIComponent(ticker)}`);
             if (!resp.ok) return;
@@ -284,7 +301,10 @@
             if (!json.success || !Array.isArray(json.data)) return;
 
             for (const { exchange, network, status } of json.data) {
-                dwStatusCache[`${exchange}:${network}`] = status;
+                const exchangeKey = normalizeDwExchangeKey(exchange);
+                const networkKey = normalizeDwNetworkKey(network);
+                dwStatusCache[`${exchangeKey}:${networkKey}`] = status;
+                dwNetworkLabels[`${exchangeKey}:${networkKey}`] = network;
             }
 
             // If we got any data, show D/W status as "Live" in the header
@@ -325,7 +345,9 @@
                 const exLower = exData.exchange.toLowerCase();
                 for (const chainEntry of exData.chains) {
                     const network = chainEntry.chain;
-                    const key = `${exLower}:${network}`;
+                    const networkKey = normalizeDwNetworkKey(network);
+                    const key = `${exLower}:${networkKey}`;
+                    dwNetworkLabels[key] = network;
                     const val = chainEntry.usdBalance;
                     if (val === null || val === undefined) {
                         if (newExchangeBalances[key] === undefined) {
@@ -348,9 +370,12 @@
     }
 
     function updateNodeDwStatus(exchange, network, status) {
-        dwStatusCache[`${exchange}:${network}`] = status;
-        const el = document.getElementById(`dw_${exchange.toLowerCase()}`);
-        if (el) el.innerHTML = _renderDwForNode(exchange.toLowerCase());
+        const exchangeKey = normalizeDwExchangeKey(exchange);
+        const networkKey = normalizeDwNetworkKey(network);
+        dwStatusCache[`${exchangeKey}:${networkKey}`] = status;
+        dwNetworkLabels[`${exchangeKey}:${networkKey}`] = network;
+        const el = document.getElementById(`dw_${exchangeKey}`);
+        if (el) el.innerHTML = _renderDwForNode(exchangeKey);
     }
 
     function renderConstellation(symbol) {
@@ -774,6 +799,7 @@
 
         for (const key in dwStatusCache) delete dwStatusCache[key];
         for (const key in hotBalanceCache) delete hotBalanceCache[key];
+        for (const key in dwNetworkLabels) delete dwNetworkLabels[key];
         renderConstellation(selectedSymbol);
     }
 
@@ -866,6 +892,7 @@
             document.getElementById('selectedSymbol').textContent = selectedSymbol;
             requestDexQuotes([selectedSymbol]);
             renderConstellation(selectedSymbol);
+            fetchDwStatus(selectedSymbol);
         });
 
         const searchInput = document.getElementById('coinSearchInput');
@@ -991,8 +1018,21 @@
                         updateListDisplay();
                     }
                     else if (data.type === 'market_summary') {
-                        renderConstellation(selectedSymbol);
-                        updateListDisplay();
+                        let touchedSelected = false;
+                        if (Array.isArray(data.data)) {
+                            for (const summary of data.data) {
+                                if (!summary || !Array.isArray(summary.entries)) continue;
+                                for (const entry of summary.entries) {
+                                    const source = entry.exchange || entry.source;
+                                    const processedSymbol = processSummaryEntry(summary, entry, source);
+                                    touchedSelected = processedSymbol === selectedSymbol || touchedSelected;
+                                }
+                            }
+                        }
+                        if (touchedSelected || marketData[selectedSymbol]) {
+                            renderConstellation(selectedSymbol);
+                            updateListDisplay();
+                        }
                     }
                     else if (data.type === 'forex') {
                         const d = data.data;
@@ -1015,11 +1055,39 @@
                             }
                         }
                     }
+                    function processSummaryEntry(summary, entry, source) {
+                        if (!summary?.base || !source || entry.price === undefined) return null;
+                        if (source === 'dex') return null;
+
+                        const symbol = summary.base;
+                        if (!marketWatchEligibleSymbols.has(symbol)) return null;
+
+                        if (!marketData[symbol]) {
+                            marketData[symbol] = {};
+                        }
+                        ensureMarketWatchItem(symbol);
+
+                        const existing = marketData[symbol][source] || {};
+                        marketData[symbol][source] = {
+                            ...existing,
+                            price: entry.price,
+                            volume: entry.volume || 0,
+                            change: entry.change_24h ?? existing.change,
+                            name: source,
+                            quote: summary.quote,
+                            updatedAtMs: Date.now()
+                        };
+
+                        return symbol;
+                    }
+
                     function processTickerPayload(data) {
                         // Unified NormalizedTicker format from sidecar
                         // Fields: exchange, base, quote, o, h, l, c, v_base, v_quote, timestamp_ms
                         const d = data.data;
                         if (!d || !d.base) return null;
+
+                        if (data.source === 'dex') return null;
 
                         const symbol = d.base; // Already normalized (e.g. "BTC")
                         const price = d.c;     // Close price (USD for KRW pairs)
@@ -1158,6 +1226,7 @@
                 selectedSymbol = item.dataset.symbol;
                 document.getElementById('selectedSymbol').textContent = selectedSymbol;
                 renderConstellation(selectedSymbol);
+                fetchDwStatus(selectedSymbol);
             });
         });
 
@@ -1195,6 +1264,7 @@
                     // Clear stale data from any previous session before fetching fresh state
                     for (const key in dwStatusCache) delete dwStatusCache[key];
                     for (const key in hotBalanceCache) delete hotBalanceCache[key];
+                    for (const key in dwNetworkLabels) delete dwNetworkLabels[key];
                     ddBtn.textContent = '← Exit Deep Dive';
                     ddBtn.style.backgroundColor = 'var(--neon-red)';
                     document.getElementById('dwServerStatus').style.display = 'flex';
@@ -1538,7 +1608,7 @@
 
                 // Update constellation node if ticker matches current view
                 if (payload.ticker === selectedSymbol) {
-                    const cacheKey = `${payload.exchange}:${payload.network}`;
+                    const cacheKey = `${normalizeDwExchangeKey(payload.exchange)}:${normalizeDwNetworkKey(payload.network)}`;
                     const prevStatus = dwStatusCache[cacheKey];
 
                     updateNodeDwStatus(payload.exchange, payload.network, payload.status);

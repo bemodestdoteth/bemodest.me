@@ -20,6 +20,8 @@ pub struct Config {
     pub forex_update_interval_sec: u64,
     pub market_cache_update_interval_sec: u64,
     pub korean_market_cache_update_interval_sec: u64,
+    pub alert_destination_tailscale_suffix: String,
+    pub alert_destination_allow_loopback_in_dev: bool,
     pub excludelist: Arc<RwLock<HashSet<String>>>,
     pub pinlist: Arc<RwLock<HashSet<String>>>,
     pub visibility: Arc<VisibilityCache>,
@@ -82,6 +84,14 @@ impl Config {
             .and_then(|s| SystemConfigNodeEnv::from_str(&s).ok())
             .unwrap_or(SystemConfigNodeEnv::Dev);
 
+        let collection_alert_destinations = env::var("COLLECTION_ALERT_DESTINATIONS")
+            .unwrap_or_else(|_| "alertDestinations".to_string());
+        let alert_destination_tailscale_suffix = env::var("ALERT_DESTINATION_TAILSCALE_SUFFIX")
+            .unwrap_or_else(|_| ".ts.net".to_string());
+        let alert_destination_allow_loopback_in_dev =
+            env::var("ALERT_DESTINATION_ALLOW_LOOPBACK_IN_DEV")
+                .unwrap_or_else(|_| "false".to_string());
+
         let inner = SystemConfig {
             port,
             api_port,
@@ -93,6 +103,7 @@ impl Config {
             dex_redis_channel: env::var("DEX_REDIS_CHANNEL")
                 .unwrap_or_else(|_| "dex_prices".to_string()),
             batching_duration_ms,
+            collection_alert_destinations,
             mongo_user: env::var("MONGO_USER").ok(),
             mongo_password: env::var("MONGO_PASSWORD").ok(),
             mongo_host: env::var("MONGO_HOST").ok(),
@@ -118,6 +129,8 @@ impl Config {
                 .ok()
                 .and_then(|s| s.parse().ok())
                 .unwrap_or(60);
+        let alert_destination_allow_loopback_in_dev =
+            alert_destination_allow_loopback_in_dev == "true";
 
         let excludelist_raw = env::var("EXCLUDELIST").unwrap_or_default();
         let excludelist_set = excludelist_raw
@@ -149,6 +162,8 @@ impl Config {
             forex_update_interval_sec,
             market_cache_update_interval_sec,
             korean_market_cache_update_interval_sec,
+            alert_destination_tailscale_suffix,
+            alert_destination_allow_loopback_in_dev,
             excludelist: Arc::new(RwLock::new(excludelist_set)),
             pinlist: Arc::new(RwLock::new(pinlist_set)),
             visibility: Arc::new(VisibilityCache::new()),

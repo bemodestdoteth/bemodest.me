@@ -1,0 +1,19 @@
+{"level":"warn","message":"[Premium] Failed to fetch entry target UPBIT_FOREX_URL is required","stack":"Error: UPBIT_FOREX_URL is required\n    at fetchUsdKrw (file:///mnt/870-evo-1/server-dev/bemodest.me/apps/api/src/modules/premium/service.js:183:11)\n    at getEntryTargetPct (file:///mnt/870-evo-1/server-dev/bemodest.me/apps/api/src/modules/premium/service.js:214:53)\n    at getPremiumCandles (file:///mnt/870-evo-1/server-dev/bemodest.me/apps/api/src/modules/premium/service.js:225:28)\n    at async file:///mnt/870-evo-1/server-dev/bemodest.me/[eval1]:17:14","timestamp":"2026-06-07 00:06:17"}
+{"level":"info","message":"Successfully connected to MongoDB","timestamp":"2026-06-15 10:14:31"}
+{"level":"info","message":"[DB] Shared MongoDB connection established","timestamp":"2026-06-15 10:14:31"}
+{"level":"info","message":"Connecting to Redis at data.bemodest.me:6380","timestamp":"2026-06-15 10:14:31"}
+{"level":"info","message":"Redis client connected","timestamp":"2026-06-15 10:14:31"}
+{"level":"info","message":"Connection to MongoDB closed","timestamp":"2026-06-15 10:14:31"}
+{"level":"info","message":"[DB] Shared MongoDB connection closed","timestamp":"2026-06-15 10:14:31"}
+{"level":"info","message":"Successfully connected to MongoDB","timestamp":"2026-06-15 13:16:19"}
+{"level":"info","message":"[DB] Shared MongoDB connection established","timestamp":"2026-06-15 13:16:19"}
+{"level":"info","message":"Connecting to Redis at data.bemodest.me:6380","timestamp":"2026-06-15 13:16:19"}
+{"level":"info","message":"Redis client connected","timestamp":"2026-06-15 13:16:19"}
+{"level":"info","message":"Connection to MongoDB closed","timestamp":"2026-06-15 13:16:19"}
+{"level":"info","message":"[DB] Shared MongoDB connection closed","timestamp":"2026-06-15 13:16:19"}
+{"level":"warn","message":"[Hynix] KIS token failed: KIS token request failed: 접근토큰 발급 잠시 후 다시 시도하세요(1분당 1회)","timestamp":"2026-06-15 23:45:34"}
+{"level":"warn","message":"[Hynix] KIS token failed: KIS token request failed: 접근토큰 발급 잠시 후 다시 시도하세요(1분당 1회)","timestamp":"2026-06-15 23:45:34"}
+{"level":"info","message":"Successfully connected to MongoDB","timestamp":"2026-06-16 11:33:07"}
+{"level":"info","message":"[DB] Shared MongoDB connection established","timestamp":"2026-06-16 11:33:07"}
+{"level":"info","message":"Successfully connected to MongoDB","timestamp":"2026-06-16 11:33:13"}
+{"level":"info","message":"[DB] Shared MongoDB connection established","timestamp":"2026-06-16 11:33:13"}

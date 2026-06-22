@@ -130,6 +130,13 @@ struct HyperliquidAsset {
     is_delisted: bool,
 }
 
+#[derive(Deserialize)]
+struct HyperliquidPerpDex {
+    name: String,
+}
+
+type HyperliquidPerpDexResponse = Vec<Option<HyperliquidPerpDex>>;
+
 use crate::types::ExchangeExt;
 
 const BINANCE_F_DEFAULT_MARKET_URL: &str = "https://fapi.binance.com/fapi/v1/exchangeInfo";
@@ -248,6 +255,13 @@ impl MarketCache {
     pub async fn get_hyperliquid_f_markets(&self) -> Vec<String> {
         self.get_markets_for_exchange(crate::types::Exchange::HyperliquidF)
             .await
+    }
+
+    #[cfg(test)]
+    pub async fn set_markets_for_test(&self, source: &str, markets: Vec<String>) {
+        if let Some(lock) = self.markets.get(source) {
+            *lock.write().await = markets;
+        }
     }
 
     pub async fn initial_fetch(cache: &Arc<Self>) {
@@ -475,9 +489,9 @@ impl MarketCache {
                 let resp: KrakenResponse = client.get(url).send().await?.json().await?;
                 Ok(resp
                     .result
-                    .into_iter()
-                    .filter(|(k, _)| k.ends_with("USD"))
-                    .map(|(_, v)| v.wsname)
+                    .into_values()
+                    .filter(|pair| pair.wsname.ends_with("/USD"))
+                    .map(|pair| pair.wsname)
                     .collect())
             }
             "kucoin" => {
@@ -508,22 +522,106 @@ impl MarketCache {
                     .map(|t| t.inst_id)
                     .collect())
             }
-            "hyperliquid_f" => {
-                let resp: HyperliquidMetaResponse = client
-                    .post(url)
-                    .json(&serde_json::json!({ "type": "meta" }))
-                    .send()
-                    .await?
-                    .json()
-                    .await?;
-                Ok(resp
-                    .universe
-                    .into_iter()
-                    .filter(|asset| !asset.is_delisted)
-                    .map(|asset| asset.name)
-                    .collect())
-            }
+            "hyperliquid_f" => fetch_hyperliquid_f_markets(client, url).await,
             _ => Err("Unknown source".into()),
         }
     }
+}
+
+fn hyperliquid_active_asset_names(resp: HyperliquidMetaResponse, dex: Option<&str>) -> Vec<String> {
+    resp.universe
+        .into_iter()
+        .filter(|asset| !asset.is_delisted)
+        .map(|asset| match dex {
+            Some(dex) if !asset.name.contains(':') => format!("{}:{}", dex, asset.name),
+            _ => asset.name,
+        })
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn hyperliquid_active_asset_names_qualifies_hip3_assets() {
+        let resp = HyperliquidMetaResponse {
+            universe: vec![
+                HyperliquidAsset {
+                    name: "SKHX".to_string(),
+                    is_delisted: false,
+                },
+                HyperliquidAsset {
+                    name: "DELISTED".to_string(),
+                    is_delisted: true,
+                },
+            ],
+        };
+
+        assert_eq!(hyperliquid_active_asset_names(resp, Some("xyz")), vec!["xyz:SKHX"]);
+    }
+
+    #[test]
+    fn hyperliquid_active_asset_names_keeps_core_assets_unqualified() {
+        let resp = HyperliquidMetaResponse {
+            universe: vec![HyperliquidAsset {
+                name: "BTC".to_string(),
+                is_delisted: false,
+            }],
+        };
+
+        assert_eq!(hyperliquid_active_asset_names(resp, None), vec!["BTC"]);
+    }
+
+    #[test]
+    fn hyperliquid_perp_dex_response_allows_null_default_dex() {
+        let dexes: HyperliquidPerpDexResponse = serde_json::from_value(serde_json::json!([
+            null,
+            { "name": "xyz" }
+        ]))
+        .unwrap();
+
+        let names: Vec<_> = dexes
+            .into_iter()
+            .flatten()
+            .map(|dex| dex.name)
+            .collect();
+
+        assert_eq!(names, vec!["xyz"]);
+    }
+}
+
+async fn fetch_hyperliquid_f_markets(
+    client: &reqwest::Client,
+    url: &str,
+) -> Result<Vec<String>, Box<dyn std::error::Error + Send + Sync>> {
+    let core: HyperliquidMetaResponse = client
+        .post(url)
+        .json(&serde_json::json!({ "type": "meta" }))
+        .send()
+        .await?
+        .json()
+        .await?;
+    let mut markets = hyperliquid_active_asset_names(core, None);
+
+    let dexes: HyperliquidPerpDexResponse = client
+        .post(url)
+        .json(&serde_json::json!({ "type": "perpDexs" }))
+        .send()
+        .await?
+        .json()
+        .await?;
+
+    for dex in dexes.into_iter().flatten() {
+        let resp: HyperliquidMetaResponse = client
+            .post(url)
+            .json(&serde_json::json!({ "type": "meta", "dex": dex.name.as_str() }))
+            .send()
+            .await?
+            .json()
+            .await?;
+        markets.extend(hyperliquid_active_asset_names(resp, Some(dex.name.as_str())));
+    }
+
+    Ok(markets)
 }

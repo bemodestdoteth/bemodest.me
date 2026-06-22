@@ -1,0 +1,63 @@
+{
+  "$ref": "#/definitions/AlertDestinationTemplate",
+  "definitions": {
+    "AlertDestinationTemplate": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "builtin_api_ingest",
+            "external_webhook"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "supported_alert_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "normal",
+              "urgent"
+            ]
+          },
+          "minItems": 1
+        },
+        "protected": {
+          "type": "boolean",
+          "default": false
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "_id",
+        "label",
+        "kind",
+        "url",
+        "supported_alert_types"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
