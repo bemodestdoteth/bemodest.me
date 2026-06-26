@@ -4,7 +4,7 @@ import test from 'node:test';
 process.env.JWT_SECRET = 'test-jwt-secret-with-at-least-32-chars';
 
 const { __test__ } = await import('./service.js');
-const { buildBatchCandleRequests, buildPremiumSeries, buildTargets, getRecommendedAction, validatePremiumRequest } = __test__;
+const { buildBatchCandleRequests, buildPremiumSeries, buildTargets, getRecommendedAction, notListedMessage, validatePremiumRequest } = __test__;
 
 function candle(time, close = 10) {
   return {
@@ -84,8 +84,8 @@ test('buildPremiumSeries emits only anchors with bounded previous matches', () =
 
 function premiumRequest(overrides = {}) {
   return {
-    koreanExchange: 'bithumb',
-    foreignExchange: 'bybit_f',
+    sourceExchange: 'bithumb',
+    counterpartExchange: 'bybit_f',
     symbol: 'btc',
     interval: '1m',
     lookbackBars: 500,
@@ -100,6 +100,19 @@ test('validatePremiumRequest preserves optional time range', () => {
   assert.equal(result.symbol, 'BTC');
   assert.equal(result.fromTime, 120);
   assert.equal(result.toTime, 240);
+});
+
+test('validatePremiumRequest accepts foreign spot source exchanges', () => {
+  const result = validatePremiumRequest(premiumRequest({ sourceExchange: 'binance' }));
+
+  assert.equal(result.sourceExchange, 'binance');
+});
+
+test('validatePremiumRequest rejects futures source exchanges', () => {
+  assert.throws(
+    () => validatePremiumRequest(premiumRequest({ sourceExchange: 'bybit_f' })),
+    /unsupported sourceExchange: bybit_f/,
+  );
 });
 
 test('validatePremiumRequest accepts toTime without fromTime for visible reload lookback', () => {
@@ -134,7 +147,7 @@ test('validatePremiumRequest rejects invalid time ranges', () => {
   );
 });
 
-test('buildBatchCandleRequests includes time range for all upstream entries', () => {
+test('buildBatchCandleRequests includes fx for KRW source exchanges', () => {
   const request = validatePremiumRequest(premiumRequest({ fromTime: 120, toTime: 240 }));
   const result = buildBatchCandleRequests(request);
 
@@ -143,13 +156,26 @@ test('buildBatchCandleRequests includes time range for all upstream entries', ()
   assert.deepEqual(result.map(item => item.toTime), [240, 240, 240]);
 });
 
-test('buildBatchCandleRequests forwards toTime-only visible reload cutoff', () => {
-  const request = validatePremiumRequest(premiumRequest({ toTime: 240 }));
+test('buildBatchCandleRequests omits fx for foreign spot source exchanges', () => {
+  const request = validatePremiumRequest(premiumRequest({ sourceExchange: 'binance', toTime: 240 }));
   const result = buildBatchCandleRequests(request);
 
-  assert.deepEqual(result.map(item => item.key), ['assetA', 'fx', 'assetB']);
-  assert.deepEqual(result.map(item => item.fromTime), [undefined, undefined, undefined]);
-  assert.deepEqual(result.map(item => item.toTime), [240, 240, 240]);
+  assert.deepEqual(result.map(item => item.key), ['assetA', 'assetB']);
+  assert.deepEqual(result.map(item => item.exchange), ['binance', 'bybit_f']);
+  assert.deepEqual(result.map(item => item.fromTime), [undefined, undefined]);
+  assert.deepEqual(result.map(item => item.toTime), [240, 240]);
+});
+
+test('notListedMessage does not attribute ambiguous foreign spot source failures to counterpart', () => {
+  const request = validatePremiumRequest(premiumRequest({ sourceExchange: 'binance', counterpartExchange: 'bybit_f' }));
+
+  assert.equal(notListedMessage(request, 'Code not found'), null);
+});
+
+test('notListedMessage attributes KRW source generic failures to counterpart', () => {
+  const request = validatePremiumRequest(premiumRequest({ counterpartExchange: 'bybit_f' }));
+
+  assert.equal(notListedMessage(request, 'Code not found'), 'BTC is not listed on Bybit Futures');
 });
 
 test('buildTargets compares latest premium spread against entry target', () => {

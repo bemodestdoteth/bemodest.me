@@ -61,15 +61,29 @@
 
         <section class="premium-controls">
             <label>
-                Korean
-                <select id="koreanExchange">
-                    <option value="bithumb">Bithumb</option>
-                    <option value="upbit">Upbit</option>
+                Source
+                <select id="sourceExchange">
+                    <optgroup label="KRW Spot">
+                        <option value="bithumb">Bithumb</option>
+                        <option value="upbit">Upbit</option>
+                    </optgroup>
+                    <optgroup label="USD/USDT Spot">
+                        <option value="binance">Binance Spot</option>
+                        <option value="bybit">Bybit Spot</option>
+                        <option value="bitget">Bitget Spot</option>
+                        <option value="mexc">MEXC Spot</option>
+                        <option value="gateio">Gate.io Spot</option>
+                        <option value="kucoin">KuCoin Spot</option>
+                        <option value="cryptocom">Crypto.com Spot</option>
+                        <option value="huobi">Huobi Spot</option>
+                        <option value="coinbase">Coinbase Spot</option>
+                        <option value="kraken">Kraken Spot</option>
+                    </optgroup>
                 </select>
             </label>
             <label>
-                Foreign
-                <select id="foreignExchange">
+                Counterpart
+                <select id="counterpartExchange">
                     <optgroup label="Spot">
                         <option value="binance">Binance Spot</option>
                         <option value="bybit">Bybit Spot</option>
@@ -147,11 +161,6 @@
             <div id="topChart" class="premium-chart"></div>
         </section>
 
-        <section id="recommendedActionCard" class="premium-action-card neutral" hidden>
-            <span>Recommended action</span>
-            <strong id="recommendedActionLabel">Neutral/Wait</strong>
-            <p id="recommendedActionDetail">Load Hyperliquid data to compare current USDT spread against target.</p>
-        </section>
 
         <section class="premium-chart-card">
             <div class="premium-chart-toolbar">

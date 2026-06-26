@@ -12,8 +12,11 @@ const INTERVAL_SECONDS = {
   '4h': 14400,
   '1d': 86400,
 };
-const SUPPORTED_KOREAN_EXCHANGES = new Set(['bithumb', 'upbit']);
-const FOREIGN_EXCHANGE_METADATA = {
+const KOREAN_SOURCE_EXCHANGE_METADATA = {
+  bithumb: { displayName: 'Bithumb', market: 'spot', quote: 'KRW' },
+  upbit: { displayName: 'Upbit', market: 'spot', quote: 'KRW' },
+};
+const FOREIGN_SPOT_EXCHANGE_METADATA = {
   binance: { displayName: 'Binance Spot', market: 'spot', quote: 'USDT' },
   bybit: { displayName: 'Bybit Spot', market: 'spot', quote: 'USDT' },
   bitget: { displayName: 'Bitget Spot', market: 'spot', quote: 'USDT' },
@@ -24,22 +27,29 @@ const FOREIGN_EXCHANGE_METADATA = {
   huobi: { displayName: 'Huobi Spot', market: 'spot', quote: 'USDT' },
   coinbase: { displayName: 'Coinbase Spot', market: 'spot', quote: 'USD' },
   kraken: { displayName: 'Kraken Spot', market: 'spot', quote: 'USD' },
+};
+const COUNTERPART_EXCHANGE_METADATA = {
+  ...FOREIGN_SPOT_EXCHANGE_METADATA,
   bybit_f: { displayName: 'Bybit Futures', market: 'futures', quote: 'USDT' },
   binance_f: { displayName: 'Binance Futures', market: 'futures', quote: 'USDT' },
   bitget_f: { displayName: 'Bitget Futures', market: 'futures', quote: 'USDT' },
   okx_f: { displayName: 'OKX Futures', market: 'futures', quote: 'USDT' },
   hyperliquid_f: { displayName: 'Hyperliquid Futures', market: 'futures', quote: 'USDT' },
 };
-const SUPPORTED_FOREIGN_EXCHANGES = new Set(Object.keys(FOREIGN_EXCHANGE_METADATA));
+const SOURCE_EXCHANGE_METADATA = {
+  ...KOREAN_SOURCE_EXCHANGE_METADATA,
+  ...FOREIGN_SPOT_EXCHANGE_METADATA,
+};
+const SUPPORTED_SOURCE_EXCHANGES = new Set(Object.keys(SOURCE_EXCHANGE_METADATA));
+const SUPPORTED_COUNTERPART_EXCHANGES = new Set(Object.keys(COUNTERPART_EXCHANGE_METADATA));
 const LOOKBACK_PRESETS = new Set([300, 500, 1000, 2000]);
 const MAX_LOOKBACK_BARS = 5000;
 const UPBIT_USDT_MARKET = 'KRW-USDT';
 const ENTRY_TARGET_CACHE_TTL_MS = 30000;
-const EXCHANGE_DISPLAY_NAMES = {
-  bithumb: 'Bithumb',
-  upbit: 'Upbit',
-  ...Object.fromEntries(Object.entries(FOREIGN_EXCHANGE_METADATA).map(([key, metadata]) => [key, metadata.displayName])),
-};
+const EXCHANGE_DISPLAY_NAMES = Object.fromEntries(
+  Object.entries({ ...SOURCE_EXCHANGE_METADATA, ...COUNTERPART_EXCHANGE_METADATA })
+    .map(([key, metadata]) => [key, metadata.displayName]),
+);
 
 let entryTargetCache = null;
 
@@ -91,8 +101,8 @@ export function validatePremiumRequest(body) {
     throw new Error('request body must be an object');
   }
 
-  const koreanExchange = requireString(body, 'koreanExchange');
-  const foreignExchange = requireString(body, 'foreignExchange');
+  const sourceExchange = requireString(body, 'sourceExchange');
+  const counterpartExchange = requireString(body, 'counterpartExchange');
   const symbol = requireString(body, 'symbol').toUpperCase();
   const interval = requireString(body, 'interval');
   const lookbackBars = parseLookbackBars(body);
@@ -101,11 +111,11 @@ export function validatePremiumRequest(body) {
     ? null
     : Number(body.exitTargetPct);
 
-  if (!SUPPORTED_KOREAN_EXCHANGES.has(koreanExchange)) {
-    throw new Error(`unsupported koreanExchange: ${koreanExchange}`);
+  if (!SUPPORTED_SOURCE_EXCHANGES.has(sourceExchange)) {
+    throw new Error(`unsupported sourceExchange: ${sourceExchange}`);
   }
-  if (!SUPPORTED_FOREIGN_EXCHANGES.has(foreignExchange)) {
-    throw new Error(`unsupported foreignExchange: ${foreignExchange}`);
+  if (!SUPPORTED_COUNTERPART_EXCHANGES.has(counterpartExchange)) {
+    throw new Error(`unsupported counterpartExchange: ${counterpartExchange}`);
   }
   if (!SUPPORTED_INTERVALS.has(interval)) {
     throw new Error(`unsupported interval: ${interval}`);
@@ -118,8 +128,8 @@ export function validatePremiumRequest(body) {
   }
 
   return {
-    koreanExchange,
-    foreignExchange,
+    sourceExchange,
+    counterpartExchange,
     symbol,
     interval,
     lookbackBars,
@@ -139,31 +149,37 @@ function buildBatchCandleRequestItem(request, item) {
 }
 
 function buildBatchCandleRequests(request) {
-  const foreignMetadata = FOREIGN_EXCHANGE_METADATA[request.foreignExchange];
-
-  return [
+  const sourceMetadata = SOURCE_EXCHANGE_METADATA[request.sourceExchange];
+  const counterpartMetadata = COUNTERPART_EXCHANGE_METADATA[request.counterpartExchange];
+  const requests = [
     buildBatchCandleRequestItem(request, {
       key: 'assetA',
-      exchange: request.koreanExchange,
-      market: 'spot',
+      exchange: request.sourceExchange,
+      market: sourceMetadata.market,
       symbol: request.symbol,
-      quote: 'KRW',
+      quote: sourceMetadata.quote,
     }),
-    buildBatchCandleRequestItem(request, {
+  ];
+
+  if (sourceMetadata.quote === 'KRW') {
+    requests.push(buildBatchCandleRequestItem(request, {
       key: 'fx',
-      exchange: request.koreanExchange,
+      exchange: request.sourceExchange,
       market: 'spot',
       symbol: 'USDT',
       quote: 'KRW',
-    }),
-    buildBatchCandleRequestItem(request, {
-      key: 'assetB',
-      exchange: request.foreignExchange,
-      market: foreignMetadata.market,
-      symbol: request.symbol,
-      quote: foreignMetadata.quote,
-    }),
-  ];
+    }));
+  }
+
+  requests.push(buildBatchCandleRequestItem(request, {
+    key: 'assetB',
+    exchange: request.counterpartExchange,
+    market: counterpartMetadata.market,
+    symbol: request.symbol,
+    quote: counterpartMetadata.quote,
+  }));
+
+  return requests;
 }
 
 async function fetchBatchCandles(request) {
@@ -234,8 +250,12 @@ function findNearestPreviousCandle(index, anchorTime, maxDriftSeconds) {
   return candle;
 }
 
-function premiumValue(assetKrw, fxKrw, referenceUsdt) {
-  return ((assetKrw / fxKrw - referenceUsdt) / referenceUsdt) * 100;
+function premiumValue(sourceValue, referenceValue) {
+  return ((sourceValue - referenceValue) / referenceValue) * 100;
+}
+
+function sourceValue(candleValue, fxCandleValue) {
+  return fxCandleValue === null ? candleValue : candleValue / fxCandleValue;
 }
 
 function buildPremiumSeries(assetA, fx, assetB, interval) {
@@ -244,7 +264,7 @@ function buildPremiumSeries(assetA, fx, assetB, interval) {
     throw new Error(`unsupported interval: ${interval}`);
   }
 
-  const fxIndex = timeIndex(fx.candles);
+  const fxIndex = fx ? timeIndex(fx.candles) : null;
   const assetBIndex = timeIndex(assetB.candles);
   const premiumCandles = [];
   const premiumLine = [];
@@ -252,18 +272,18 @@ function buildPremiumSeries(assetA, fx, assetB, interval) {
   const topAssetB = [];
 
   for (const a of assetA.candles) {
-    const fxCandle = findNearestPreviousCandle(fxIndex, a.time, maxDriftSeconds);
+    const fxCandle = fxIndex ? findNearestPreviousCandle(fxIndex, a.time, maxDriftSeconds) : null;
     const b = findNearestPreviousCandle(assetBIndex, a.time, maxDriftSeconds);
-    if (!fxCandle || !b) {
+    if ((fxIndex && !fxCandle) || !b) {
       continue;
     }
 
     const premiumCandle = {
       time: a.time,
-      open: premiumValue(a.open, fxCandle.open, b.open),
-      high: premiumValue(a.high, fxCandle.high, b.high),
-      low: premiumValue(a.low, fxCandle.low, b.low),
-      close: premiumValue(a.close, fxCandle.close, b.close),
+      open: premiumValue(sourceValue(a.open, fxCandle?.open ?? null), b.open),
+      high: premiumValue(sourceValue(a.high, fxCandle?.high ?? null), b.high),
+      low: premiumValue(sourceValue(a.low, fxCandle?.low ?? null), b.low),
+      close: premiumValue(sourceValue(a.close, fxCandle?.close ?? null), b.close),
     };
 
     premiumCandles.push(premiumCandle);
@@ -293,15 +313,16 @@ function notListedMessage(request, upstreamMessage) {
   }
 
   if (upstreamMessage.includes('Upbit get_ohlcv')) {
-    return `${request.symbol} is not listed on ${formatExchangeName(request.koreanExchange)}`;
+    return `${request.symbol} is not listed on ${formatExchangeName(request.sourceExchange)}`;
   }
 
   if (upstreamMessage.includes('Bithumb get_ohlcv')) {
-    return `${request.symbol} is not listed on ${formatExchangeName(request.koreanExchange)}`;
+    return `${request.symbol} is not listed on ${formatExchangeName(request.sourceExchange)}`;
   }
 
-  if (SUPPORTED_FOREIGN_EXCHANGES.has(request.foreignExchange)) {
-    return `${request.symbol} is not listed on ${formatExchangeName(request.foreignExchange)}`;
+  const sourceMetadata = SOURCE_EXCHANGE_METADATA[request.sourceExchange];
+  if (sourceMetadata?.quote === 'KRW') {
+    return `${request.symbol} is not listed on ${formatExchangeName(request.counterpartExchange)}`;
   }
 
   return null;
@@ -409,6 +430,7 @@ export const __test__ = {
   buildTargets,
   findNearestPreviousCandle,
   getRecommendedAction,
+  notListedMessage,
   timeIndex,
   validatePremiumRequest,
 };
@@ -416,7 +438,7 @@ export const __test__ = {
 export async function getPremiumCandles(body) {
   const request = validatePremiumRequest(body);
   const results = await fetchBatchCandles(request);
-  const series = buildPremiumSeries(results.assetA, results.fx, results.assetB, request.interval);
+  const series = buildPremiumSeries(results.assetA, results.fx ?? null, results.assetB, request.interval);
   let targetSnapshot = null;
   try {
     targetSnapshot = await getEntryTargetSnapshot();

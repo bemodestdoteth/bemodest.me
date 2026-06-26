@@ -110,9 +110,11 @@ function syncChartTimeScales() {
     let syncing = false;
 
     const syncRange = targetChart => range => {
-        if (syncing || !range) return;
+        const from = Number(range?.from);
+        const to = Number(range?.to);
+        if (syncing || !topSeries.assetA || !premiumSeries.premium || !Number.isFinite(from) || !Number.isFinite(to) || from >= to) return;
         syncing = true;
-        targetChart.timeScale().setVisibleRange(range);
+        targetChart.timeScale().setVisibleRange({ from, to });
         syncing = false;
     };
 
@@ -230,42 +232,33 @@ function renderTargets() {
 
     entryEl.textContent = Number.isFinite(entryTargetPct) ? formatPercent(entryTargetPct) : '--';
     exitEl.textContent = Number.isFinite(exitTargetPct) ? formatPercent(exitTargetPct) : 'Manual';
-    renderRecommendedAction();
-}
-
-function renderRecommendedAction() {
-    const cardEl = document.getElementById('recommendedActionCard');
-    const labelEl = document.getElementById('recommendedActionLabel');
-    const detailEl = document.getElementById('recommendedActionDetail');
-    const action = latestData.targets.recommendedAction;
-
-    if (!action) {
-        cardEl.hidden = true;
-        cardEl.className = 'premium-action-card neutral';
-        labelEl.textContent = 'Neutral/Wait';
-        detailEl.textContent = 'USDT spread or target is unavailable.';
-        return;
-    }
-
-    const current = Number.isFinite(latestData.targets.currentUsdtSpreadPct)
-        ? formatPercent(latestData.targets.currentUsdtSpreadPct)
-        : '--';
-    const target = Number.isFinite(latestData.targets.entryTargetPct)
-        ? formatPercent(latestData.targets.entryTargetPct)
-        : '--';
-    const delta = Number.isFinite(action.deltaPct) ? formatPercent(action.deltaPct) : '--';
-
-    cardEl.hidden = false;
-    cardEl.className = `premium-action-card ${action.status}`;
-    labelEl.textContent = action.label;
-    detailEl.textContent = `${action.detail} Current: ${current}, target: ${target}, delta: ${delta}.`;
 }
 
 function renderPremiumTitle() {
     const titleEl = document.getElementById('premiumChartTitle');
-    titleEl.textContent = latestData.request.foreignExchange === 'hyperliquid_f'
+    titleEl.textContent = latestData.request.counterpartExchange === 'hyperliquid_f'
         ? 'USD Spread vs Hyperliquid'
         : 'Premium %';
+}
+
+function isFiniteChartNumber(value) {
+    return Number.isFinite(value);
+}
+
+function validLinePoint(point) {
+    return isFiniteChartNumber(point.time) && isFiniteChartNumber(point.value);
+}
+
+function validCandle(candle) {
+    return isFiniteChartNumber(candle.time)
+        && isFiniteChartNumber(candle.open)
+        && isFiniteChartNumber(candle.high)
+        && isFiniteChartNumber(candle.low)
+        && isFiniteChartNumber(candle.close);
+}
+
+function toLinePoint(candle) {
+    return { time: candle.time, value: candle.close };
 }
 
 function renderTopChart(mode) {
@@ -273,17 +266,17 @@ function renderTopChart(mode) {
     topSeries = {};
 
     if (mode === 'line') {
-        topSeries.assetA = topChart.addLineSeries({ color: SERIES_COLORS.assetA, title: 'Korean spot', priceScaleId: 'right' });
-        topSeries.assetB = topChart.addLineSeries({ color: SERIES_COLORS.assetB, title: 'Foreign futures', priceScaleId: 'left' });
-        topSeries.assetA.setData(latestData.top.assetA.map(c => ({ time: c.time, value: c.close })));
-        topSeries.assetB.setData(latestData.top.assetB.map(c => ({ time: c.time, value: c.close })));
+        topSeries.assetA = topChart.addLineSeries({ color: SERIES_COLORS.assetA, title: 'Source', priceScaleId: 'right' });
+        topSeries.assetB = topChart.addLineSeries({ color: SERIES_COLORS.assetB, title: 'Counterpart', priceScaleId: 'left' });
+        topSeries.assetA.setData(latestData.top.assetA.map(toLinePoint).filter(validLinePoint));
+        topSeries.assetB.setData(latestData.top.assetB.map(toLinePoint).filter(validLinePoint));
         return;
     }
 
-    topSeries.assetA = topChart.addCandlestickSeries({ upColor: '#26a69a', downColor: '#ef5350', title: 'Korean spot', priceScaleId: 'right' });
-    topSeries.assetB = topChart.addCandlestickSeries({ upColor: '#64b5f6', downColor: '#ffb74d', title: 'Foreign futures', priceScaleId: 'left' });
-    topSeries.assetA.setData(latestData.top.assetA);
-    topSeries.assetB.setData(latestData.top.assetB);
+    topSeries.assetA = topChart.addCandlestickSeries({ upColor: '#26a69a', downColor: '#ef5350', title: 'Source', priceScaleId: 'right' });
+    topSeries.assetB = topChart.addCandlestickSeries({ upColor: '#64b5f6', downColor: '#ffb74d', title: 'Counterpart', priceScaleId: 'left' });
+    topSeries.assetA.setData(latestData.top.assetA.filter(validCandle));
+    topSeries.assetB.setData(latestData.top.assetB.filter(validCandle));
 }
 
 function renderPremiumChart(mode) {
@@ -291,14 +284,14 @@ function renderPremiumChart(mode) {
     if (premiumSeries.premium) premiumChart.removeSeries(premiumSeries.premium);
     premiumSeries = {};
 
-    const title = latestData.request.foreignExchange === 'hyperliquid_f' ? 'USD Spread vs Hyperliquid' : 'Premium %';
+    const title = latestData.request.counterpartExchange === 'hyperliquid_f' ? 'USD Spread vs Hyperliquid' : 'Premium %';
 
     if (mode === 'line') {
         premiumSeries.premium = premiumChart.addLineSeries({ color: SERIES_COLORS.premium, title });
-        premiumSeries.premium.setData(latestData.premium.line);
+        premiumSeries.premium.setData(latestData.premium.line.filter(validLinePoint));
     } else {
         premiumSeries.premium = premiumChart.addCandlestickSeries({ upColor: '#26a69a', downColor: '#ef5350', title });
-        premiumSeries.premium.setData(latestData.premium.candles);
+        premiumSeries.premium.setData(latestData.premium.candles.filter(validCandle));
     }
 
     renderZeroLine();
@@ -345,7 +338,7 @@ function renderTargetLines() {
 }
 
 function premiumRequestLabel(body) {
-    return `${body.symbol} ${body.interval} ${body.koreanExchange}/${body.foreignExchange} lookback=${body.lookbackBars}`;
+    return `${body.symbol} ${body.interval} ${body.sourceExchange}/${body.counterpartExchange} lookback=${body.lookbackBars}`;
 }
 
 async function parsePremiumResponse(response) {
@@ -382,8 +375,8 @@ function premiumErrorMessage(error, body) {
 function buildPremiumRequestBody() {
     const exitTargetRaw = document.getElementById('exitTargetPct').value;
     return {
-        koreanExchange: document.getElementById('koreanExchange').value,
-        foreignExchange: document.getElementById('foreignExchange').value,
+        sourceExchange: document.getElementById('sourceExchange').value,
+        counterpartExchange: document.getElementById('counterpartExchange').value,
         symbol: document.getElementById('symbol').value.trim().toUpperCase(),
         interval: document.getElementById('interval').value,
         lookbackBars: Number(document.getElementById('lookbackBars').value),
