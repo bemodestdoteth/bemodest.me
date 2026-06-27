@@ -23,7 +23,7 @@
     "@bemodest/database": "workspace:*",
     "@bemodest/types": "workspace:*",
     "@bemodest/utils": "workspace:*",
-    "@my-exchanges/core": "file:../../../my_exchanges_ts/core",
+    "@bemodest/core": "workspace:*",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { validateApiConfig } from '@bemodest/config';
 import { getDBClient } from '@bemodest/database';
 import { logger } from '@bemodest/utils';
-import { decodeSecret } from '@my-exchanges/core';
+import { decodeSecret } from '@bemodest/core';
 
 const config = validateApiConfig();
 let hynixTestOverrides = null;
