@@ -33,6 +33,7 @@ const ApiConfigSchema = SystemConfigSchema.extend({
   COLLECTION_ALERT_RULES: z.string().default('alertRules'),
   COLLECTION_ALERT_DESTINATIONS: z.string().default('alertDestinations'),
   COLLECTION_ALERT_LOGS: z.string().default('alertLogs'),
+  COLLECTION_CHAIN_FORWARD_REQUESTS: z.string().default('chainForwardRequests'),
   COLLECTION_FUTURES_POSITIONS: z.string().default('futuresPositions'),
   COLLECTION_CONTRACT_MAPPINGS: z.string().default('coingeckoContractMappings'),
   MONGODB_MAX_TIME_MS: z.string().default('30000'),

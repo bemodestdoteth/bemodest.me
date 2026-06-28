@@ -1,6 +1,6 @@
 import { logger } from '@bemodest/utils';
 import { encodeDbPassword } from '@bemodest/config';
-import { MongoClient, Db, Collection, FindOptions, UpdateFilter, Filter, AggregateOptions, IndexSpecification, CreateIndexesOptions } from 'mongodb';
+import { MongoClient, Db, FindOptions, UpdateFilter, Filter, IndexSpecification, CreateIndexesOptions, FindOneAndUpdateOptions, Document } from 'mongodb';
 import * as fs from 'node:fs/promises';
 
 
@@ -126,6 +126,23 @@ export class MongoDBClient {
             return result;
         } catch (error) {
             logger.error('Error updating document:', error);
+            throw error;
+        }
+    }
+
+    async findOneAndUpdate(
+        collectionName: string,
+        query: Filter<any>,
+        update: UpdateFilter<any> | Document[],
+        options: FindOneAndUpdateOptions = {}
+    ): Promise<any | null> {
+        try {
+            this._ensureConnected();
+            const collection = this.database!.collection(collectionName);
+            const document = await collection.findOneAndUpdate(query, update, { ...options, maxTimeMS: this.maxTimeMS });
+            return document;
+        } catch (error) {
+            logger.error('Error finding and updating document:', error);
             throw error;
         }
     }

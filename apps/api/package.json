@@ -13,6 +13,7 @@
     "test:websocket": "node --env-file=.env.dev src/scripts/test-websocket.js",
     "test:premium": "node --test src/modules/premium/service.test.js",
     "test:hynix": "node --test src/modules/hynix/service.test.js",
+    "test:chain-forward": "node --test src/modules/chain-forward/service.test.js",
     "verify:password": "node --env-file=.env.dev src/scripts/verify-password.js"
   },
   "author": "",
