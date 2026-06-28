@@ -1,5 +1,5 @@
 /**
- * HTTP request utilities with retry logic for my_exchanges library.
+ * HTTP request utilities with retry logic for @bemodest/core.
  *
  * Provides rate limiting (TokenBucket), encryption helpers, and retry-enabled
  * HTTP request functions using native fetch.

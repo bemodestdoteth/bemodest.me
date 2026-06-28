@@ -1,5 +1,5 @@
 /**
- * Centralized HTTP session management for my_exchanges library.
+ * Centralized HTTP session management for @bemodest/core.
  *
  * Provides singleton session managers with connection pooling,
  * proper lifecycle management, and configuration integration.

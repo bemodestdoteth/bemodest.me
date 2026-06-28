@@ -1,4 +1,4 @@
-/** MongoDB client for my_exchanges library.
+/** MongoDB client for @bemodest/core.
  *
  * Asynchronous wrapper around the native mongodb driver with connection retries,
  * singleton pattern, and Fernet-encrypted credential support.

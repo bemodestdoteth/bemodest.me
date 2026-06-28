@@ -1,5 +1,5 @@
 /**
- * Logging infrastructure for my_exchanges library.
+ * Logging infrastructure for @bemodest/core.
  *
  * Provides standardized pino configuration with file rotation,
  * console output, and intercept handler for standard library logging.

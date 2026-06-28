@@ -1,4 +1,4 @@
-/** Redis client for my_exchanges library.
+/** Redis client for @bemodest/core.
  *
  * Provides a singleton ioredis client configured from environment variables.
  */

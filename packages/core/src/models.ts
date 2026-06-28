@@ -59,6 +59,7 @@ export const EvmChainConfigSchema = z.object({
   wsRpc: z.array(z.string().url()).optional(),
   blockExplorerPrefix: z.string().optional(),
   forwarding: EvmChainForwardingSchema,
+  annotation: z.record(z.union([z.string(), z.record(z.unknown())])).optional(),
 });
 
 export type EvmChainConfig = z.infer<typeof EvmChainConfigSchema>;
