@@ -1,4 +1,5 @@
-import { JsonRpcProvider, Contract } from "ethers";
+import { createPublicClient, defineChain, formatEther, formatUnits, http, parseAbi } from "viem";
+import type { Address, Chain } from "viem";
 import { Connection, PublicKey } from "@solana/web3.js";
 import {
   getAssociatedTokenAddressSync,
@@ -9,10 +10,39 @@ import { SuiClient } from "@mysten/sui/client";
 import { StargateClient } from "@cosmjs/stargate";
 import { getChainTypeFromCAIP2, getEipChainId } from "./chains";
 
-const ERC20_ABI = [
+const ERC20_ABI = parseAbi([
   "function balanceOf(address) view returns (uint256)",
   "function decimals() view returns (uint8)",
-];
+]);
+
+function defineRpcChain(chainId: number, rpcUrl: string): Chain {
+  return defineChain({
+    id: chainId,
+    name: `EIP-155 ${chainId}`,
+    nativeCurrency: {
+      decimals: 18,
+      name: "Ether",
+      symbol: "ETH",
+    },
+    rpcUrls: {
+      default: {
+        http: [rpcUrl],
+      },
+    },
+  });
+}
+
+function createEvmClient(caip2Id: string, rpcUrl: string) {
+  const chainId = getEipChainId(caip2Id);
+  return createPublicClient({
+    chain: chainId === null ? undefined : defineRpcChain(chainId, rpcUrl),
+    transport: http(rpcUrl),
+  });
+}
+
+async function retryDelay(attempt: number): Promise<void> {
+  await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
+}
 
 export async function evmBalanceUsd(
   addr: string,
@@ -23,20 +53,24 @@ export async function evmBalanceUsd(
   attempt: number = 1,
 ): Promise<number | null> {
   try {
-    const chainId = getEipChainId(caip2Id);
-    const provider = new JsonRpcProvider(rpcUrl, chainId ?? undefined, {
-      staticNetwork: true,
-    });
-    const contract = new Contract(contractAddr, ERC20_ABI, provider);
+    const client = createEvmClient(caip2Id, rpcUrl);
     const [raw, decimals] = await Promise.all([
-      contract.balanceOf(addr),
-      contract.decimals(),
+      client.readContract({
+        address: contractAddr as Address,
+        abi: ERC20_ABI,
+        functionName: "balanceOf",
+        args: [addr as Address],
+      }),
+      client.readContract({
+        address: contractAddr as Address,
+        abi: ERC20_ABI,
+        functionName: "decimals",
+      }),
     ]);
-    const amount = Number(raw) / 10 ** Number(decimals);
-    return amount * price;
-  } catch (err) {
+    return Number(formatUnits(raw, decimals)) * price;
+  } catch {
     if (attempt < 3) {
-      await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
+      await retryDelay(attempt);
       return await evmBalanceUsd(
         addr,
         caip2Id,
@@ -58,16 +92,12 @@ export async function evmNativeBalanceUsd(
   attempt: number = 1,
 ): Promise<number | null> {
   try {
-    const chainId = getEipChainId(caip2Id);
-    const provider = new JsonRpcProvider(rpcUrl, chainId ?? undefined, {
-      staticNetwork: true,
-    });
-    const raw = await provider.getBalance(addr);
-    const amount = Number(raw) / 1e18;
-    return amount * price;
-  } catch (err) {
+    const client = createEvmClient(caip2Id, rpcUrl);
+    const raw = await client.getBalance({ address: addr as Address });
+    return Number(formatEther(raw)) * price;
+  } catch {
     if (attempt < 3) {
-      await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
+      await retryDelay(attempt);
       return await evmNativeBalanceUsd(
         addr,
         caip2Id,
@@ -167,8 +197,9 @@ export async function solanaBalanceUsd(
       `[solanaBalanceUsd] Total SPL token amount: ${amount} | Total value: ${amount * price} USD`,
     );
     return amount * price;
-  } catch (err: any) {
-    console.error(`[solanaBalanceUsd] Error on attempt ${attempt} (rpc: ${rpcUrl}):`, err);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[solanaBalanceUsd] Error on attempt %d (rpc: %s): %s", attempt, rpcUrl, message);
     if (attempt < 3) {
       await new Promise((r) => setTimeout(r, 1000 * Math.pow(2, attempt - 1)));
       return await solanaBalanceUsd(

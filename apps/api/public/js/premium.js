@@ -372,9 +372,45 @@ function premiumErrorMessage(error, body) {
     return `Failed to load premium candles (${premiumRequestLabel(body)}): ${error.message}`;
 }
 
-function buildPremiumRequestBody() {
+function parseDateEnd(value) {
+    if (value === '') return null;
+
+    const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(value);
+    if (!match) throw new Error('Date End must be selected with the calendar date/time picker.');
+
+    const [, yearRaw, monthRaw, dayRaw, hourRaw, minuteRaw] = match;
+    const year = Number(yearRaw);
+    const month = Number(monthRaw);
+    const day = Number(dayRaw);
+    const hour = Number(hourRaw);
+    const minute = Number(minuteRaw);
+
+    if (month < 1 || month > 12 || day < 1 || day > 31 || hour > 23 || minute > 59) {
+        throw new Error('Date End has an out-of-range date or time value.');
+    }
+
+    const date = new Date(year, month - 1, day, hour, minute, 0, 0);
+    if (date.getFullYear() !== year
+        || date.getMonth() !== month - 1
+        || date.getDate() !== day
+        || date.getHours() !== hour
+        || date.getMinutes() !== minute) {
+        throw new Error('Date End is not a valid local date and time.');
+    }
+
+    return Math.floor(date.getTime() / 1000);
+}
+
+function premiumFormError(message) {
+    const statusEl = document.getElementById('premiumStatus');
+    statusEl.classList.add('error');
+    statusEl.textContent = message;
+}
+
+function buildPremiumRequestBody(options = {}) {
+    const { includeDateEnd = true } = options;
     const exitTargetRaw = document.getElementById('exitTargetPct').value;
-    return {
+    const body = {
         sourceExchange: document.getElementById('sourceExchange').value,
         counterpartExchange: document.getElementById('counterpartExchange').value,
         symbol: document.getElementById('symbol').value.trim().toUpperCase(),
@@ -382,6 +418,13 @@ function buildPremiumRequestBody() {
         lookbackBars: Number(document.getElementById('lookbackBars').value),
         exitTargetPct: exitTargetRaw === '' ? null : Number(exitTargetRaw),
     };
+
+    if (includeDateEnd) {
+        const toTime = parseDateEnd(document.getElementById('dateEnd').value);
+        if (toTime !== null) body.toTime = toTime;
+    }
+
+    return body;
 }
 
 function requestPremiumCandles(body, options = {}) {
@@ -425,7 +468,11 @@ function requestPremiumCandles(body, options = {}) {
 }
 
 function loadPremiumCandles() {
-    requestPremiumCandles(buildPremiumRequestBody());
+    try {
+        requestPremiumCandles(buildPremiumRequestBody());
+    } catch (err) {
+        premiumFormError(err.message);
+    }
 }
 
 function reloadPremiumCandlesFromVisibleRange() {
@@ -433,7 +480,7 @@ function reloadPremiumCandlesFromVisibleRange() {
     if (!visibleRange) return;
 
     requestPremiumCandles({
-        ...buildPremiumRequestBody(),
+        ...buildPremiumRequestBody({ includeDateEnd: false }),
         toTime: Math.ceil(visibleRange.to),
     }, { visibleRange });
 }

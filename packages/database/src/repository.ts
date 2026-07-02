@@ -24,8 +24,7 @@ export abstract class GenericRepository<T extends Document, S extends z.ZodType<
 
     protected async getCollection(): Promise<Collection<T>> {
         const client = await getDBClient();
-        // @ts-ignore - access private database for repo use
-        return client.database!.collection<T>(this.collectionName);
+        return client.getCollection<T>(this.collectionName);
     }
 
     async findOne(filter: Filter<T>, options?: FindOptions): Promise<T | null> {

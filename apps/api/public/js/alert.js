@@ -498,7 +498,7 @@ async function resetDestination(id, destinationId) {
 async function showDestinationPrompt(destination = null) {
     const label = prompt('Destination label', destination?.label || 'External webhook');
     if (!label) return;
-    const url = prompt('Destination URL', destination?.url || 'https://alerts.example.ts.net/hooks/price-spike');
+    const url = prompt('Destination URL', destination?.url || 'http://dev.bemodest.me:25832/hooks/price-spike');
     if (!url) return;
     const normal = confirm('Deliver normal alerts to this destination?');
     const urgent = confirm('Deliver urgent alerts to this destination?');

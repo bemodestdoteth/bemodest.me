@@ -1,6 +1,6 @@
 import { validateApiConfig } from '@bemodest/config';
 const { COLLECTION_ADDRS } = validateApiConfig();
-import { JsonRpcProvider, FetchRequest } from 'ethers';
+import { createPublicClient, defineChain, formatEther, http } from 'viem';
 import { MongoDBClient } from '@bemodest/database';
 import { logger } from '@bemodest/utils';
 import { initRpcManager, getRpcUrl, reportRpcFailure } from '../utils/rpc.js';
@@ -19,6 +19,30 @@ const CUTOFF_TIMESTAMP_S = Math.floor(new Date(CUTOFF_DATE).getTime() / 1_000);
 const ETHERSCAN_DELAY_MS = 250; // ~4 req/s — well within free-tier 5 req/s limit
 const MAX_ETH_RPC_ATTEMPTS = 3;
 const RPC_TIMEOUT_MS = 5_000;
+
+function targetChainId() {
+    const raw = CHAIN_FILTER.split(':')[1];
+    const chainId = Number.parseInt(raw || '1', 10);
+    return Number.isFinite(chainId) ? chainId : 1;
+}
+
+function defineTargetChain(rpcUrl) {
+    const chainId = targetChainId();
+    return defineChain({
+        id: chainId,
+        name: `EIP-155 ${chainId}`,
+        nativeCurrency: {
+            decimals: 18,
+            name: 'Ether',
+            symbol: 'ETH',
+        },
+        rpcUrls: {
+            default: {
+                http: [rpcUrl],
+            },
+        },
+    });
+}
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -39,14 +63,12 @@ async function fetchEthBalance(addr, attempt = 1) {
         return 0;
     }
     try {
-        // Ethers v6: JsonRpcProvider tries to detect network by default which can cause infinite retry loops.
-        // We use staticNetwork: true to bypass detection and FetchRequest to add a timeout.
-        const req = new FetchRequest(rpcUrl);
-        req.timeout = RPC_TIMEOUT_MS;
-
-        const provider = new JsonRpcProvider(req, 1, { staticNetwork: true });
-        const raw = await provider.getBalance(addr);
-        return Number(raw) / 1e18;
+        const client = createPublicClient({
+            chain: defineTargetChain(rpcUrl),
+            transport: http(rpcUrl, { timeout: RPC_TIMEOUT_MS }),
+        });
+        const raw = await client.getBalance({ address: addr });
+        return Number(formatEther(raw));
     } catch (/** @type {any} */ err) {
         reportRpcFailure(rpcUrl);
 

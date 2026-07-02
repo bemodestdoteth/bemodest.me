@@ -17,3 +17,15 @@
 {"level":"info","message":"[DB] Shared MongoDB connection established","timestamp":"2026-06-16 11:33:07"}
 {"level":"info","message":"Successfully connected to MongoDB","timestamp":"2026-06-16 11:33:13"}
 {"level":"info","message":"[DB] Shared MongoDB connection established","timestamp":"2026-06-16 11:33:13"}
+{"level":"info","message":"Successfully connected to MongoDB","timestamp":"2026-06-28 06:44:30"}
+{"level":"info","message":"[DB] Shared MongoDB connection established","timestamp":"2026-06-28 06:44:30"}
+{"level":"info","message":"Connection to MongoDB closed","timestamp":"2026-06-28 06:44:30"}
+{"level":"info","message":"[DB] Shared MongoDB connection closed","timestamp":"2026-06-28 06:44:30"}
+{"level":"info","message":"Successfully connected to MongoDB","timestamp":"2026-06-28 06:47:07"}
+{"level":"info","message":"[DB] Shared MongoDB connection established","timestamp":"2026-06-28 06:47:07"}
+{"level":"info","message":"Connection to MongoDB closed","timestamp":"2026-06-28 06:47:07"}
+{"level":"info","message":"[DB] Shared MongoDB connection closed","timestamp":"2026-06-28 06:47:07"}
+{"level":"info","message":"Successfully connected to MongoDB","timestamp":"2026-06-28 06:47:08"}
+{"level":"info","message":"[DB] Shared MongoDB connection established","timestamp":"2026-06-28 06:47:08"}
+{"level":"info","message":"Connection to MongoDB closed","timestamp":"2026-06-28 06:47:08"}
+{"level":"info","message":"[DB] Shared MongoDB connection closed","timestamp":"2026-06-28 06:47:08"}

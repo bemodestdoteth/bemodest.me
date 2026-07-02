@@ -14,7 +14,7 @@ Destination templates use a stable `_id`, `label`, `kind`, `url`, `enabled`, `su
 Supported kinds:
 
 - `builtin_api_ingest`: protected built-in API destination, supports `normal` and `urgent`, and is never marked dead by migration. The built-in API receiver is `POST /api/alert-events/ingest`; the local default URL is `http://127.0.0.1:${PORT}/api/alert-events/ingest`.
-- `external_webhook`: external webhook destination, defaults to `normal` and `urgent` support and preserves existing enabled/dead state during migration. External URLs must point to a real receiver service, typically an allowed HTTPS `.ts.net` endpoint such as `/hooks/new-entry` or `/hooks/price-spike`.
+- `external_webhook`: external webhook destination, defaults to `normal` and `urgent` support and preserves existing enabled/dead state during migration. External URLs must point to a real receiver service, typically an allowed HTTP/HTTPS `.bemodest.me` endpoint such as `/hooks/new-entry` or `/hooks/price-spike`.
 
 `/api/alerts/fired` is legacy/stale and must not be used. `WEBHOOK_URL` is deprecated and rejected by API config validation.
 

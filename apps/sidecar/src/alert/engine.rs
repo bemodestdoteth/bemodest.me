@@ -930,7 +930,19 @@ fn is_allowed_destination_url(url: &str, config: &Config) -> bool {
             && config.alert_destination_allow_loopback_in_dev;
     }
 
-    parsed.scheme() == "https" && host.ends_with(&config.alert_destination_tailscale_suffix)
+    matches!(parsed.scheme(), "http" | "https")
+        && host_matches_alert_suffix(host, &config.alert_destination_tailscale_suffix)
+}
+
+fn host_matches_alert_suffix(host: &str, suffix: &str) -> bool {
+    let suffix = suffix.trim();
+    if suffix.is_empty() {
+        return false;
+    }
+    if suffix.starts_with('.') {
+        return host.ends_with(suffix) && host.len() > suffix.len();
+    }
+    host == suffix || host.ends_with(&format!(".{suffix}"))
 }
 
 fn classify_alert_type(rule: &RuntimeAlertRule, metric_value: f64) -> Option<(AlertType, f64)> {

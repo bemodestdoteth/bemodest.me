@@ -588,6 +588,13 @@ const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost']);
 const ALERT_DESTINATION_TAILSCALE_SUFFIX = process.env.ALERT_DESTINATION_TAILSCALE_SUFFIX ?? '.ts.net';
 const ALERT_DESTINATION_ALLOW_LOOPBACK_IN_DEV = process.env.ALERT_DESTINATION_ALLOW_LOOPBACK_IN_DEV ?? 'false';
 
+function hostMatchesAlertSuffix(host, suffix) {
+    const trimmedSuffix = suffix.trim();
+    if (!trimmedSuffix) return false;
+    if (trimmedSuffix.startsWith('.')) return host.endsWith(trimmedSuffix) && host.length > trimmedSuffix.length;
+    return host === trimmedSuffix || host.endsWith(`.${trimmedSuffix}`);
+}
+
 function normalizeAlertRuleScope(rule) {
     return rule.scope ?? 'alert';
 }
@@ -606,16 +613,16 @@ function destinationNodePolicyStatus(url) {
     try {
         const parsed = new URL(url);
         const isLoopback = LOOPBACK_HOSTS.has(parsed.hostname);
-        const isTailscale = parsed.protocol === 'https:' && parsed.hostname.endsWith(ALERT_DESTINATION_TAILSCALE_SUFFIX);
+        const isAllowedSuffixHost = ['http:', 'https:'].includes(parsed.protocol) && hostMatchesAlertSuffix(parsed.hostname, ALERT_DESTINATION_TAILSCALE_SUFFIX);
         if (isLoopback && policy.loopback_allowed_in_dev) {
             return { url_allowed_by_node_policy: true, node_policy_reason: 'loopback allowed in dev', node_policy: policy };
         }
-        if (isTailscale) {
-            return { url_allowed_by_node_policy: true, node_policy_reason: `HTTPS host matches ${ALERT_DESTINATION_TAILSCALE_SUFFIX}`, node_policy: policy };
+        if (isAllowedSuffixHost) {
+            return { url_allowed_by_node_policy: true, node_policy_reason: `HTTP/HTTPS host matches ${ALERT_DESTINATION_TAILSCALE_SUFFIX}`, node_policy: policy };
         }
         return {
             url_allowed_by_node_policy: false,
-            node_policy_reason: `requires HTTPS ${ALERT_DESTINATION_TAILSCALE_SUFFIX}${config.NODE_ENV === 'dev' ? ' or explicitly allowed loopback' : ''}`,
+            node_policy_reason: `requires HTTP/HTTPS ${ALERT_DESTINATION_TAILSCALE_SUFFIX}${config.NODE_ENV === 'dev' ? ' or explicitly allowed loopback' : ''}`,
             node_policy: policy,
         };
     } catch (err) {
@@ -626,10 +633,10 @@ function destinationNodePolicyStatus(url) {
 function assertAllowedDestinationUrl(url) {
     const parsed = new URL(url);
     const isLoopback = LOOPBACK_HOSTS.has(parsed.hostname);
-    const isTailscale = parsed.hostname.endsWith(ALERT_DESTINATION_TAILSCALE_SUFFIX);
+    const isAllowedSuffixHost = ['http:', 'https:'].includes(parsed.protocol) && hostMatchesAlertSuffix(parsed.hostname, ALERT_DESTINATION_TAILSCALE_SUFFIX);
     if (isLoopback && config.NODE_ENV === 'dev' && ALERT_DESTINATION_ALLOW_LOOPBACK_IN_DEV === 'true') return;
-    if (isTailscale) return;
-    throw new Error(`Alert destination URL must use ${ALERT_DESTINATION_TAILSCALE_SUFFIX}${config.NODE_ENV === 'dev' ? ' or explicitly allowed loopback' : ''}`);
+    if (isAllowedSuffixHost) return;
+    throw new Error(`Alert destination URL must use HTTP/HTTPS ${ALERT_DESTINATION_TAILSCALE_SUFFIX}${config.NODE_ENV === 'dev' ? ' or explicitly allowed loopback' : ''}`);
 }
 
 function hydrateDestinationStatus(destination) {

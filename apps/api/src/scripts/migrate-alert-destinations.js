@@ -4,6 +4,13 @@ import { validateApiConfig } from '@bemodest/config';
 const config = validateApiConfig();
 const APPLY = process.argv.includes('--apply');
 const BUILTIN_ALERT_DESTINATION_ID = 'builtin-api-ingest';
+
+function hostMatchesAlertSuffix(host, suffix) {
+    const trimmedSuffix = suffix.trim();
+    if (!trimmedSuffix) return false;
+    if (trimmedSuffix.startsWith('.')) return host.endsWith(trimmedSuffix) && host.length > trimmedSuffix.length;
+    return host === trimmedSuffix || host.endsWith(`.${trimmedSuffix}`);
+}
 const BUILTIN_DESTINATION = {
     _id: BUILTIN_ALERT_DESTINATION_ID,
     label: 'Built-in API ingest',
@@ -32,9 +39,12 @@ function slugifyDestinationId(label, usedIds = new Set()) {
 function assertAllowedDestinationUrl(url) {
     const parsed = new URL(url);
     const isLoopback = parsed.hostname === '127.0.0.1' || parsed.hostname === 'localhost';
-    if (isLoopback && config.NODE_ENV === 'dev' && config.ALERT_DESTINATION_ALLOW_LOOPBACK_IN_DEV === 'true') return;
-    if (parsed.hostname.endsWith(config.ALERT_DESTINATION_TAILSCALE_SUFFIX)) return;
-    throw new Error(`Alert destination URL must use ${config.ALERT_DESTINATION_TAILSCALE_SUFFIX}`);
+    const suffix = config.ALERT_DESTINATION_TAILSCALE_SUFFIX ?? process.env.ALERT_DESTINATION_TAILSCALE_SUFFIX ?? '.ts.net';
+    const allowLoopbackInDev = config.ALERT_DESTINATION_ALLOW_LOOPBACK_IN_DEV ?? process.env.ALERT_DESTINATION_ALLOW_LOOPBACK_IN_DEV ?? 'false';
+    const isAllowedSuffixHost = ['http:', 'https:'].includes(parsed.protocol) && hostMatchesAlertSuffix(parsed.hostname, suffix);
+    if (isLoopback && config.NODE_ENV === 'dev' && allowLoopbackInDev === 'true') return;
+    if (isAllowedSuffixHost) return;
+    throw new Error(`Alert destination URL must use HTTP/HTTPS ${suffix}`);
 }
 
 function addDestinationTemplate(destinations, template, labelConflicts) {

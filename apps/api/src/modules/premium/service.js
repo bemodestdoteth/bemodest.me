@@ -187,13 +187,19 @@ async function fetchBatchCandles(request) {
     throw new Error('PREMIUM_CANDLES_URL is required');
   }
 
-  const response = await fetch(`${config.PREMIUM_CANDLES_URL}/batch-candles`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      requests: buildBatchCandleRequests(request),
-    }),
-  });
+  let response;
+  try {
+    response = await fetch(`${config.PREMIUM_CANDLES_URL}/batch-candles`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requests: buildBatchCandleRequests(request),
+      }),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`premium candle service request failed: ${message}`);
+  }
 
   const bodyText = await response.text();
   let payload = null;

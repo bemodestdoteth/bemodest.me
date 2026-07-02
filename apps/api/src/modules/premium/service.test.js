@@ -2,8 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 process.env.JWT_SECRET = 'test-jwt-secret-with-at-least-32-chars';
+process.env.PREMIUM_CANDLES_URL = 'https://premium-candles.test';
 
-const { __test__ } = await import('./service.js');
+const { __test__, getPremiumCandles } = await import('./service.js');
 const { buildBatchCandleRequests, buildPremiumSeries, buildTargets, getRecommendedAction, notListedMessage, validatePremiumRequest } = __test__;
 
 function candle(time, close = 10) {
@@ -176,6 +177,22 @@ test('notListedMessage attributes KRW source generic failures to counterpart', (
   const request = validatePremiumRequest(premiumRequest({ counterpartExchange: 'bybit_f' }));
 
   assert.equal(notListedMessage(request, 'Code not found'), 'BTC is not listed on Bybit Futures');
+});
+
+test('getPremiumCandles reports upstream fetch failures with service context', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => {
+    throw new TypeError('fetch failed');
+  };
+
+  try {
+    await assert.rejects(
+      () => getPremiumCandles(premiumRequest({ sourceExchange: 'kraken', counterpartExchange: 'binance_f', symbol: 'M' })),
+      /premium candle service request failed: fetch failed/,
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test('buildTargets compares latest premium spread against entry target', () => {
